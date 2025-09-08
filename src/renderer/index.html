@@ -21,6 +21,6 @@
     </body>
 
     <script>
-    location.href = window.location.href + 'test'
+	if (!window.location.href.includes('test'))location.href = window.location.href + 'test/'
     </script>
 </html>
