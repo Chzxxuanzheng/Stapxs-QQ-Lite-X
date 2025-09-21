@@ -1,0 +1,65 @@
+name: 编译 web 端
+
+on:
+  push:
+    branches:
+      - web
+      - test
+    paths:
+      - package.json
+      - vite.config.ts
+      - tsconfig.web.json
+      - tsconfig.json
+      - README.md
+      - LICENSE
+      - src/renderer/**
+      - .github/workflows/build-pages.yml
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 设置 Nodejs
+        uses: actions/setup-node@v4
+        with:
+            node-version: 20.x
+
+      - name: 拉取分支
+        uses: actions/checkout@v4
+        with:
+            submodules: recursive
+
+      - name: 更新依赖
+        run: yarn
+
+      - name: 设置环境变量
+        run: |
+            echo VITE_HASH=$(git rev-parse --short=7 HEAD) >> $GITHUB_ENV
+            echo VERSION=$(node -p "require('./package.json').version") >> $GITHUB_ENV
+
+      - name: 构建
+        run: yarn build
+
+      - name: 添加README和证书
+        run: |
+            cp ./README/pages/README.md ./dist/README.md
+            cp ./LICENSE ./dist/LICENSE
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+            name: stapxs-qq-lite-x-${{ env.VERSION }}-${{ env.VITE_HASH }}-web
+            path: ./dist
+
+      - name: 更新到分支
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+            branch: ${{ github.ref_name }}-pages
+            folder: dist
