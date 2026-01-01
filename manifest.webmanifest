@@ -1,1 +1,1 @@
-{"name":"stapxs-qq-lite-x","short_name":"stapxs-qq-lite-x","description":"一个跨协议的 Stapxs QQ Lite 发行版。","start_url":"./","display":"standalone","background_color":"#ffffff","theme_color":"#42b883","lang":"en","scope":"./"}
+{"name":"stapxs-qq-lite-x","short_name":"stapxs-qq-lite-x","description":"一个跨协议的 Stapxs QQ Lite 发行版。","start_url":"https://cdn.jsdelivr.net/gh/chzxxuanzheng/Stapxs-QQ-Lite-X@test-pages/","display":"standalone","background_color":"#ffffff","theme_color":"#42b883","lang":"en","scope":"https://cdn.jsdelivr.net/gh/chzxxuanzheng/Stapxs-QQ-Lite-X@test-pages/"}

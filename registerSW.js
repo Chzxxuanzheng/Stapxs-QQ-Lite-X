@@ -1,1 +1,1 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('./sw.js', { scope: './' })})}
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('https://cdn.jsdelivr.net/gh/chzxxuanzheng/Stapxs-QQ-Lite-X@test-pages/sw.js', { scope: 'https://cdn.jsdelivr.net/gh/chzxxuanzheng/Stapxs-QQ-Lite-X@test-pages/' })})}
