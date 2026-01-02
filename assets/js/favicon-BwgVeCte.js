@@ -1,4 +1,4 @@
-import{r as a,S as f}from"./main-D8Ovluk4.js";import{n as y}from"./@vue-BpW6Ui9Z.js";let r=!1,c="";function x(){r||(r=!0,y(()=>{r=!1;let e=0;if(a.sysConfig.use_favicon_notice===!1)return s(0);for(const l of f.activeSessions.values())l.newMsg>0&&e++;s(e)}))}function s(e){const l=e.toString().length*150,i=getComputedStyle(document.body).getPropertyValue("--color-main").trim();if(c===`${e}-${i}`)return;c=`${e}-${i}`;const o=`
+import{r as a,S as f}from"./main-RwmKUAWy.js";import{n as y}from"./@vue-BpW6Ui9Z.js";let r=!1,c="";function x(){r||(r=!0,y(()=>{r=!1;let e=0;if(a.sysConfig.use_favicon_notice===!1)return s(0);for(const l of f.activeSessions.values())l.newMsg>0&&e++;s(e)}))}function s(e){const l=e.toString().length*150,i=getComputedStyle(document.body).getPropertyValue("--color-main").trim();if(c===`${e}-${i}`)return;c=`${e}-${i}`;const o=`
 <svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
     <!-- 背景 -->
     <circle
