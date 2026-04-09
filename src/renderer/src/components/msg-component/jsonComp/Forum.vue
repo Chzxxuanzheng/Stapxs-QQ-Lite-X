@@ -37,7 +37,7 @@ const forum = z
                     guild_name: z.string(),
                 }),
                 feed: z.object({
-                    comment_count: z.number(),
+                    comment_count: z.number().optional(),
                     images: z
                         .array(
                             z.object({
@@ -48,7 +48,7 @@ const forum = z
                         )
                         .optional(),
                     prefer_count: z.number().optional(),
-                    view_count: z.number(),
+                    view_count: z.number().optional(),
                 }),
                 jump_url: z.string(),
             }),
@@ -57,8 +57,8 @@ const forum = z
     })
     .transform((o) => ({
         title: o.prompt.replace('[频道帖子]', ''),
-        view: o.meta.detail.feed.view_count,
-        comment: o.meta.detail.feed.comment_count,
+        view: o.meta.detail.feed.view_count ?? 0,
+        comment: o.meta.detail.feed.comment_count ?? 0,
         prefer: o.meta.detail.feed.prefer_count ?? 0,
         jumpUrl: o.meta.detail.jump_url,
         img: o.meta.detail.feed.images?.[0]?.pic_url,
