@@ -2375,3 +2375,40 @@ msgstr ""
 
 msgid "历史记录"
 msgstr ""
+
+
+msgid "访客详情"
+msgstr ""
+
+msgid "仅有效数据"
+msgstr ""
+
+msgid "暂无数据"
+msgstr ""
+
+msgid "应用版本"
+msgstr ""
+
+msgid "系统版本"
+msgstr ""
+
+msgid "机器人版本"
+msgstr ""
+
+msgid "系统架构"
+msgstr ""
+
+msgid "切换窗口透明"
+msgstr ""
+
+msgid "访客详情"
+msgstr ""
+
+msgid "仅有效数据"
+msgstr ""
+
+msgid "数值"
+msgstr ""
+
+msgid "全局"
+msgstr ""
