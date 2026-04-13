@@ -2131,6 +2131,44 @@ input.input-pop-box {
 .default-menu-leave-active {
     animation: default-menu-enter 0.3s ease-in-out reverse;
 }
+.history-box > .space {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+}
+.history-box > .space > svg {
+    font-size: 50px;
+    color: var(--color-main);
+}
+
+.history-box > .main {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 60vh;
+}
+
+.history-box > .main > div {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    border-radius: 7px;
+}
+
+.history-box > .main > div:hover {
+    background-color: var(--color-card-2);
+}
+
+.history-box > .main > div > img {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 7px;
+    border: 2px solid var(--color-main);
+    margin-right: 5px;
+}
 @keyframes default-menu-enter {
     from {
         opacity: 0;

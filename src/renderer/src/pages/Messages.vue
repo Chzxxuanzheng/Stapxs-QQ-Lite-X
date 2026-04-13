@@ -19,6 +19,10 @@
                 <span>{{ $t('消息') }}</span>
                 <div style="flex: 1" />
                 <font-awesome-icon
+                    :icon="['fas', 'clock-rotate-left']"
+                    @click="openHistory"
+                />
+                <font-awesome-icon
                     :icon="['fas', 'compress-arrows-alt']"
                     @click="foldAllBox"
                 />
@@ -111,6 +115,9 @@ import { Session } from '@renderer/function/model/session'
 import { changeSession } from '@renderer/function/utils/msgUtil'
 import { vMenu } from '@renderer/function/utils/vcmd'
 import { openFriendMenu } from '@renderer/function/utils/contextMenu'
+import { popBox } from '@renderer/function/utils/popBox'
+import History from '@renderer/components/popBox/History.vue'
+import app from '@renderer/main'
 
 const { sideBarState } = defineProps<{
     sideBarState: 'fold' | 'open'
@@ -196,6 +203,17 @@ function foldAllBox() {
         if (!item) continue
         item.closeBox()
     }
+}
+
+/**
+ * 历史记录
+ */
+function openHistory() {
+    popBox({
+        comp: History,
+        svg: 'clock-rotate-left',
+        title: app.config.globalProperties.$t('历史记录'),
+    })
 }
 
 // /**

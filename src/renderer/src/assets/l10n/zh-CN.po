@@ -2372,3 +2372,6 @@ msgstr ""
 
 msgid "500次使用频率"
 msgstr ""
+
+msgid "历史记录"
+msgstr ""

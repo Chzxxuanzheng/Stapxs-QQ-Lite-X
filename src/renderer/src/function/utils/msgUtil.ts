@@ -9,6 +9,7 @@ import { BubbleBox, SessionBox } from '../model/box'
 import { popBox } from './popBox'
 import app from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
+import { useSessionHistoryStore } from '@renderer/state/sessionHistory'
 
 /**
  * 发送消息
@@ -127,6 +128,9 @@ export function changeSession(session: Session, fromBox?: SessionBox) {
     if (runtimeData.nowChat === session) return
     if (!session.isActive) session.activate()
     runtimeData.nowChat = session
+
+    const history = useSessionHistoryStore()
+    history.add(session)
 
     // 补加列表没有的会话时,盒子切换
     if (!fromBox && !session.alwaysTop) {

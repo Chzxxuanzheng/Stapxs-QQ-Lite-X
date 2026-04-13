@@ -42,7 +42,6 @@
                                 <TinySessionBody
                                     ref="sessionItems"
                                     :session="session"
-                                    from="global-search"
                                 />
                                 <span
                                     v-if="
