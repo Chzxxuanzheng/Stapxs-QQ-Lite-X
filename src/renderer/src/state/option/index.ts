@@ -25,6 +25,7 @@ export interface OptionField<T> {
         | ((newValue: T) => T | void)
         | ((newValue: T, oldValue: T) => T | void)
     onLoad?: (() => T | void) | ((value: T) => T | void)
+    [key: string]: any
 }
 
 type ExtractDefault<T> = T extends { default: infer V } ? V : never

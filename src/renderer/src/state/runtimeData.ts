@@ -54,7 +54,7 @@ const useRuntimeData = defineStore('runtimeData', () => {
                 tags.canCors = res.ok
             })
         })
-    }, 0)
+    }, 100)
 
     // 系统颜色模式检测
     const media = globalThis.matchMedia('(prefers-color-scheme: dark)')
@@ -70,7 +70,7 @@ const useRuntimeData = defineStore('runtimeData', () => {
     }
     setTimeout(() => {
         watchEffect(checkDevMode)
-    }, 0)
+    }, 100)
 
     function reset() {
         selfInfo.value = undefined

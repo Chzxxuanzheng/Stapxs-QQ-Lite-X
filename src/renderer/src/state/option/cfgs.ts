@@ -89,6 +89,12 @@ export const OptionInfos = {
     theme_color: {
         default: 0,
         onChange: (id: number) => {
+            OptionInfos.theme_color.changeColor(id, true)
+        },
+        onLoad: (id: number) => {
+            OptionInfos.theme_color.changeColor(id, false)
+        },
+        changeColor(id: number, ga: boolean) {
             const COLOR_NAMES = [
                 '林槐蓝',
                 '墨竹青',
@@ -107,12 +113,9 @@ export const OptionInfos = {
                     document.documentElement,
                 ).getPropertyValue('--color-main-' + id)
             }
-            sendIdentifyData({ use_theme_color: COLOR_NAMES[id] })
+            if (ga) sendIdentifyData({ use_theme_color: COLOR_NAMES[id] })
             // 避免 css 未加载完
             setTimeout(refreshFavicon, 100)
-        },
-        onLoad: (id: number) => {
-            OptionInfos.theme_color.onChange(id)
         },
     },
     opt_auto_win_color: {
