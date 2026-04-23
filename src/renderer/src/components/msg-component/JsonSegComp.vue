@@ -27,6 +27,7 @@ const comps = import.meta.glob('./jsonComp/*.vue', {
 const cardComponentMap = {
     'com.tencent.tuwen.lua': comps['./jsonComp/Tuwen.lua.vue'],
     'com.tencent.mannounce': comps['./jsonComp/Mannounce.vue'],
+    'com.tencent.miniapp.lua': comps['./jsonComp/Miniapp.lua.vue'],
     'com.tencent.miniapp_01': comps['./jsonComp/Miniapp.vue'],
     'com.tencent.music.lua': comps['./jsonComp/Music.lua.vue'],
     'com.tencent.contact.lua': comps['./jsonComp/Contact.lua.vue'],
