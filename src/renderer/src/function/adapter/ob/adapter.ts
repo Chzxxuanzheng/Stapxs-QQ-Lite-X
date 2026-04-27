@@ -614,10 +614,11 @@ export class OneBotAdapter implements AdapterInterface {
         }
     }
     async jsonParser(data: ObJsonSeg, _?: ObMsg): Promise<JsonSegData> {
+        const jsonData = JSON.parse(data.data.data)
         return {
             type: 'json',
             data: data.data.data,
-            id: crypto.randomUUID(),
+            id: jsonData['app'],
         }
     }
 
