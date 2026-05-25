@@ -118,6 +118,17 @@
                 >
                     <font-awesome-icon :icon="['fas', 'star']" />
                 </div>
+                <div
+                    v-if="
+                        session instanceof GroupSession &&
+                        session.isActive &&
+                        session.getMe().isAdmin()
+                    "
+                    :title="$t('@全体成员')"
+                    @click="insertAtAll()"
+                >
+                    <font-awesome-icon :icon="['fas', 'at']" />
+                </div>
                 <div class="space" />
                 <div
                     class="send"
@@ -242,7 +253,7 @@ import { logger } from '@renderer/function/base'
 import app from '@renderer/main'
 import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
 import { delay } from '@renderer/function/utils/systemUtil'
-import { AtSeg } from '@renderer/function/model/seg'
+import { AtAllSeg, AtSeg } from '@renderer/function/model/seg'
 import {
     useTemplateRef,
     shallowRef,
@@ -598,6 +609,14 @@ function endChoiceAt() {
     atFindList.value = []
     atFindMode.value = false
     atSelected.value = 0
+}
+
+/**
+ * 插入 at 全体成员
+ */
+function insertAtAll() {
+    // 添加 at 信息
+    inputMsg.value.addSq(new AtAllSeg())
 }
 //#endregion
 

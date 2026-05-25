@@ -210,6 +210,13 @@ export class Member implements IUser {
         return canBeAdmined(this.role, other)
     }
 
+    isAdmin(): boolean {
+        if (this.leave) return false
+        if (this.role === Role.Admin) return true
+        if (this.role === Role.Owner) return true
+        return false
+    }
+
     match(search: string): boolean {
         search = search.trim().toLowerCase()
         if (this.leave) return false

@@ -307,7 +307,9 @@ export class AtSeg extends Seg {
 @autoMarkRaw
 export class AtAllSeg extends Seg {
     static readonly type = 'atall'
-    constructor(_: AtAllSegData) {
+    constructor()
+    constructor(_: AtAllSegData)
+    constructor(_?: AtAllSegData) {
         super()
     }
 
