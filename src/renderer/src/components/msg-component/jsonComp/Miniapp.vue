@@ -31,13 +31,14 @@ const miniapp = z
                 desc: z.string(),
                 icon: z.string(),
                 preview: z.string(),
-                qqdocurl: z.string(),
+                qqdocurl: z.string().optional(),
+                url: z.string(),
             }),
         }),
     })
     .transform((o) => ({
         title: o.meta.detail_1.desc,
-        jumpUrl: o.meta.detail_1.qqdocurl,
+        jumpUrl: o.meta.detail_1.qqdocurl ?? `https://${o.meta.detail_1.url}`,
         img: o.meta.detail_1.preview,
         icon: o.meta.detail_1.icon,
         name: o.meta.detail_1.title,
