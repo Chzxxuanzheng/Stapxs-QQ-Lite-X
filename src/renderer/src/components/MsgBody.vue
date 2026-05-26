@@ -20,9 +20,6 @@
             selected: selected,
             'without-avatar': withoutAvatar,
         }"
-        :data-raw="data.plaintext()"
-        :data-sender="data.sender.user_id"
-        :data-time="data.time"
     >
         <img
             v-if="direction === 'left'"
@@ -182,8 +179,6 @@
                                     v-user-tooltip="
                                         () => getAtMember(item.user_id)
                                     "
-                                    :data-id="item.user_id"
-                                    :data-group="data.session?.id"
                                     :class="{
                                         'msg-at': true,
                                         atme:

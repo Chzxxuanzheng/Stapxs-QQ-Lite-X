@@ -16,9 +16,6 @@
             onmenu: onmenu,
             unmounted: from === 'message' && !data.isActive,
         }"
-        :data-name="data.name"
-        :data-nickname="data instanceof UserSession ? data.name : ''"
-        :data-type="data.type"
     >
         <div :class="{ new: data.showNotice && from === 'message' }" />
         <font-awesome-icon v-if="data.id == -10000" :icon="['fas', 'bell']" />
