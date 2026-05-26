@@ -262,8 +262,10 @@
     justify-content: right;
 }
 
-.msg-img.loaded {
-    cursor: pointer;
+.msg-img.loading,
+.msg-img.error {
+    justify-content: center;
+    border-radius: 7px;
 }
 
 .msg-img > img {
@@ -272,6 +274,7 @@
     max-height: 35vh;
     max-width: 100%;
     object-fit: cover;
+    cursor: pointer;
 }
 
 .msg-img.top {
