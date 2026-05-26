@@ -252,13 +252,14 @@
 
 .msg-img {
     margin: 5px 0;
-    border-radius: 7px;
     max-height: 35vh;
-    max-width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
     overflow: hidden;
+}
+
+.right .msg-img {
+    justify-content: right;
 }
 
 .msg-img.loaded {
@@ -266,9 +267,10 @@
 }
 
 .msg-img > img {
+    border-radius: 7px;
     display: block;
-    width: 100%;
     max-height: 35vh;
+    max-width: 100%;
     object-fit: cover;
 }
 

@@ -7,14 +7,25 @@
 -->
 
 <template>
-    <div :class="`msg-img ${pos} ${type} ${state}`"
-        :style="{'--height': `${heightStyle}px`, '--width': `${widthStyle}px`}">
-        <font-awesome-icon v-if="state === 'loading'" :icon="['fas', 'spinner']" spin />
-        <img v-else-if="state === 'loaded'"
+    <div
+        :class="['msg-img', pos, type, state]"
+        :style="{
+            '--height': `${heightStyle}px`,
+            '--width': `${widthStyle}px`,
+        }"
+    >
+        <font-awesome-icon
+            v-if="state === 'loading'"
+            :icon="['fas', 'spinner']"
+            spin
+        />
+        <img
+            v-else-if="state === 'loaded'"
             :alt="seg.summary"
             :title="seg.summary"
             :src="src"
-            @click="imgClick" />
+            @click="imgClick"
+        />
         <div v-else class="fail-load">
             <font-awesome-icon :icon="['fas', 'face-frown']" />
             {{ $t('加载图片失败') }}
@@ -31,18 +42,19 @@ import Viewer from '../Viewer.vue'
 
 const state = shallowRef<'loading' | 'loaded' | 'error'>('loading')
 
-const src = computed(()=>{
+const src = computed(() => {
     return getUrl(seg.imgData.src)
 })
 
-const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> = inject('viewer')!
+const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
+    inject('viewer')!
 
 const { vh } = useViewportUnits()
 const width = shallowRef(35)
 const height = shallowRef(35)
 
-const heightStyle = computed(()=>height.value * vh.value)
-const widthStyle = computed(()=>width.value * vh.value)
+const heightStyle = computed(() => height.value * vh.value)
+const widthStyle = computed(() => width.value * vh.value)
 
 const { seg, pos } = defineProps<{
     seg: ImgSeg | MfaceSeg
@@ -52,7 +64,7 @@ const { seg, pos } = defineProps<{
 let type: 'image' | 'face' | 'mface' | 'long-image' = 'image'
 if (seg instanceof ImgSeg) {
     type = seg.isFace ? 'face' : 'image'
-}else {
+} else {
     type = 'mface'
 }
 
@@ -75,17 +87,20 @@ img.onerror = () => {
  */
 function init() {
     img.src = src.value
-    if (seg instanceof MfaceSeg) {          // 商场表情
+    if (seg instanceof MfaceSeg) {
+        // 商场表情
         type = 'mface'
     } else {
         if (seg.isFace) type = 'face'
-        if (seg.width) {                    // 信息完整的图片
+        if (seg.width) {
+            // 信息完整的图片
             const imgWidth = seg.width!
             const imgHeight = seg.height!
             const hwRate = imgHeight / imgWidth
-            if (hwRate > 3) {               // 长图特殊处理
+            if (hwRate > 3) {
+                // 长图特殊处理
                 type = 'long-image'
-            }else if (imgHeight <= vh.value * 35) {
+            } else if (imgHeight <= vh.value * 35) {
                 width.value = imgWidth / vh.value
                 height.value = imgHeight / vh.value
             }
@@ -114,9 +129,13 @@ function imgClick() {
     viewer.value?.open(seg.imgData)
 }
 
-watch(()=>seg.imgData.src, ()=>{
-    init()
-}, { immediate: true })
+watch(
+    () => seg.imgData.src,
+    () => {
+        init()
+    },
+    { immediate: true },
+)
 
 function getUrl(url: string) {
     if (url.startsWith('http')) return url
