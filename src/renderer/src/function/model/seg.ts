@@ -38,6 +38,7 @@ function registerSegType<T extends Seg>(segClass: SegCon<T>): void {
 
 export abstract class Seg {
     declare static readonly type: string
+    declare static readonly inline: boolean
 
     abstract plaintext(msg?: Msg): string
 
@@ -56,6 +57,10 @@ export abstract class Seg {
         return (this.constructor as typeof Seg).type
     }
 
+    get inline(): boolean {
+        return (this.constructor as typeof Seg).inline
+    }
+
     toString(): string {
         return this.plaintext()
     }
@@ -69,6 +74,7 @@ export abstract class Seg {
 @autoMarkRaw
 export class TxtSeg extends Seg {
     static readonly type = 'text'
+    static readonly inline = true
     text: string
     praseMsg: string
     links: string[]
@@ -99,6 +105,7 @@ export class TxtSeg extends Seg {
 @autoMarkRaw
 export class MdSeg extends Seg {
     static readonly type = 'markdown'
+    static readonly inline = true
     content: string
     constructor(data: MdSegData) {
         super()
@@ -122,6 +129,7 @@ export class MdSeg extends Seg {
 @autoMarkRaw
 export class ImgSeg extends Seg {
     static readonly type = 'image'
+    static readonly inline = false
     _url: Resource
     summary: string
     isFace: boolean = false
@@ -193,6 +201,7 @@ export class ImgSeg extends Seg {
 @autoMarkRaw
 export class MfaceSeg extends Seg {
     static readonly type = 'mface'
+    static readonly inline = false
     _url: ProxyUrl
     summary: string
     packageId: number
@@ -243,6 +252,7 @@ export class MfaceSeg extends Seg {
 @autoMarkRaw
 export class FaceSeg extends Seg {
     static readonly type = 'face'
+    static readonly inline = true
     text?: string
     id: number
     face?: Emoji
@@ -278,6 +288,7 @@ export class FaceSeg extends Seg {
 @autoMarkRaw
 export class AtSeg extends Seg {
     static readonly type = 'at'
+    static readonly inline = true
     user_id: number
     constructor(user_id: number)
     constructor(data: AtSegData)
@@ -307,6 +318,7 @@ export class AtSeg extends Seg {
 @autoMarkRaw
 export class AtAllSeg extends Seg {
     static readonly type = 'atall'
+    static readonly inline = true
     constructor()
     constructor(_: AtAllSegData)
     constructor(_?: AtAllSegData) {
@@ -329,6 +341,7 @@ export class AtAllSeg extends Seg {
 @autoMarkRaw
 export class FileSeg extends Seg {
     static readonly type = 'file'
+    static readonly inline = false
     name: string
     file_id?: string
     _url: ProxyUrl
@@ -443,6 +456,7 @@ export class FileSeg extends Seg {
 @autoMarkRaw
 export class VideoSeg extends Seg {
     static readonly type = 'video'
+    static readonly inline = false
     file: string
     _url: Resource
     constructor(data: VideoSegData) {
@@ -474,6 +488,7 @@ export class VideoSeg extends Seg {
 @autoMarkRaw
 export class ForwardSeg extends Seg {
     static readonly type = 'forward'
+    static readonly inline = false
     id?: string
     content: Msg[]
     constructor(msgs?: Msg[])
@@ -526,6 +541,7 @@ export class ForwardSeg extends Seg {
 @autoMarkRaw
 export class ReplySeg extends Seg {
     static readonly type = 'reply'
+    static readonly inline = false
     id: string
     msg?: Msg
     constructor(msgId: string)
@@ -553,6 +569,7 @@ export class ReplySeg extends Seg {
 @autoMarkRaw
 export class PokeSeg extends Seg {
     static readonly type = 'poke'
+    static readonly inline = false
     constructor(_: PokeSegData) {
         super()
     }
@@ -571,6 +588,7 @@ export class PokeSeg extends Seg {
 @autoMarkRaw
 export class XmlSeg extends Seg {
     static readonly type = 'xml'
+    static readonly inline = false
     readonly data: string
     readonly id: string
     constructor(data: XmlSegData) {
@@ -598,6 +616,7 @@ export class XmlSeg extends Seg {
 @autoMarkRaw
 export class JsonSeg extends Seg {
     static readonly type = 'json'
+    static readonly inline = false
     readonly data: string
     readonly id: string
     constructor(data: JsonSegData) {
@@ -628,6 +647,7 @@ export class JsonSeg extends Seg {
 @autoMarkRaw
 export class ErrorSeg extends Seg {
     static readonly type = 'error'
+    static readonly inline = false
 
     plaintext(_?: Msg): string {
         const { $t } = app.config.globalProperties
@@ -644,6 +664,7 @@ export class ErrorSeg extends Seg {
 @autoMarkRaw
 export class UnknownSeg extends Seg {
     static readonly type = 'unknown'
+    static readonly inline = false
     private readonly _type: string
     data: object
     constructor(data: UnknownSegData) {

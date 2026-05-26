@@ -129,7 +129,7 @@
                             v-for="(item, index) in data.message"
                             :key="data.uuid + '-m-' + index"
                             :class="{
-                                'msg-inline': View.isMsgInline(item.type),
+                                'msg-inline': item.inline,
                             }"
                         >
                             <div v-if="item.type === undefined" />
@@ -702,7 +702,6 @@ import { logger, popInfo } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import Emoji from '@renderer/function/model/emoji'
 import { Msg, SelfMsg } from '@renderer/function/model/msg'
-import { MsgBodyFuns as ViewFuns } from '@renderer/function/model/msg-body'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 import {
     AtAllSeg,
@@ -908,7 +907,6 @@ export default defineComponent({
             isMe: false,
             isDebugMsg: runtimeData.sysConfig.debug_msg,
             linkViewStyle: '',
-            View: ViewFuns,
             pageViewInfo: undefined as { [key: string]: any } | undefined,
             getVideo: false,
             senderInfo: null as any,

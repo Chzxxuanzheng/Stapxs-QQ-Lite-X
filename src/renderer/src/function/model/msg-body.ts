@@ -12,30 +12,6 @@ import app from '@renderer/main'
 
 export class MsgBodyFuns {
     /**
-     * 判断消息块是否需要行内显示
-     * @param typeName 消息类型
-     * @returns T / F
-     */
-    static isMsgInline(typeName: string) {
-        switch (typeName) {
-            case 'at':
-            case 'atall':
-            case 'text':
-            case 'face':
-                return true
-            case 'bface':
-            case 'image':
-            case 'record':
-            case 'video':
-            case 'file':
-            case 'json':
-            case 'xml':
-                return false
-        }
-        return false
-    }
-
-    /**
      * 处理纯文本消息（处理换行，转义字符并进行 xss 过滤便于高亮链接）
      * @param { string } text 文本
      * @returns 处理完成的文本
