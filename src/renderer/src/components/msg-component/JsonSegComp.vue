@@ -35,6 +35,7 @@ const cardComponentMap = {
     'com.tencent.forum': comps['./jsonComp/Forum.vue'],
     'com.tencent.autoreply': comps['./jsonComp/AutoReply.vue'],
     'com.tencent.feed.lua': comps['./jsonComp/Feed.lua.vue'],
+    'com.tencent.plaintext.lua': comps['./jsonComp/Plaintext.lua.vue'],
 }
 
 const { seg } = defineProps<{
