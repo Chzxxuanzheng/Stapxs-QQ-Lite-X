@@ -1,0 +1,6 @@
+nodeLinker: hoisted
+onlyBuiltDependencies:
+  - electron
+  - esbuild
+  - core-js
+  - sharp

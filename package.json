@@ -113,14 +113,5 @@
         "vue3-lottie": "^3.3.1",
         "xss": "^1.0.15"
     },
-    "packageManager": "pnpm@10.33.0",
-    "pnpm": {
-        "nodeLinker": "hoisted",
-        "onlyBuiltDependencies": [
-            "electron",
-            "esbuild",
-            "core-js",
-            "sharp"
-        ]
-    }
+    "packageManager": "pnpm@10.33.0"
 }
