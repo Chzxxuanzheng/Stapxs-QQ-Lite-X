@@ -92,11 +92,34 @@ const bot = z
         type: 'bot' as const,
         img: o.meta.contact.avatar,
         title: o.meta.contact.nickname,
+        desc: o.meta.contact.contact,
         jumpUrl: o.meta.contact.jumpUrl,
         name: o.meta.contact.tag,
     }))
 
-const contact = z.union([friend, group, bot])
+const pd = z
+    .object({
+        app: z.literal('com.tencent.contact.lua'),
+        meta: z.object({
+            contact: z.object({
+                avatar: z.string(),
+                nickname: z.string(),
+                contact: z.string(),
+                jumpUrl: z.string(),
+                tag: z.literal('频道名片'),
+            }),
+        }),
+    })
+    .transform((o) => ({
+        type: 'bot' as const,
+        img: o.meta.contact.avatar,
+        title: o.meta.contact.nickname,
+        desc: o.meta.contact.contact,
+        jumpUrl: o.meta.contact.jumpUrl,
+        name: o.meta.contact.tag,
+    }))
+
+const contact = z.union([friend, group, bot, pd])
 
 const json = JSON.parse(seg.data)
 const parsedData = contact.safeParse(json)
