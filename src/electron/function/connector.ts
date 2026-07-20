@@ -3,12 +3,12 @@
  */
 
 import WebSocket from 'ws'
-import log4js from 'log4js'
 import { BrowserWindow, ipcMain } from 'electron'
 import { logLevel } from '../index.ts'
+import { getLogger } from './logger.ts'
 
 export class Connector {
-    private readonly logger = log4js.getLogger('connector')
+    private readonly logger = getLogger('connector')
 
     private readonly win: BrowserWindow
     private websocket: WebSocket | undefined

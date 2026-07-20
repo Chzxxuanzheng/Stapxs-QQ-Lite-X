@@ -1,6 +1,5 @@
 import axios from 'axios'
 import Store from 'electron-store'
-import log4js from 'log4js'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -16,13 +15,14 @@ import {
 } from 'electron'
 import { logLevel, touchBarInstance, win } from '../index.ts'
 import { Connector } from './connector.ts'
+import { getLogger } from './logger.ts'
 import ScanNetwork from './scannetwork.ts'
 import { runCommand } from './util.ts'
 import { execSync } from 'node:child_process'
 
 let connector = undefined as Connector | undefined
 const store = new Store()
-const logger = log4js.getLogger('ipc')
+const logger = getLogger('ipc')
 let template: (MenuItemConstructorOptions | MenuItem)[] = []
 
 // 消息缓存，key 为 tag

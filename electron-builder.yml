@@ -23,6 +23,8 @@ asarUnpack:
 
 # Windows 配置
 win:
+    # 临时仅对 Windows 关闭 asar，避免传递依赖在该平台打包时被遗漏
+    asar: false
     target:
         - { target: portable, arch: x64 }
     executableName: Stapxs QQ Lite X

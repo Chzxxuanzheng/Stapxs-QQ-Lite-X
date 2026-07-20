@@ -69,6 +69,8 @@ if (uptime > timesEnd.value) {
 
 export const nowTimes = _nowTimes.value
 
+const BOOT_TIMEOUT_MS = 10000
+
 // 奇奇怪怪的日志
 const strList = ['VERSION', 'WELCOME', 'HELLO']
 const colorList = [
@@ -96,11 +98,60 @@ if (import.meta.env.DEV) {
 console.log('[ SSystem Bootloader Loading …… core/ssqq-core ]')
 
 // 加载配置文件，挂在
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string) {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => {
+            setTimeout(() => {
+                reject(new Error(`${label} timeout(${timeoutMs}ms)`))
+            }, timeoutMs)
+        }),
+    ])
+}
+
+async function runBootStep(label: string, fn: () => Promise<void>) {
+    const start = Date.now()
+    try {
+        await withTimeout(fn(), BOOT_TIMEOUT_MS, label)
+        console.log(`[boot] ${label} done in ${Date.now() - start}ms`)
+        return true
+    } catch (err) {
+        console.error(`[boot] ${label} failed`, err)
+        return false
+    }
+}
+
 setTimeout(async () => {
-    // 加载设置项
-    await backend.init() // Desktop：初始化客户端功能
+    await runBootStep('backend.init', async () => {
+        await backend.init() // Desktop：初始化客户端功能
+    })
+    console.log('[boot] backend.mode', {
+        type: backend.type,
+        platform: backend.platform,
+        release: backend.release,
+        arch: backend.arch,
+    })
+
     const option = useOptionStore()
-    await option.init() // 载入设置项
-    await win.init() // 初始化窗口信息
-    app.mount('#app')
+    await runBootStep('option.init', async () => {
+        await option.init() // 载入设置项
+    })
+
+    await runBootStep('win.init', async () => {
+        await win.init() // 初始化窗口信息
+    })
+    console.log(
+        `[boot] win.state withBar=${String(win.withBar)} margin=${String(
+            win.margin,
+        )} maximized=${String(win.maximized)} darkMode=${String(
+            win.darkMode,
+        )} vibrancy=${String(win.vibrancyMode)}`,
+    )
+
+    try {
+        app.mount('#app')
+        console.log('[boot] app.mount done')
+    } catch (err) {
+        console.error('[boot] app.mount failed', err)
+    }
 }, 0)

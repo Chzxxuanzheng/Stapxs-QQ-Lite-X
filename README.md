@@ -78,6 +78,21 @@ pnpm dev:electron
 pnpm build:electron
 ```
 
+<details>
+<summary>Windows 构建态自动化验收</summary>
+
+```bash
+# Windows 构建态验收
+pnpm verify:electron:win
+
+# Windows 快速复验（复用现有构建产物）
+pnpm verify:electron:win:quick
+```
+
+其中 `verify:electron:win` 会在 Windows 上执行一次完整的构建后冷启动验收，检查主进程和渲染进程的启动日志，以及首页首屏健康标记；`verify:electron:win:quick` 会复用现有构建产物，仅做快速回归。验收产物默认输出到 `artifacts/electron-smoke` 目录。
+
+</details>
+
 ### > 构建 Capacitor 应用
 
 在 `3.0.0` 版本及以后，Stapxs QQ Lite X 支持通过 Capacitor 构建为移动端应用并补充部分平台特性的功能，你也可以自行构建。
@@ -121,6 +136,8 @@ XCode 的构建结果将最终输出在 `src/mobile/ios/build` 目录下，脚�
 | open:android   | 在 Android Studio 中打开项目 |
 | build          | 网页构建                     |
 | build:electron | 构建当前平台的应用           |
+| verify:electron:win | Windows 打包态完整验收   |
+| verify:electron:win:quick | Windows 打包态快速回归 |
 | build:ios      | 构建 iOS 应用                |
 | build:android  | 构建 Android 应用            |
 | proxy          | 一个临时跨域代理服务器       |

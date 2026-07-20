@@ -1,12 +1,12 @@
 import os from 'os'
 import http from 'http'
-import log4js from 'log4js'
 
 import { logLevel } from '../index.ts'
+import { getLogger } from './logger.ts'
 
 class ScanNetwork {
 
-    private logger = log4js.getLogger('ScanNetwork')
+    private logger = getLogger('ScanNetwork')
     private win: Electron.BrowserWindow
 
     constructor(win: Electron.BrowserWindow) {

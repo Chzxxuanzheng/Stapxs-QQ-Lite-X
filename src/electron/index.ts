@@ -1,12 +1,13 @@
 import path from 'path'
 import Store from 'electron-store'
 import fs from 'fs'
-import log4js from 'log4js'
+import os from 'os'
 
 import windowStateKeeper from 'electron-window-state'
 import packageInfo from '../../package.json' with { type: 'json' }
 
 import { regIpcListener } from './function/ipc.ts'
+import { getLogger } from './function/logger.ts'
 import { Menu, session, app, protocol, BrowserWindow, Tray } from 'electron'
 import { touchBar } from './function/touchbar.ts'
 import { join } from 'path'
@@ -14,8 +15,27 @@ import Icon from './assets/tray@2x.png?asset'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const isPrimary = app.requestSingleInstanceLock()
-const logger = log4js.getLogger('background')
 export let logLevel = isDevelopment ? 'debug' : 'info'
+const logger = getLogger('background')
+
+const startupErrorLog = path.join(os.tmpdir(), 'stapxs-qq-lite-x-startup-error.log')
+
+function writeStartupError(tag: string, error: unknown) {
+    const now = new Date().toISOString()
+    const text =
+        error instanceof Error
+            ? `${error.name}: ${error.message}\n${error.stack ?? ''}`
+            : String(error)
+    fs.appendFileSync(startupErrorLog, `[${now}] ${tag}\n${text}\n\n`, 'utf8')
+}
+
+process.on('uncaughtException', (error) => {
+    writeStartupError('uncaughtException', error)
+})
+
+process.on('unhandledRejection', (reason) => {
+    writeStartupError('unhandledRejection', reason)
+})
 
 protocol.registerSchemesAsPrivileged([
     { scheme: 'app', privileges: { secure: true, standard: true } },
@@ -94,6 +114,31 @@ async function createWindow() {
         }
     }
     win = new BrowserWindow(windowConfig)
+    win.webContents.on(
+        'did-fail-load',
+        (_, errorCode, errorDescription, validatedURL, isMainFrame) => {
+            const message =
+                `did-fail-load code=${errorCode} desc=${errorDescription} ` +
+                `url=${validatedURL} mainFrame=${isMainFrame}`
+            logger.error(message)
+            writeStartupError('did-fail-load', message)
+        },
+    )
+    win.webContents.on('did-finish-load', () => {
+        logger.info('did-finish-load')
+    })
+    win.webContents.on('console-message', (_, level, message, line, sourceId) => {
+        logger.info(`[renderer:${level}] ${message} (${sourceId}:${line})`)
+    })
+    win.webContents.on('render-process-gone', (_, details) => {
+        const message = `render-process-gone reason=${details.reason} exitCode=${details.exitCode}`
+        logger.error(message)
+        writeStartupError('render-process-gone', message)
+    })
+    win.once('ready-to-show', () => {
+        logger.info('ready-to-show')
+        win?.show()
+    })
     win.once('focus', () => {
         if (win) win.flashFrame(false)
     })

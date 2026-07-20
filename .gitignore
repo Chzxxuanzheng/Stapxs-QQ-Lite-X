@@ -9,6 +9,8 @@ dev-dist
 dist
 dist_electron
 dist_capacitor
+artifacts
+app-asar-extract
 stats.html
 
 notice_local.json

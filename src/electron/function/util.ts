@@ -1,11 +1,11 @@
 import child_process from 'node:child_process'
-import log4js from 'log4js'
 import jp from 'jsonpath'
 import axios from 'axios'
 
 import { logLevel } from '../index.ts'
+import { getLogger } from './logger.ts'
 
-const logger = log4js.getLogger('util')
+const logger = getLogger('util')
 
 export async function runCommand(
     command: string,

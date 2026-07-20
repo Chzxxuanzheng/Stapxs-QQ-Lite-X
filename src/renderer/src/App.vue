@@ -15,36 +15,21 @@
         </div>
     </div>
     <!-- 拖拽区域 -->
-    <div
-        v-if="backend.platform == 'darwin'"
-        class="controller mac-controller"
-    />
+    <div v-if="backend.platform == 'darwin'" class="controller mac-controller" />
     <div id="base-app" ref="base-app">
-        <div
-            class="main-body"
-            :style="{
-                '--side-bar-width': runtimeData.sysConfig.side_bar_width + 'px',
-            }"
-        >
+        <div class="main-body" :style="{
+            '--side-bar-width': runtimeData.sysConfig.side_bar_width + 'px',
+        }">
             <SideBar />
             <div class="main-box">
-                <Chat
-                    v-if="driver.isConnected() && runtimeData.nowChat"
-                    ref="chat"
-                    v-model="runtimeData.nowChat.inputMsg"
-                    :chat="runtimeData.nowChat"
-                />
+                <Chat v-if="driver.isConnected() && runtimeData.nowChat" ref="chat"
+                    v-model="runtimeData.nowChat.inputMsg" :chat="runtimeData.nowChat" />
                 <!-- 背景 -->
-                <div
-                    v-if="!runtimeData.tags.vibrancy || !runtimeData.nowChat"
-                    v-hide="runtimeData.tags.noLogin"
-                    class="main-box-bg"
-                >
+                <div v-if="!runtimeData.tags.vibrancy || !runtimeData.nowChat" v-hide="runtimeData.tags.noLogin"
+                    class="main-box-bg">
                     <div class="ss-card choice-chat">
                         <template v-if="runtimeData.nowChat">
-                            <font-awesome-icon
-                                :icon="['fas', 'angles-right']"
-                            />
+                            <font-awesome-icon :icon="['fas', 'angles-right']" />
                             <span>(っ≧ω≦)っ</span>
                             <span>{{ $t('别划了别划了被看见了啦') }}</span>
                         </template>
@@ -80,12 +65,9 @@
         <Tooltips />
         <div id="mobile-css" />
     </div>
-    <div
-        class="bg-blur"
-        :style="{
-            backdropFilter: `blur(${runtimeData.sysConfig.background_img_blur}px)`,
-        }"
-    />
+    <div class="bg-blur" :style="{
+        backdropFilter: `blur(${runtimeData.sysConfig.background_img_blur}px)`,
+    }" />
 </template>
 
 <script setup lang="ts">
@@ -94,7 +76,15 @@ import * as App from './function/utils/appUtil'
 
 import { logger, popInfo, popList } from '@renderer/function/base'
 import { i18n, uptime } from '@renderer/main'
-import { onMounted, provide, shallowReactive, useTemplateRef } from 'vue'
+import {
+    nextTick,
+    onMounted,
+    provide,
+    shallowReactive,
+    shallowRef,
+    useTemplateRef,
+    watch,
+} from 'vue'
 import driver from '@renderer/function/driver'
 import { Notify } from '@renderer/function/notify'
 import { ensurePopBox } from '@renderer/function/utils/popBox'
@@ -123,6 +113,7 @@ const fps = shallowReactive({
     ticks: 0,
     value: 0,
 })
+const hasHandledPostLoginGuide = shallowRef(false)
 const $t = i18n.global.t
 const runtimeData = useRuntimeData()
 //#endregion
@@ -179,6 +170,42 @@ useFrame(() => {
     if (!baseApp.value) return
     baseApp.value.scrollTop = 0
 })
+
+function getHomeState() {
+    if (runtimeData.tags.noLogin) return 'login'
+    if (driver.isConnected()) {
+        return runtimeData.nowChat ? 'chat' : 'chat-empty'
+    }
+    return runtimeData.nowChat ? 'chat-stale' : 'offline-home'
+}
+
+async function logLaunchState() {
+    await nextTick()
+    console.log(
+        `[home] state=${getHomeState()} noLogin=${String(
+            runtimeData.tags.noLogin,
+        )} connected=${String(driver.isConnected())} nowChat=${String(
+            Boolean(runtimeData.nowChat),
+        )} withBar=${String(win.withBar)} margin=${String(win.margin)}`,
+    )
+}
+
+watch(
+    () => runtimeData.tags.noLogin,
+    async (isNoLogin, oldValue) => {
+        if (isNoLogin === oldValue) return
+        await logLaunchState()
+        if (oldValue === true && isNoLogin === false) {
+            if (!hasHandledPostLoginGuide.value) {
+                hasHandledPostLoginGuide.value = true
+                console.log('[guide] trigger post-login welcome flow')
+                setTimeout(() => {
+                    App.checkOpenTimes()
+                }, 0)
+            }
+        }
+    },
+)
 //#endregion
 
 //#region == 方法函数 ===================================================
@@ -190,15 +217,15 @@ async function init() {
         // eslint-disable-next-line
         console.log(
             '[ SSystem Bootloader Complete took ' +
-                (new Date().getTime() - uptime) +
-                'ms, welcome to sar-dos on stapxs-qq-lite.su ]',
+            (new Date().getTime() - uptime) +
+            'ms, welcome to sar-dos on stapxs-qq-lite.su ]',
         )
     else
         // eslint-disable-next-line
         console.log(
             '[ SSystem Bootloader Complete took ' +
-                (new Date().getTime() - uptime) +
-                'ms, welcome to ssqq on stapxs-qq-lite.user ]',
+            (new Date().getTime() - uptime) +
+            'ms, welcome to ssqq on stapxs-qq-lite.user ]',
         )
 
     // AMAP：初始化高德地图
@@ -230,8 +257,8 @@ async function init() {
     // 基础初始化完成
     logger.system(
         '欢迎回来，开发者。Stapxs QQ Lite X 正处于 ' +
-            (import.meta.env.DEV ? 'development' : 'production') +
-            ' 模式。正在为您加载更多功能。',
+        (import.meta.env.DEV ? 'development' : 'production') +
+        ' 模式。正在为您加载更多功能。',
     )
     // 加载移动平台特性
     App.loadMobile()
@@ -288,8 +315,8 @@ async function init() {
     //#region == 公告弹窗 ======================================
     openLoginPan() // 打开登录面板
     App.checkUpdate() // 检查更新
-    App.checkOpenTimes() // 检查打开次数
     App.checkNotice() // 检查公告
+    await logLaunchState()
     //#endregion
 
     if (new Date().getMonth() == 3 && new Date().getDate() == 1)
