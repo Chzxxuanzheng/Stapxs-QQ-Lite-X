@@ -36,7 +36,9 @@
             <template v-if="item instanceof GroupFile">
                 <div v-if="downloadPercent === undefined"
                     class="download"
-                    @click.stop="item.download()">
+                    :class="{ disabled: !runtimeData.tags.canCors }"
+                    :title="runtimeData.tags.canCors ? '' : $t('当前环境无法跨域下载文件，请先在设置中配置跨域代理')"
+                    @click.stop="runtimeData.tags.canCors ? item.download() : ''">
                     <font-awesome-icon :icon="['fas', 'angle-down']" />
                 </div>
                 <svg v-else-if="downloadPercent !== undefined && downloadPercent < 100"
@@ -82,6 +84,7 @@ import { computed, markRaw, shallowRef } from 'vue'
 import { vMenu } from '@renderer/function/utils/vcmd'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
+import useRuntimeData from '@renderer/state/runtimeData'
 import FileMenu from './menu/FileMenu.vue'
 
 const isOpenMenu = shallowRef(false)
@@ -89,6 +92,8 @@ const isOpenMenu = shallowRef(false)
 const { item } = defineProps<{
     item: GroupFile | GroupFileFolder
 }>()
+
+const runtimeData = useRuntimeData()
 
 const downloadPercent = computed(() => {
     return item instanceof GroupFile ? item.downloadPercent.value : undefined

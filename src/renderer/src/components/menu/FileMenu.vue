@@ -10,7 +10,10 @@
 -->
 <template>
     <div class="ss-card msg-menu-body">
-        <div v-if="displayTag.download" @click="download">
+        <div v-if="displayTag.download"
+            :class="{ disabled: !runtimeData.tags.canCors }"
+            :title="runtimeData.tags.canCors ? '' : $t('当前环境无法跨域下载文件，请先在设置中配置跨域代理')"
+            @click="download">
             <div><font-awesome-icon :icon="['fas', 'angle-down']" /></div>
             <a>{{ $t('下载') }}</a>
         </div>
@@ -98,6 +101,12 @@ function close(): void {
 }
 
 function download(): void {
+    // 不具备跨域能力时禁止下载
+    if (!runtimeData.tags.canCors) {
+        popInfo.error($t('当前环境无法跨域下载文件，请先在设置中配置跨域代理'))
+        close()
+        return
+    }
     ;(file as GroupFile)?.download()
     close()
 }

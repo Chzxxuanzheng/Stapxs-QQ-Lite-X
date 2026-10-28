@@ -426,8 +426,9 @@ export class FileSeg extends Seg {
             return
         }
         this.download_percent = 0
+        // 传原始链接，由 downloadFile 统一走代理，避免对已代理的链接二次包装
         downloadFile(
-            this.url,
+            this._url,
             this.name,
             (event: ProgressEvent) => {
                 if (!event.lengthComputable) return
