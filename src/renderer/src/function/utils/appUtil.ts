@@ -251,14 +251,6 @@ export function downloadFile(
 ) {
     if (url instanceof ProxyUrl) url = url.url
     
-    if (document.location.protocol == 'https:') {
-        // 判断下载文件 URL 的协议
-        // PS：Chrome 不会对 http 下载的文件进行协议升级
-        if (url.toLowerCase().startsWith('http:')) {
-            url = 'https' + url.substring(url.indexOf('://'))
-        }
-    }
-
     if (backend.isWeb()) {
         new FileDownloader({
             url: url,
