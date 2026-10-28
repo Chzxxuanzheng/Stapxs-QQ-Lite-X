@@ -1333,6 +1333,12 @@ body.with-bar .msg-menu {
     display: flex;
 }
 
+/* 不具备跨域能力时禁用下载入口 */
+.file-main > div.download.disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
 .file-main > div.download > svg {
     color: var(--color-font);
     height: 0.8rem;

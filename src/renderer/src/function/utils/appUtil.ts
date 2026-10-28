@@ -239,14 +239,18 @@ export function jumpToSession(session: Session, msg?: Message) {
 /**
  * 下载文件
  * @param url 文件链接
- * @param process 下载中回调
+ * @param name 文件名
+ * @param onprocess 下载中回调
+ * @param oncancel 取消回调
  */
 export function downloadFile(
-    url: string,
+    url: ProxyUrl | string,
     name: string,
     onprocess: (event: ProgressEvent & { [key: string]: any }) => undefined,
     oncancel: (event: ProgressEvent & { [key: string]: any }) => undefined,
 ) {
+    if (url instanceof ProxyUrl) url = url.url
+    
     if (document.location.protocol == 'https:') {
         // 判断下载文件 URL 的协议
         // PS：Chrome 不会对 http 下载的文件进行协议升级
@@ -254,6 +258,7 @@ export function downloadFile(
             url = 'https' + url.substring(url.indexOf('://'))
         }
     }
+
     if (backend.isWeb()) {
         new FileDownloader({
             url: url,

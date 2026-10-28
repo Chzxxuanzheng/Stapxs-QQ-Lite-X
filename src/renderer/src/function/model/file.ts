@@ -16,6 +16,7 @@ import { getSizeFromBytes } from '../utils/systemUtil'
 import { Name, Time } from './data'
 import { GroupSession } from './session'
 import { BaseUser, IUser } from './user'
+import { ProxyUrl } from './proxyUrl'
 
 export class GroupFile {
     type: string = 'file'
@@ -28,7 +29,7 @@ export class GroupFile {
     deadTime?: number
     creator: IUser
     createTime?: Time
-    url?: string
+    url?: ProxyUrl
     folder?: GroupFileFolder
 
     downloadPercent: ShallowRef<number | undefined> = shallowRef()
@@ -57,6 +58,18 @@ export class GroupFile {
      * @returns 文件是否下载成功
      */
     async download(): Promise<boolean> {
+        const { $t } = app.config.globalProperties
+        const runtimeData = useRuntimeData()
+
+        // web 端下载需要读取响应内容，受同源策略限制，不具备跨域能力时必定失败
+        // 这里提前拦截，避免无意义的请求和一直停留在下载中状态
+        if (!runtimeData.tags.canCors) {
+            popInfo.error(
+                $t('当前环境无法跨域下载文件，请先在设置中配置跨域代理'),
+            )
+            return false
+        }
+
         this.downloadPercent.value = 0
 
         // 如果没有url，则获取url
@@ -69,7 +82,7 @@ export class GroupFile {
         let re: boolean | undefined
 
         downloadFile(
-            this.url as string,
+            this.url!,
             this.name,
             (event: ProgressEvent) => {
                 if (!event.lengthComputable) return
@@ -87,7 +100,7 @@ export class GroupFile {
             const timer = setInterval(() => {
                 if (re !== undefined) {
                     clearInterval(timer)
-                    resolve(false)
+                    resolve(re)
                 }
             }, 100)
         })
@@ -109,7 +122,7 @@ export class GroupFile {
             return false
         }
 
-        this.url = data
+        this.url = new ProxyUrl(data)
         return true
     }
 

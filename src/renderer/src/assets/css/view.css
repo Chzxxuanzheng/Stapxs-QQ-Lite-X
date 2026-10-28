@@ -905,6 +905,21 @@ body.with-bar #base-app {
     background: var(--color-main);
 }
 
+/* 不具备跨域能力时禁用菜单项 */
+.msg-menu-body > div.disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.msg-menu-body > div.disabled:hover {
+    background: transparent;
+}
+
+.msg-menu-body > div.disabled:hover > div > svg,
+.msg-menu-body > div.disabled:hover > a {
+    color: var(--color-font);
+}
+
 .menu div.item > svg {
     margin-right: 0 !important;
     height: 1rem;
