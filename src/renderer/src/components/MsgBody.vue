@@ -167,6 +167,9 @@
                                 "
                                 :pos="getSegPos(item)"
                                 :seg="item"
+                                @image-loaded="
+                                    (height) => emit('imageLoaded', height)
+                                "
                             />
                             <template v-else-if="item instanceof FaceSeg">
                                 <EmojiFace
@@ -808,6 +811,7 @@ const emit = defineEmits<{
     showMsgMenu: [event: MenuEventData, msg: Msg]
     showUserMenu: [event: MenuEventData, user: IUser]
     emojiClick: [id: string, msg: Msg]
+    imageLoaded: [height: number]
 }>()
 
 const msgMain = useTemplateRef<HTMLDivElement>('msgMain')

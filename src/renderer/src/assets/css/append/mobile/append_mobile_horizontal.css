@@ -229,6 +229,7 @@ html {
 
 /* 消息 */
 .msg-img {
+    --msg-img-max-height: 40vh;
     max-height: 40vh;
 }
 
