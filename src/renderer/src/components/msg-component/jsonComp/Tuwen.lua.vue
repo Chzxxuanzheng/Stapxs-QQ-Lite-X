@@ -30,17 +30,18 @@ const tuwen = z
             news: z.object({
                 title: z.string(),
                 desc: z.string(),
+                pcJumpUrl: z.string().optional(),
                 jumpUrl: z.string(),
                 preview: z.string(),
                 tagIcon: z.string(),
                 tag: z.string(),
             }),
-        }),
+        })
     })
     .transform((o) => ({
         title: o.meta.news.title,
         desc: o.meta.news.desc,
-        jumpUrl: o.meta.news.jumpUrl,
+        jumpUrl: o.meta.news?.pcJumpUrl ?? o.meta.news.jumpUrl,
         img: o.meta.news.preview,
         icon: o.meta.news.tagIcon,
         name: o.meta.news.tag,
