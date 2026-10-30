@@ -602,6 +602,8 @@ export class MilkyAdapter implements AdapterInterface {
             ? Number(start.message_id)
             : undefined
 
+		if (startId === 0) return []
+
         while (out.length < count) {
             // 拉消息
             const data = await this._getHistoryMsg(
@@ -611,11 +613,11 @@ export class MilkyAdapter implements AdapterInterface {
             )
             if (!data || data.messages.length === 0) break
 
+            out = [...data.messages, ...out]
+
             // 保存头部消息
             startId = data.next_message_seq ?? data.messages.at(0)?.message_seq
             if (!startId) break
-
-            out = [...data.messages, ...out]
         }
         return await Promise.all(out.map((item) => this.parseMsg(item)))
     }
