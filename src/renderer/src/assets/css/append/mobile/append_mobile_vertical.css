@@ -82,6 +82,7 @@
 }
 
 .msg-img {
+    --msg-img-max-height: 20vh;
     max-height: 20vh;
 }
 

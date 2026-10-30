@@ -251,11 +251,26 @@
 }
 
 .msg-img {
+    /* 图片占位的高度上限，移动端会覆盖 */
+    --msg-img-max-height: 30vh;
+    /* 图片原始像素尺寸，组件拿到后会覆盖这两个值 */
+    --img-w: 200;
+    --img-h: 150;
     margin: 5px 0;
-    max-height: 35vh;
+    max-height: var(--msg-img-max-height);
+    max-width: 100%;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.msg-img.image {
+    width: min(
+        calc(var(--img-w) * 1px),
+        calc(var(--msg-img-max-height) * var(--img-w) / var(--img-h))
+    );
+    aspect-ratio: var(--img-w) / var(--img-h);
 }
 
 .right .msg-img {
@@ -266,15 +281,33 @@
 .msg-img.error {
     justify-content: center;
     border-radius: 7px;
+    background: var(--color-card-2);
 }
 
 .msg-img > img {
     border-radius: 7px;
     display: block;
-    max-height: 35vh;
+    width: auto;
+    height: auto;
     max-width: 100%;
-    object-fit: cover;
+    max-height: var(--msg-img-max-height);
     cursor: pointer;
+}
+
+/* 表情 / 表情包 / 长图沿用各自的固定尺寸，不套用普通图片的占位规则 */
+.msg-img.face,
+.msg-img.mface,
+.msg-img.long-image {
+    width: auto;
+    aspect-ratio: auto;
+    background: transparent;
+}
+
+/* 表情图片没有固定尺寸，给个最小尺寸防止加载前/失败时塌陷 */
+.msg-img.face.loading,
+.msg-img.face.error {
+    min-width: 96px;
+    min-height: 96px;
 }
 
 .msg-img.top {
@@ -295,7 +328,7 @@
 .msg-img.face,
 .msg-img.mface > img,
 .msg-img.face > img {
-    max-height: calc(var(--height) / 2);
+    max-height: 17.5vh;
 }
 
 .msg-img.mface {
