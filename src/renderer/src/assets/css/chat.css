@@ -1185,19 +1185,19 @@ body.with-bar .msg-menu {
     height: unset;
 }
 
-.bulletins > div > div.base > div.body > span {
+.bulletin-content {
     white-space: pre-line;
 }
 
-.bulletins > div > div.base > div.body > span > a {
-    color: var(--color-main) !important;
+.bulletin-content > a {
+    color: var(--color-main);
     font-weight: bold;
     text-decoration: underline;
     padding: 0 5px;
     opacity: 0.8;
 }
 
-.bulletins > div > div.base > div.body > span > a:before {
+.bulletin-content > a:before {
     text-align: center;
     content: '🔗';
     color: transparent;

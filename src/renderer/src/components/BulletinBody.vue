@@ -5,6 +5,44 @@
  * @Version: 1.0
 -->
 
+<script setup lang="ts">
+import { Ann } from '@renderer/function/model/ann'
+import { openLink } from '@renderer/function/utils/appUtil'
+import { parseUrlFromMsg } from '@renderer/function/utils/baseUtil'
+import { computed, inject, nextTick, onMounted, shallowRef } from 'vue'
+
+const { data, index } = defineProps<{
+	data: Ann,
+	index: number
+}>()
+
+const viewer = inject('viewer')
+
+const showAll = shallowRef(false)
+const needShow = shallowRef(true)
+
+const parsedMsg = computed(()=>parseUrlFromMsg(data.content))
+
+onMounted(()=>{
+	nextTick(()=>{
+		const tab1 = document.getElementById('info-pan-notices')
+            const tab2 = document.getElementById('info-pan-member')
+            const pan = document.getElementById('bulletins-msg-' + index)
+            if (pan && tab1 && tab2) {
+                // PS：display none 不渲染无法获取实际高度
+                tab1.click()
+                const maxHeight = Number(
+                    getComputedStyle(pan).maxHeight.replace('px', ''),
+                )
+                const height = pan.offsetHeight
+                tab2.click()
+                needShow.value = height == maxHeight
+            }
+	})
+})
+</script>
+
+
 <template>
     <div class="base" @click="showAll = !showAll">
         <header>
@@ -20,11 +58,14 @@
                 all: showAll,
             }"
         >
-            <span
-                style="margin-right: auto; margin-bottom: auto"
-                @click="textClick"
-                v-html="parseText(data.content)"
-            />
+			<div class="bulletin-content">
+				<template v-for="(data, id) in parsedMsg" :key="id">
+					<span v-if="data.type === 'txt'">{{ data.content }}</span>
+					<a v-else @click="openLink(data.content.startsWith('http') ? data.content : `https://${data.content}`)" class="link">
+						{{ data.content }}
+					</a>
+				</template>
+			</div>
             <img
                 v-if="data.img"
                 :alt="'[' + $t('图片') + ']'"
@@ -33,7 +74,7 @@
                     img: true,
                     all: showAll,
                 }"
-                @click.stop="imgClick(data.imgData!)"
+                @click.stop="(viewer as any)?.open(data.imgData!)"
             />
         </div>
         <span v-show="needShow && !showAll">{{ $t('点击展开') }}</span>
@@ -50,91 +91,3 @@
         </div>
     </div>
 </template>
-
-<script lang="ts">
-import { Ann } from '@renderer/function/model/ann'
-import { Img } from '@renderer/function/model/img'
-import { openLink } from '@renderer/function/utils/appUtil'
-import { getTrueLang } from '@renderer/function/utils/systemUtil'
-import useRuntimeData from '@renderer/state/runtimeData'
-import { defineComponent } from 'vue'
-import xss from 'xss'
-
-export default defineComponent({
-    name: 'BulletinBody',
-    inject: ['viewer'],
-    setup() {
-        return {
-            runtimeData: useRuntimeData(),
-        }
-    },
-    props: {
-        data: {
-            type: Object as () => Ann,
-            required: true,
-        },
-        index: {
-            type: Number,
-            required: true,
-        },
-    },
-    data() {
-        return {
-            trueLang: getTrueLang(),
-            showAll: false,
-            needShow: true,
-        }
-    },
-    mounted() {
-        this.$nextTick(() => {
-            const tab1 = document.getElementById('info-pan-notices')
-            const tab2 = document.getElementById('info-pan-member')
-            const pan = document.getElementById('bulletins-msg-' + this.index)
-            if (pan && tab1 && tab2) {
-                // PS：display none 不渲染无法获取实际高度
-                tab1.click()
-                const maxHeight = Number(
-                    getComputedStyle(pan).maxHeight.replace('px', ''),
-                )
-                const height = pan.offsetHeight
-                tab2.click()
-                this.needShow = height == maxHeight
-            }
-        })
-    },
-    methods: {
-        parseText(text: string) {
-            text = text
-                .replaceAll('\r', '\n')
-                .replaceAll('\n\n', '\n')
-                .replaceAll('&#10;', '\n')
-            text = xss(text, { whiteList: { a: ['href', 'target'] } })
-            // 匹配链接
-            const reg =
-                /(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/gi
-            text = text.replaceAll(
-                reg,
-                '<a href="" data-link="$&" onclick="return false">$&</a>',
-            )
-            return text
-        },
-        textClick(event: Event) {
-            const target = event.target as HTMLElement
-            if (target.dataset.link) {
-                // 点击了链接
-                const link = target.dataset.link
-                openLink(link)
-            }
-        },
-        /**
-         * 图片点击
-         * @param img
-         */
-        imgClick(img: Img) {
-            if (this.viewer) {
-                ;(this.viewer as any).open(img)
-            }
-        },
-    },
-})
-</script>

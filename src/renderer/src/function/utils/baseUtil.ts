@@ -235,3 +235,114 @@ export class URL {
         return url
     }
 }
+
+
+const topLevelDomains = new Set(
+	(
+		// 通用顶级域名
+		'com net org edu gov mil int info biz name pro mobi asia ' +
+		'tel cat jobs travel museum aero coop post xxx ' +
+		// 常用新顶级域名
+		'io dev app xyz me tv cc co ai top site online shop store ' +
+		'cloud tech link live vip club work art fun space website ' +
+		'blog wiki email page one run zone plus today world life ' +
+		'news chat design studio tools media group team systems ' +
+		'agency company center city global ltd inc moe ' +
+		// 国家和地区顶级域名（节选）
+		'cn hk tw mo jp kr sg my th vn id ph in pk bd lk np mm kh la ' +
+		'uk us ca au nz za mx ar br cl pe de fr it es pt nl be ch at ' +
+		'se no fi dk ie is pl cz sk hu ro bg gr hr si rs ua by kz ru ' +
+		'su tr il sa ae eg ma ng ke eu ' +
+		// 内网与约定后缀
+		'lan local test'
+	).split(/\s+/),
+)
+
+/**
+ * 去除链接末尾被误识别的标点
+ * @param url 原始匹配到的链接
+ */
+function trimUrlTail(url: string): string {
+	const tailPunctuation = '.,!?;:，。！？；：、\'"'
+	const bracketPairs: [string, string][] = [
+		['(', ')'],
+		['[', ']'],
+		['{', '}'],
+		['（', '）'],
+		['【', '】'],
+		['《', '》'],
+	]
+
+	let result = url
+	while (result.length > 0) {
+		const last = result.charAt(result.length - 1)
+		if (tailPunctuation.includes(last)) {
+			result = result.substring(0, result.length - 1)
+			continue
+		}
+
+		// 仅当右括号多于左括号时才去除
+		const pair = bracketPairs.find(([, right]) => right === last)
+		if (pair) {
+			const [left] = pair
+			const leftCount = result.split(left).length - 1
+			const rightCount = result.split(last).length - 1
+			if (rightCount > leftCount) {
+				result = result.substring(0, result.length - 1)
+				continue
+			}
+		}
+		break
+	}
+	return result
+}
+
+/**
+ * 判断匹配结果是否为合法链接，按一级域名白名单校验
+ * @param url 已裁剪的匹配结果
+ */
+function isValidHost(url: string): boolean {
+	const host = url
+		.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '')
+		.split(/[/?#:]/)[0]
+		.toLowerCase()
+	if (!host) return false
+	// 本地主机与 IPv4 地址直接放行
+	if (host === 'localhost') return true
+	if (/^(\d{1,3}\.){3}\d{1,3}$/.test(host)) return true
+
+	const tld = host.split('.').pop()
+	return !!tld && tld !== host && topLevelDomains.has(tld)
+}
+
+export function parseUrlFromMsg(msg: string): { type: 'txt' | 'link', content: string }[] {
+	const result: { type: 'txt' | 'link', content: string }[] = []
+	const links: string[] = []
+	// 支持带协议、裸域名、localhost:端口；路径遇到空白、引号、中文即停止
+	const urlRegex =
+		/(?:(?:[a-z][a-z0-9+.-]*:\/\/)?(?:localhost|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z0-9-]+)(?::\d{1,5})?)(?:[/?#][^\s<>"'`，。！？；：、（）【】《》「」『』“”‘’…—～·\u4e00-\u9fff]*)?/gi
+
+	let lastIndex = 0
+	let match: RegExpExecArray | null
+	while ((match = urlRegex.exec(msg)) !== null) {
+		const url = trimUrlTail(match[0])
+		// 一级域名不在白名单内则视为普通文本（如 bot.py）
+		if (!url || !isValidHost(url)) continue
+		const index = match.index
+
+		if (index > lastIndex) {
+			result.push({
+				type: 'txt',
+				content: msg.substring(lastIndex, index),
+			})
+		}
+		result.push({ type: 'link', content: url })
+		links.push(url)
+		lastIndex = index + url.length
+	}
+
+	if (lastIndex < msg.length)
+		result.push({ type: 'txt', content: msg.substring(lastIndex) })
+
+	return result
+}
