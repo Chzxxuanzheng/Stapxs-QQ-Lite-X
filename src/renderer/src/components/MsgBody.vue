@@ -136,19 +136,14 @@
                             <span v-else-if="isDebugMsg" class="msg-text">
                                 {{ item }}
                             </span>
-                            <template v-else-if="item instanceof TxtSeg">
-                                <div
-                                    v-if="hasMarkdown()"
-                                    class="msg-md-title"
-                                />
-                                <span
-                                    v-else
-                                    v-show="item.praseMsg !== ''"
-                                    class="msg-text"
-                                    @click="textClick"
-                                    v-html="item.praseMsg"
-                                />
-                            </template>
+                            <div v-else-if="item instanceof TxtSeg" class="msg-text">
+								<template v-for="(data, id) in item.praseMsg" :key="id">
+									<span v-if="data.type === 'txt'">{{ data.content }}</span>
+									<a v-else @click="openLink(data.content.startsWith('http') ? data.content : `https://${data.content}`)" class="link">
+										{{ data.content }}
+									</a>
+								</template>
+                            </div>
                             <div
                                 v-else-if="item instanceof MdSeg"
                                 v-once
@@ -1131,19 +1126,6 @@ export default defineComponent({
         },
 
         /**
-         * 文本消息被点击
-         * @param event 事件
-         */
-        textClick(event: Event) {
-            const target = event.target as HTMLElement
-            if (target.dataset.link) {
-                // 点击了链接
-                const link = target.dataset.link
-                openLink(link)
-            }
-        },
-
-        /**
          * 下载 txt 文件并获取文件内容
          * @param url 链接
          */
@@ -1163,16 +1145,6 @@ export default defineComponent({
                             txt.length > 300 ? txt.slice(0, 300) + '…' : txt
                     }
                 })
-        },
-
-        hasMarkdown() {
-            let hasMarkdown = false
-            this.data.message.forEach((item: any) => {
-                if (item.type === 'markdown') {
-                    hasMarkdown = true
-                }
-            })
-            return hasMarkdown
         },
 
         async showPock() {

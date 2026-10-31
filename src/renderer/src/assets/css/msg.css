@@ -87,6 +87,7 @@
     color: var(--color-font-r);
 }
 
+.message-body a.link,
 .message-body a:link {
     text-decoration: underline;
     display: inline-block;
@@ -94,6 +95,7 @@
     opacity: 0.8;
 }
 
+.message-body a.link:before,
 .message-body a:link:before {
     text-align: center;
     content: '🔗';
@@ -101,7 +103,8 @@
     text-shadow: 0 0 0 var(--color-font-1);
 }
 
-.message-body.special a:link::before {
+.message-body.special a.link:before,
+.message-body.special a:link:before {
     text-shadow: 0 0 0 var(--color-font-1-r);
 }
 
@@ -195,10 +198,12 @@
     color: var(--color-font-r) !important;
 }
 
+.message-mine a.link,
 .message-mine a:link {
     opacity: 0.8;
 }
 
+.message-mine a.link:before,
 .message-mine a:link:before {
     text-align: center;
     content: '🔗';
