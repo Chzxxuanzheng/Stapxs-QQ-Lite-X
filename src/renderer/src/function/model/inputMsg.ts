@@ -50,7 +50,8 @@ export class InputMsg {
         const runtimeData = useRuntimeData()
         if (
             runtimeData.sysConfig.reply_with_at === 'insert' &&
-            msg.sender?.user_id
+            msg.sender?.user_id && 
+			msg.sender.user_id !== runtimeData.loginInfo!.uin
         ) {
             this.addSq(new AtSeg(msg.sender.user_id))
         }
@@ -207,8 +208,9 @@ export class InputMsg {
             const front: Seg[] = [new ReplySeg(this.reply.message_id)]
             if (
                 runtimeData.sysConfig.reply_with_at === 'prefix' &&
-                this.reply.sender?.user_id
-            )
+                this.reply.sender?.user_id &&
+				this.reply.sender?.user_id !== runtimeData.loginInfo!.uin
+		)
                 front.push(new AtSeg(this.reply.sender.user_id))
             back = [...front, ...back]
         }
