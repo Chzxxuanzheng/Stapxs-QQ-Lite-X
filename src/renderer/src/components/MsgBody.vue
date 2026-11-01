@@ -316,15 +316,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div
-                                v-else-if="item instanceof VideoSeg"
-                                class="msg-video"
-                            >
-                                <video playsinline controls muted autoplay>
-                                    <source :src="item.url" type="video/mp4" />
-                                    现在还有不支持 video tag 的浏览器吗？
-                                </video>
-                            </div>
+							<VideoSegComp v-else-if="item instanceof VideoSeg" :seg="item" />
                             <template v-else-if="item instanceof ForwardSeg">
                                 <div
                                     v-tooltip="
@@ -745,6 +737,7 @@ import JsonSegComp from './msg-component/JsonSegComp.vue'
 import XmlSegComp from './msg-component/XmlSegComp.vue'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { getCm } from '@renderer/function/utils/baseUtil'
+import VideoSegComp from './msg-component/VideoSegComp.vue'
 
 //#region == 声明变量 ================================================================
 const {

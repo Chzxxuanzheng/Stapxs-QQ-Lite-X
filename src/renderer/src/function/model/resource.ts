@@ -10,37 +10,17 @@ import { markRaw, shallowRef } from 'vue'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { ProxyUrl } from './proxyUrl'
 
-const timerRegistry = new FinalizationRegistry((timerId) => {
-    clearInterval(timerId as ReturnType<typeof setInterval>)
-})
-
 export class Resource {
     _id?: string
     _url = shallowRef<ProxyUrl>(undefined as unknown as ProxyUrl)
+	private refreshTimeout: undefined | ReturnType<typeof setTimeout>
 
     protected constructor(id: string | undefined, url: string) {
         this._id = id
         this._url.value = new ProxyUrl(url)
-        const runtimeData = useRuntimeData()
 
         // 设置定时更新
-        if (!this._id) return
-        if (!runtimeData.nowAdapter?.getResource) return
-        const selfRef = new WeakRef(this)
-        const interval = setInterval(
-            async () => {
-                const self = selfRef.deref()
-                if (!self) return clearInterval(interval)
-                if (!runtimeData.nowAdapter?.getResource) return
-                const newUrl = await runtimeData.nowAdapter.getResource(
-                    this._id as string,
-                )
-                if (!newUrl) return
-                this._url.value = new ProxyUrl(newUrl)
-            },
-            55 * 60 * 1000,
-        )
-        timerRegistry.register(this, interval)
+        this.scheduleRefresh()
     }
 
     /**
@@ -78,4 +58,40 @@ export class Resource {
     get rawUrl(): string {
         return this._url.value.raw
     }
+
+    protected scheduleRefresh(): void {
+        clearTimeout(this.refreshTimeout)
+        if (!this._id) return
+
+        const ref = new WeakRef(this)
+        this.refreshTimeout = setTimeout(
+			() => void ref.deref()?.refresh(),
+			55 * 60 * 1000
+		)
+
+    }
+
+	protected async _refresh_func(): Promise<boolean> {
+        const runtimeData = useRuntimeData()
+		if (!runtimeData.nowAdapter?.getResource) return false
+		const newUrl = await runtimeData.nowAdapter.getResource(
+			this._id as string,
+		)
+		if (!newUrl) return false
+		this._url.value = new ProxyUrl(newUrl)
+
+		return true
+	}
+
+	async refresh(): Promise<boolean> {
+		clearTimeout(this.refreshTimeout)
+
+		if (!this._id) return false
+
+		const re = await this._refresh_func()
+
+		this.scheduleRefresh()
+
+		return re
+	}
 }

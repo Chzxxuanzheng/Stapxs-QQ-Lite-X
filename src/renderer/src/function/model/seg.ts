@@ -204,6 +204,10 @@ export class ImgSeg extends Seg {
         return this.url
     }
 
+	async refreshResource(): Promise<boolean> {
+		return await this._url.refresh()
+	}
+
     override serializeData(): ImgSegData {
         return {
             type: 'image',
@@ -494,6 +498,10 @@ export class VideoSeg extends Seg {
     get rawUrl(): string {
         return this._url.rawUrl
     }
+
+	async refreshResource(): Promise<boolean> {
+		return await this._url.refresh()
+	}
 
     override serializeData(): VideoSegData {
         return {

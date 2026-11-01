@@ -97,33 +97,23 @@ const boxStyle = computed(() => {
     return { '--img-w': `${w}`, '--img-h': `${h}` }
 })
 
+function init() {
+	void initImg()
+}
+
 /**
  * 初始化图片尺寸信息
  */
-function init() {
-    const img = new Image()
-    img.onload = () => {
+async function initImg() {
+	let loadResult = await loadedImg()
+	if (!loadResult && seg instanceof ImgSeg) {
+		await seg.refreshResource()
+		loadResult = await loadedImg()
+	}
+
+	if (loadResult) {
         // 加载前的高度，用于让父级纠正滚动位置
         const beforeHeight = rootRef.value?.getBoundingClientRect().height ?? 0
-
-        const w = img.naturalWidth || img.width
-        const h = img.naturalHeight || img.height
-        if (w > 0 && h > 0) {
-            naturalWidth.value = w
-            naturalHeight.value = h
-            // 回填尺寸元数据，供其它图片组件复用，避免重复探测
-            if (seg instanceof ImgSeg && !seg.width) {
-                try {
-                    seg.setSize(w, h)
-                } catch {
-                    // 尺寸已被其它实例设置，忽略即可
-                }
-            }
-            if (h / w > 3) {
-                // 长图特殊处理
-                type.value = 'long-image'
-            }
-        }
 
         state.value = 'loaded'
 
@@ -133,16 +123,46 @@ function init() {
                 rootRef.value?.getBoundingClientRect().height ?? 0
             emit('imageLoaded', afterHeight - beforeHeight)
         })
-    }
-
-    img.onerror = () => {
+	} else {
         state.value = 'error'
-    }
-
-    img.src = src
+	}
 }
 
-init()
+async function loadedImg(): Promise<boolean> {
+	return new Promise((resolve) => {
+		const img = new Image()
+		img.onload = () => {
+			const w = img.naturalWidth || img.width
+			const h = img.naturalHeight || img.height
+			if (w > 0 && h > 0) {
+				naturalWidth.value = w
+				naturalHeight.value = h
+				// 回填尺寸元数据，供其它图片组件复用，避免重复探测
+				if (seg instanceof ImgSeg && !seg.width) {
+					try {
+						seg.setSize(w, h)
+					} catch {
+						// 尺寸已被其它实例设置，忽略即可
+					}
+				}
+				if (h / w > 3) {
+					// 长图特殊处理
+					type.value = 'long-image'
+				}
+			}
+
+			resolve(true)
+		}
+
+		img.onerror = () => {
+			resolve(false)
+		}
+
+    img.src = src
+	})
+}
+
+void init()
 
 /**
  * 图片点击
