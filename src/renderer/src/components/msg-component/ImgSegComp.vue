@@ -8,25 +8,27 @@
 
 <template>
     <div ref="rootRef" :class="['msg-img', pos, type, state]" :style="boxStyle">
-        <font-awesome-icon
-            v-if="state === 'loading'"
-            :icon="['fas', 'spinner']"
-            spin
-        />
-        <img
-            v-else-if="state === 'loaded'"
-            :alt="seg.summary"
-            :title="seg.summary"
-            :src="src"
-            :width="naturalWidth || undefined"
-            :height="naturalHeight || undefined"
-            @click="imgClick"
-        />
-        <div v-else class="fail-load">
-            <font-awesome-icon :icon="['fas', 'face-frown']" />
-            {{ $t('加载图片失败') }}
-            <a :href="src" target="_blank">{{ $t('预览图片') }}</a>
-        </div>
+		<Transition name="fade-out-in">
+			<font-awesome-icon
+				v-if="state === 'loading'"
+				:icon="['fas', 'spinner']"
+				spin
+			/>
+			<img
+				v-else-if="state === 'loaded'"
+				:alt="seg.summary"
+				:title="seg.summary"
+				:src="src"
+				:width="naturalWidth || undefined"
+				:height="naturalHeight || undefined"
+				@click="imgClick"
+			/>
+			<div v-else class="fail-load">
+				<font-awesome-icon :icon="['fas', 'face-frown']" />
+				{{ $t('加载图片失败') }}
+				<a :href="src" target="_blank">{{ $t('预览图片') }}</a>
+			</div>
+		</Transition>
     </div>
 </template>
 

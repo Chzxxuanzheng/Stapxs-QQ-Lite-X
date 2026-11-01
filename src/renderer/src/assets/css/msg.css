@@ -279,14 +279,14 @@
 }
 
 .right .msg-img {
-    justify-content: right;
+	margin-left: auto;
 }
 
 .msg-img.loading,
 .msg-img.error {
     justify-content: center;
     border-radius: 7px;
-    background: var(--color-card-2);
+	opacity: 1;
 }
 
 .msg-img > img {
@@ -316,15 +316,14 @@
 }
 
 .msg-img.top {
-    margin: 0 0 5px 0;
+    margin-top: 0;
 }
 
 .msg-img.bottom {
-    margin: 5px 0 0 0;
+    margin-bottom: 0;
 }
 
 .msg-img.alone {
-    border: 1px solid var(--color-main);
     max-width: calc(100% + 20px);
     margin: -10px;
 }
@@ -980,4 +979,14 @@ a.chat-hr-note {
 .file-view > span.txt > a {
     display: block;
     width: 100%;
+}
+
+.fade-out-in-enter-active,
+.fade-out-in-leave-active {
+	transition: opacity 0.3s ease;
+}
+
+.fade-out-in-enter-from,
+.fade-out-in-leave-to {
+	opacity: 0;
 }
