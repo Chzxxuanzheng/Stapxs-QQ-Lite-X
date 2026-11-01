@@ -136,14 +136,14 @@
                             <span v-else-if="isDebugMsg" class="msg-text">
                                 {{ item }}
                             </span>
-                            <div v-else-if="item instanceof TxtSeg" class="msg-text">
+                            <template v-else-if="item instanceof TxtSeg">
 								<template v-for="(data, id) in item.praseMsg" :key="id">
-									<span v-if="data.type === 'txt'">{{ data.content }}</span>
-									<a v-else @click="openLink(data.content.startsWith('http') ? data.content : `https://${data.content}`)" class="link">
+									<span v-if="data.type === 'txt'" class="msg-text">{{ data.content }}</span>
+									<a v-else @click="openLink(data.content.startsWith('http') ? data.content : `https://${data.content}`)" class="link msg-text">
 										{{ data.content }}
 									</a>
 								</template>
-                            </div>
+                            </template>
                             <div
                                 v-else-if="item instanceof MdSeg"
                                 v-once
