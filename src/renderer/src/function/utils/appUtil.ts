@@ -4,14 +4,11 @@ import FileDownloader from 'js-file-downloader'
 import semver from 'semver'
 import appInfo from '../../../../../package.json'
 
-import { KeyboardInfo } from '@capacitor/keyboard'
 import { logger, popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { hslToRgb, rgbToHsl } from '@renderer/function/utils/systemUtil'
 import { defineAsyncComponent, h, markRaw } from 'vue'
 import { GroupSession, Session, UserSession } from '../model/session'
-import { Notify } from '../notify'
-import { changeSession, sendMsgRaw } from './msgUtil'
+import { changeSession } from './msgUtil'
 
 /**
  * 滚动到目标消息（不自动加载）
@@ -61,53 +58,10 @@ export function scrollToMsg(
 /**
  * 打开链接
  * @param url 链接
+ * @param _external 兼容参数：Web 端已无内嵌浏览器，恒为外链跳转
  */
-export function openLink(url: string, external = false) {
-    // 判断是不是 Electron，是的话打开内嵌 iframe
-    if (backend.isDesktop()) {
-        const runtimeData = useRuntimeData()
-        if (!external && !runtimeData.sysConfig.close_browser) {
-            url = ProxyUrl.proxy(url)
-            htmlPopBox(`<iframe src="${url}" class="view-iframe"></iframe>`, {
-                full: true,
-                button: [
-                    {
-                        text: app.config.globalProperties.$t(
-                            '请不要在内嵌页面中输入敏感信息，内嵌页面并不安全。',
-                        ),
-                        noClose: true,
-                    },
-                    {
-                        text: app.config.globalProperties.$t('打开…'),
-                        fun: () => {
-                            const shell = window.electron?.shell
-                            if (shell) shell.openExternal(url)
-                            else
-                                backend.call(
-                                    '',
-                                    'sys:openInBrowser',
-                                    false,
-                                    url,
-                                )
-                        },
-                    },
-                    {
-                        text: app.config.globalProperties.$t('关闭'),
-                        master: true,
-                    },
-                ],
-            })
-        } else {
-            const shell = window.electron?.shell
-            if (shell) {
-                shell.openExternal(url)
-            } else {
-                backend.call('', 'sys:openInBrowser', false, url)
-            }
-        }
-    } else {
-        window.open(url)
-    }
+export function openLink(url: string, _external = false) {
+    window.open(url)
 }
 
 /**
@@ -170,16 +124,6 @@ export async function reloadUsers(useCache: boolean = true) {
             )
         }
     }
-
-    // 更新菜单
-    updateMenu({
-        parent: 'account',
-        id: 'userList',
-        action: 'label',
-        value: app.config.globalProperties.$t('用户列表（{count}）', {
-            count: Session.sessionList.length,
-        }),
-    })
 
     // 设置置顶列表
     for (const id of runtimeData.sysConfig.pin_sessions) {
@@ -247,434 +191,30 @@ export function downloadFile(
     url: ProxyUrl | string,
     name: string,
     onprocess: (event: ProgressEvent & { [key: string]: any }) => undefined,
-    oncancel: (event: ProgressEvent & { [key: string]: any }) => undefined,
+    _oncancel: (event: ProgressEvent & { [key: string]: any }) => undefined,
 ) {
     if (url instanceof ProxyUrl) url = url.url
-    
-    if (backend.isWeb()) {
-        new FileDownloader({
-            url: url,
-            autoStart: true,
-            process: onprocess,
-            nameCallback: function () {
-                return name
-            },
-        }).catch((e) => logger.error(e as Error, '下载文件失败'))
-    } else {
-        backend.addListener(undefined, 'sys:downloadBack', (event, data) => {
-            onprocess(data || event.payload)
-        })
-        backend.addListener(undefined, 'sys:downloadCancel', (event, data) => {
-            oncancel(data || event.payload)
-        })
-        backend.call(undefined, 'sys:download', false, {
-            downloadPath: url,
-            fileName: name,
-        })
-    }
+
+    new FileDownloader({
+        url: url,
+        autoStart: true,
+        process: onprocess,
+        nameCallback: function () {
+            return name
+        },
+    }).catch((e) => logger.error(e as Error, '下载文件失败'))
 }
 
-/**
-* Windows：获取加载系统主题色        setTimeout(()=>{userInfoPanData.user = undefined}, 2000)
-
-* @param color 颜色
-*/
-export function updateWinColor(color: string) {
-    const process = window.electron?.process
-    if (process && process.platform == 'win32') {
-        const red = parseInt(color.substr(0, 2), 16)
-        const green = parseInt(color.substr(2, 2), 16)
-        const blue = parseInt(color.substr(4, 2), 16)
-        // 平衡颜色亮度
-        const hsl = rgbToHsl(red, green, blue)
-        if (win.darkMode) {
-            hsl[2] = 0.8
-        } else {
-            hsl[2] = 0.3
-        }
-        const finalColor = hslToRgb(hsl[0], hsl[1], hsl[2])
-        document.documentElement.style.setProperty(
-            '--color-main',
-            'rgb(' +
-                finalColor[0] +
-                ',' +
-                finalColor[1] +
-                ',' +
-                finalColor[2] +
-                ')',
-        )
-    } else {
-        document.documentElement.style.setProperty(
-            '--color-main',
-            '#' + color.substring(0, 6) + 'CF',
-        )
-    }
-}
-export async function loadWinColor() {
-    // 获取系统主题色
-    updateWinColor(await backend.call(undefined, 'sys:getWinColor', true))
-}
-
-/**
- * macOS：创建应用菜单
- */
-export function createMenu() {
-    const { $t } = app.config.globalProperties
-    // MacOS：初始化菜单
-    if (backend.isDesktop()) {
-        // 初始化菜单
-        const menuTitles = {} as { [key: string]: string }
-        menuTitles.success = $t(
-            '应用显示完成，应用初始化完成！欢迎使用 {name}！',
-            {
-                name: $t('Stapxs QQ Lite X'),
-            },
-        )
-
-        menuTitles.title = $t('Stapxs QQ Lite X')
-        menuTitles.about = $t('关于') + ' ' + $t('Stapxs QQ Lite X')
-        menuTitles.update = $t('检查更新…')
-        menuTitles.hide = $t('隐藏') + ' ' + $t('Stapxs QQ Lite X')
-        menuTitles.hideOthers = $t('隐藏其他')
-        menuTitles.unhide = $t('全部显示')
-        menuTitles.quit = $t('退出') + ' ' + $t('Stapxs QQ Lite X')
-
-        menuTitles.edit = $t('编辑')
-        menuTitles.undo = $t('撤销')
-        menuTitles.redo = $t('重做')
-        menuTitles.cut = $t('剪切')
-        menuTitles.copy = $t('复制')
-        menuTitles.paste = $t('粘贴')
-        menuTitles.selectAll = $t('全选')
-
-        menuTitles.account = $t('账户')
-        menuTitles.login = $t('连接')
-        menuTitles.logout = $t('登出')
-        menuTitles.userList = $t('用户列表（{count}）', {
-            count: Session.sessionList.length,
-        })
-        menuTitles.flushUser = $t('刷新列表…')
-
-        menuTitles.help = $t('帮助')
-        menuTitles.doc = $t('帮助文档')
-        menuTitles.feedback = $t('在 Github 上反馈问题')
-        menuTitles.license = $t('许可协议')
-
-        backend.call(undefined, 'sys:createMenu', false, menuTitles)
-    }
-}
-export function updateMenu(config: {
-    parent: string
-    id: string
-    action: string
-    value: string
-}) {
-    // MacOS：更新菜单
-    backend.call(undefined, 'sys:updateMenu', false, config)
-}
-
-/**
- * Electron：注册系统 IPC
- */
-export function createIpc() {
-    const runtimeData = useRuntimeData()
-    // 服务发现
-    backend.addListener(undefined, 'sys:serviceFound', (event, data) => {
-        const info = data ?? event.payload
-        setQuickLogin(info.address, info.port)
-    })
-    // bot 功能
-    backend.addListener(undefined, 'bot:flushUser', () => {
-        reloadUsers()
-        popInfo.info(app.config.globalProperties.$t('刷新用户列表成功'))
-    })
-    backend.addListener(undefined, 'bot:logout', () => {
-        runtimeData.sysConfig.auto_connect = false
-        if (!runtimeData.nowAdapter) return
-        runtimeData.nowAdapter.close()
-    })
-    backend.addListener(undefined, 'bot:quickReply', (event, data) => {
-        const info = data ?? event.payload
-        const session = Session.getSessionById(info.id)
-        if (!session) return
-        sendMsgRaw(session, [
-            new ReplySeg(String(info.msg)),
-            new TxtSeg(info.content),
-        ])
-        // 去消息列表内寻找，去除新消息标记
-        session.setRead('sender')
-    })
-    // 应用功能
-    backend.addListener(undefined, 'app:about', () => {
-        popBox({
-            title:
-                app.config.globalProperties.$t('关于') +
-                ' ' +
-                app.config.globalProperties.$t('Stapxs QQ Lite X'),
-            comp: AboutPan,
-            props: { showUI: false },
-            allowAutoClose: false,
-        })
-    })
-    backend.addListener(undefined, 'sys:handleUri', (event, data) => {
-        logger.info(JSON.stringify(data ?? event.payload))
-    })
-    backend.addListener(undefined, 'app:changeTab', (event, name) => {
-        window.focus()
-        document
-            .getElementById('bar-' + (name ?? event.payload).toLowerCase())
-            ?.click()
-    })
-    backend.addListener(undefined, 'app:openLink', (event, link) => {
-        openLink(link ?? event.payload)
-    })
-    backend.addListener(undefined, 'app:error', (event, text) => {
-        logger.error(null, text ?? event.payload)
-    })
-    backend.addListener(undefined, 'app:jumpChat', (event, data) => {
-        const info = data ?? event.payload
-        jumpToSession(info.userId, info.msgId)
-        new Notify().closeAll(info.userId)
-    })
-    // 后端连接模式
-    backend.addListener(undefined, 'onebot:onopen', (event, data) => {
-        backendWs._onOpen(data ?? event.payload)
-    })
-    backend.addListener(undefined, 'onebot:onmessage', (event, message) => {
-        backendWs._onMessage(message ?? event.payload)
-    })
-    backend.addListener(undefined, 'onebot:onclose', (event, data) => {
-        backendWs._onClose(data ?? event.payload)
-    })
-}
-
-/**
- * Capacitor：初始化移动平台
- */
-export async function loadMobile() {
-    const { $t } = app.config.globalProperties
-    const runtimeData = useRuntimeData()
-    // Capacitor：相关初始化
-    if (backend.isMobile()) {
-        // 注册回调监听
-        backend.addListener('Onebot', 'onebot:event', (data) => {
-            const msg = JSON.parse(data.data)
-            switch (data.type) {
-                case 'onopen':
-                    backendWs._onOpen({
-                        address: runtimeData.connectInfo.address!,
-                    })
-                    break
-                case 'onmessage':
-                    backendWs._onMessage(data.data)
-                    break
-                case 'onclose':
-                    backendWs._onClose({
-                        code: msg.code,
-                        message: msg.message,
-                    })
-                    break
-                case 'onerror': {
-                    backendWs._onClose({
-                        code: -1,
-                        message: $t('连接失败') + ': ' + msg.type,
-                    })
-                    break
-                }
-                case 'onServiceFound':
-                    setQuickLogin(msg.address, msg.port)
-                    break
-                default:
-                    break
-            }
-        })
-        // 通知
-        const permission = await backend.call(
-            'LocalNotifications',
-            'checkPermissions',
-            true,
-        )
-        const permissionStr = permission || permission.display
-        if (permissionStr.indexOf('prompt') != -1) {
-            await backend.call(
-                'LocalNotifications',
-                'requestPermissions',
-                false,
-            )
-        } else if (permissionStr.indexOf('denied') != -1) {
-            logger.error(null, '通知权限已被拒绝')
-            logger.system('开发者阁下为什么要拒绝通知权限的请求呢？')
-        } else {
-            logger.debug('通知权限已开启')
-            // 注册通知类型
-            backend.call('LocalNotifications', 'registerActionTypes', false, {
-                types: [
-                    {
-                        id: 'msgQuickReply',
-                        actions: [
-                            {
-                                id: 'REPLY_ACTION',
-                                title: '快速回复',
-                                requiresAuthentication: true,
-                                input: true,
-                                inputButtonTitle: '发送',
-                                inputPlaceholder: '输入回复内容……',
-                            },
-                        ],
-                    },
-                ] as ActionType[],
-            })
-            // 注册相关事件
-            backend.addListener(
-                'LocalNotifications',
-                'localNotificationActionPerformed',
-                (info) => {
-                    const notification =
-                        info.notification as LocalNotificationSchema
-                    if (info.actionId == 'tap') {
-                        // PS：通知被点击后会自动被关闭，所以这里不需要处理
-                        jumpToSession(
-                            notification.extra.userId,
-                            notification.extra.msgId,
-                        )
-                    } else if (info.actionId == 'REPLY_ACTION') {
-                        // 快速回复
-                        const session = Session.getSessionById(
-                            notification.extra.userId,
-                        )
-                        if (!session) return
-                        sendMsgRaw(session, [
-                            new ReplySeg(String(notification.extra.msgId)),
-                            new TxtSeg(info.inputValue ?? ''),
-                        ])
-                        // 去消息列表内寻找，去除新消息标记
-                        session.setRead('sender')
-                    }
-                },
-            )
-        }
-        // 键盘
-        backend.call('Keyboard', 'setAccessoryBarVisible', false, {
-            isVisible: false,
-        })
-        backend.call('Keyboard', 'setResizeMode', false, { mode: 'none' })
-        backend.addListener(
-            'Keyboard',
-            'keyboardWillShow',
-            async (info: KeyboardInfo) => {
-                const keyboardHeight = info.keyboardHeight
-
-                // 调整输入框高度
-                const sendMore = document.getElementById('send-more')
-                if (sendMore && keyboardHeight > window.innerHeight / 3) {
-                    sendMore.style.paddingBottom = '10px'
-                }
-
-                const safeArea = await backend.call(
-                    'SafeArea',
-                    'getSafeArea',
-                    true,
-                )
-                const tabBar = document.getElementsByTagName('ul')[0]
-                // iOS 26 后键盘背景是半透明的，不能让 webview 调整高度，会漏出背景的黑色
-                // 干脆把所有的 iOS 版本处理方法都改为内部避让
-                if (backend.platform == 'ios') {
-                    const baseApp = document.getElementById('base-app')
-                    if (safeArea && baseApp) {
-                        baseApp.style.setProperty(
-                            '--safe-area-bottom',
-                            keyboardHeight - safeArea.bottom + 100 + 'px',
-                        )
-                    }
-                    // 调整菜单高度
-                    if (safeArea && tabBar) {
-                        tabBar.style.setProperty(
-                            'padding-bottom',
-                            keyboardHeight - safeArea.bottom + 100 + 'px',
-                            'important',
-                        )
-                    }
-                }
-
-                // 调整整个 HTML 的高度
-                // PS：仅用于解决 Android 在全屏沉浸式下键盘遮挡问题
-                const html = document.getElementsByTagName('html')[0]
-                if (html && backend.platform == 'android') {
-                    html.style.height = `calc(100% - ${keyboardHeight + safeArea.top}px)`
-                }
-            },
-        )
-        backend.addListener('Keyboard', 'keyboardWillHide', async () => {
-            const sendMore = document.getElementById('send-more')
-            if (sendMore) {
-                sendMore.style.paddingBottom = 'var(--safe-area-bottom)'
-            }
-            if (backend.platform == 'ios') {
-                const baseApp = document.getElementById('base-app')
-                const safeArea = await backend.call(
-                    'SafeArea',
-                    'getSafeArea',
-                    true,
-                )
-                if (safeArea && baseApp) {
-                    baseApp.style.setProperty(
-                        '--safe-area-bottom',
-                        safeArea.bottom + 'px',
-                    )
-                }
-
-                const tabBar = document.getElementsByTagName('ul')[0]
-                if (tabBar) {
-                    tabBar.style.paddingBottom = ''
-                }
-            }
-            // 调整整个 HTML 的高度
-            // PS：仅用于解决 Android 在全屏沉浸式下键盘遮挡问题
-            const html = document.getElementsByTagName('html')[0]
-            if (html && backend.platform == 'android') {
-                html.style.height = 'calc(100%)'
-            }
-        })
-        // 状态栏（Android）
-        backend.call('NavigationBar', 'setTransparency', false, {
-            isTransparent: true,
-        })
-        backend.call('StatusBar', 'setOverlaysWebView', false, {
-            overlay: true,
-        })
-        backend.call('StatusBar', 'setBackgroundColor', false, {
-            color: '#ffffff00',
-        })
-    }
-}
-
-import {
-    ActionType,
-    LocalNotificationSchema,
-} from '@capacitor/local-notifications'
-import AboutPan from '@renderer/components/popBox/AboutPan.vue'
-import { backend } from '@renderer/runtime/backend'
 import { FriendData, GroupData } from '../adapter/interface'
-import driver, { backendWs } from '../driver'
+import driver from '../driver'
 import { NoticeBodyV3 } from '../elements/system'
 import { SessionBox } from '../model/box'
 import { Message } from '../model/message'
 import { ProxyUrl } from '../model/proxyUrl'
 import { htmlPopBox, popBox, PopBoxButton } from './popBox'
 import WelPan from '@renderer/components/popBox/WelPan.vue'
-import { ReplySeg, TxtSeg } from '../model/seg'
-import win from '@renderer/runtime/win'
 import SvgMedal from '@renderer/components/svg/SvgMedal.vue'
 import { useLocalStorage } from './vuse'
-/**
- * 初始化快速连接信息
- * @param address 地址
- * @param port 端口
- */
-function setQuickLogin(address: string, port: number) {
-    if (loginInfo.quickLogin != null)
-        loginInfo.quickLogin.push({ address: address, port: port })
-}
 
 /**
  * 检查更新
@@ -843,34 +383,18 @@ function showTestLog(data: GhCommits) {
                 ],
             ),
         ])
-    const buttonGoUpdate = !backend.isWeb()
-        ? [
-              {
-                  text: $t('知道了'),
-              },
-              {
-                  text: $t('下载更新…'),
-                  master: true,
-                  noClose: true,
-                  fun: () =>
-                      openLink(
-                          'https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X/actions/workflows/build-electron.yml',
-                          true,
-                      ),
-              },
-          ]
-        : [
-              {
-                  text: $t('查看…'),
-                  noClose: true,
-                  fun: () => openLink(data.html_url),
-              },
-              {
-                  text: $t('刷新页面'),
-                  master: true,
-                  fun: () => location.reload(),
-              },
-          ]
+    const buttonGoUpdate = [
+        {
+            text: $t('查看…'),
+            noClose: true,
+            fun: () => openLink(data.html_url),
+        },
+        {
+            text: $t('刷新页面'),
+            master: true,
+            fun: () => location.reload(),
+        },
+    ]
     popBox({
         comp: pages,
         svg: 'bullhorn',
@@ -1075,27 +599,6 @@ export function checkNotice() {
 }
 
 /**
- * TODO：后端代理请求模式（暂未使用）
- * @param type 请求类型
- * @param url 地址
- * @param cookies Cookies
- * @param data 数据
- */
-export function BackendRequest(
-    type: 'GET' | 'POST',
-    url: string,
-    cookies: string[],
-    data: any = undefined,
-) {
-    backend.call(undefined, 'sys:requestHttp', false, {
-        type: type,
-        url: url,
-        cookies: JSON.stringify(cookies),
-        data: data,
-    })
-}
-
-/**
  * UM：统计事件统一上传方法
  * @param event 事件名
  * @param data 数据
@@ -1123,26 +626,15 @@ export function sendIdentifyData(data: { [key: string]: any }) {
  * @returns
  */
 export function shouldAutoFocus(): boolean {
-    // 桌面端
-    if (backend.type !== 'web') {
-        // 除了苹果的不知道啥东西,都可以
-        if (['electron'].includes(backend.type)) {
-            return true
-        }
+    // 移动端浏览器不自动聚焦
+    if (
+        /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent,
+        )
+    ) {
         return false
     }
-    // web端
-    else {
-        // 移动端浏览器不自动聚焦
-        if (
-            /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-                navigator.userAgent,
-            )
-        ) {
-            return false
-        }
-        return true
-    }
+    return true
 }
 
 /**

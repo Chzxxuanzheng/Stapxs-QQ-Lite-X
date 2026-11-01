@@ -11,32 +11,6 @@
             "presentation": {
                 "hidden": true
             }
-        },
-        {
-            "name": "Electron Debug Main Process",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceRoot}",
-            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron-vite",
-            "windows": {
-                "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron-vite.cmd"
-            },
-            "runtimeArgs": ["--sourcemap"]
-            // "env": {
-            // 	"REMOTE_DEBUGGING_PORT": "9222"
-            // }
-        }
-    ],
-    "compounds": [
-        {
-            "name": "Debug All",
-            "configurations": [
-                "Electron Debug Main Process",
-                "Debug Renderer Process"
-            ],
-            "presentation": {
-                "order": 1
-            }
         }
     ]
 }

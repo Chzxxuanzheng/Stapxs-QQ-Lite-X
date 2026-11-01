@@ -5,17 +5,12 @@ import languageConfig from '@renderer/assets/l10n/_l10nconfig.json'
 import { refreshFavicon } from '@renderer/function/utils/favicon'
 import { GroupSession, Session } from '@renderer/function/model/session'
 import { BubbleBox, SessionBoxData } from '@renderer/function/model/box'
-import {
-    loadWinColor,
-    sendIdentifyData,
-    updateWinColor,
-} from '@renderer/function/utils/appUtil'
+import { sendIdentifyData } from '@renderer/function/utils/appUtil'
 import app, { i18n } from '@renderer/main'
 import {
     getPortableFileLang,
     getTrueLang,
 } from '@renderer/function/utils/systemUtil'
-import { backend } from '@renderer/runtime/backend'
 import type { OptionField } from './index'
 
 /**
@@ -118,20 +113,6 @@ export const OptionInfos = {
             setTimeout(refreshFavicon, 100)
         },
     },
-    opt_auto_win_color: {
-        default: false,
-        onChange: (value: boolean) => {
-            if (!value) return
-            backend.addListener(
-                undefined,
-                'sys:WinColorChanged',
-                (_, params) => {
-                    updateWinColor(params)
-                },
-            )
-            loadWinColor()
-        },
-    },
     background_img: {
         default: '',
         onChange: (value: string) => {
@@ -177,12 +158,6 @@ export const OptionInfos = {
     },
     fs_adaptation: {
         default: 0,
-    },
-    opt_always_top: {
-        default: false,
-        onChange: (value: boolean) => {
-            backend.call(undefined, 'win:alwaysTop', false, value)
-        },
     },
     merge_forward_width: {
         default: true,
@@ -273,9 +248,6 @@ export const OptionInfos = {
     },
     send_key: {
         default: 'none' as 'none' | 'shift' | 'ctrl' | 'alt' | 'meta',
-    },
-    close_browser: {
-        default: false,
     },
     close_ga: {
         default: false,

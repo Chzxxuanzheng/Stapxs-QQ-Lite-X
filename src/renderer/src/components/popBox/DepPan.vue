@@ -128,7 +128,6 @@
                     <font-awesome-icon :icon="['fas', 'angle-right']" />
                 </div>
                 <div
-                    v-if="backend.platform == 'web'"
                     class="ss-card jump-card"
                     @click="
                         openLink('https://github.com/Stapxs/Stapxs-Web-API')
@@ -144,40 +143,6 @@
                     </header>
                     <font-awesome-icon :icon="['fas', 'angle-right']" />
                 </div>
-                <template v-else>
-                    <div
-                        class="ss-card jump-card"
-                        @click="
-                            openLink(
-                                'https://gitlab.com/Binaryify/NeteaseCloudMusicApi',
-                            )
-                        "
-                    >
-                        <header>
-                            <div />
-                            <div>
-                                Netease Cloud Music API<span>{{
-                                    $t('网易云音乐预览信息服务')
-                                }}</span>
-                            </div>
-                        </header>
-                        <font-awesome-icon :icon="['fas', 'angle-right']" />
-                    </div>
-                    <div
-                        class="ss-card jump-card"
-                        @click="openLink('https://api.bilibili.com')"
-                    >
-                        <header>
-                            <div />
-                            <div>
-                                Bilibili API<span>{{
-                                    $t('Bilibili 预览信息服务')
-                                }}</span>
-                            </div>
-                        </header>
-                        <font-awesome-icon :icon="['fas', 'angle-right']" />
-                    </div>
-                </template>
             </div>
             <div v-else class="dept">
                 <div
@@ -263,7 +228,6 @@
 
 <script setup lang="ts">
 import { openLink } from '@renderer/function/utils/appUtil'
-import { backend } from '@renderer/runtime/backend'
 const { type } = defineProps<{
     type?: string
 }>()

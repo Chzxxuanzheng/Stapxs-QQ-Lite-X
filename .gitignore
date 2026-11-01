@@ -3,12 +3,8 @@ node_modules
 *.log*
 .npmrc
 
-out
-
 dev-dist
 dist
-dist_electron
-dist_capacitor
 stats.html
 
 notice_local.json

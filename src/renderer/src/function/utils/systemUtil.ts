@@ -1,7 +1,6 @@
 import app, { i18n } from '@renderer/main'
 
 import l10nConfig from '@renderer/assets/l10n/_l10nconfig.json'
-import { backend } from '@renderer/runtime/backend'
 import PO from 'pofile'
 import packageInfo from '../../../../../package.json'
 import { logger, popInfo } from '../base'
@@ -16,22 +15,6 @@ import LoginPan from '@renderer/components/popBox/LoginPan.vue'
  */
 export function delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-/**
- * 区分安卓、iOS、MacOS 和其他
- */
-export function getDeviceType() {
-    const userAgent = navigator.userAgent
-    if (userAgent.indexOf('Android') > -1 || userAgent.indexOf('Adr') > -1) {
-        return 'Android'
-    } else if (!!userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)) {
-        return 'iOS'
-    } else if (userAgent.indexOf('Mac OS X') > -1) {
-        return 'MacOS'
-    } else {
-        return 'Other'
-    }
 }
 
 /**
@@ -434,12 +417,8 @@ export async function getApi(url: string) {
             return data
         }
     } catch (error) {
-        logger.error(error as Error, '前端请求 API 失败，尝试后端请求……')
-        if (!backend.isWeb()) {
-            return await backend.call('Onebot', 'sys:getApi', true, url)
-        } else {
-            return null
-        }
+        logger.error(error as Error, '前端请求 API 失败')
+        return null
     }
 }
 

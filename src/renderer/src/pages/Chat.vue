@@ -200,7 +200,6 @@ import {
     useViewportUnits,
 } from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
-import { backend } from '@renderer/runtime/backend'
 import {
     nextTick,
     onMounted,
@@ -241,12 +240,6 @@ const tags = shallowReactive({ ...tagsDefault })
 //#region == 初始化 ======================================================================
 onMounted(init)
 
-// Capacitor：系统返回操作（Android）
-if (backend.type == 'capacitor' && backend.platform === 'android') {
-    backend.addListener('App', 'backButton', () => {
-        exitWin()
-    })
-}
 // 新消息滚动到底部
 Session.beforeNewMessageHook.push(async (session, _msg) => {
     if (session !== chat) return

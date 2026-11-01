@@ -16,7 +16,6 @@ import { Msg } from './model/msg'
 import { NotifyInfo } from './elements/system'
 import { Notify } from './notify'
 import { isImportant as userIsImportant } from './utils/msgUtil'
-import { backend } from '@renderer/runtime/backend'
 import { refreshFavicon } from './utils/favicon'
 
 /**
@@ -99,22 +98,6 @@ Session.afterNewMessageHook.push((session: Session, msg: Message) => {
     if (!isFileMsg(msg)) return
 
     session.loadFiles(false)
-})
-//#endregion
-
-// 本人无苹果设备,不保证可以用
-//#region == Touch Bar ============================================
-Session.afterActiveHook.push((_) => {
-    if (!backend.isDesktop()) return
-    const list = [] as { id: number; name: string; image?: string }[]
-    for (const session of Session.activeSessions.values()) {
-        list.push({
-            id: session.id,
-            name: session.showName,
-            image: session.face,
-        })
-    }
-    backend.call(undefined, 'sys:flushOnMessage', false, list)
 })
 //#endregion
 

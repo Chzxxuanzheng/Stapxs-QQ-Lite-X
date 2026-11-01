@@ -1,24 +1,4 @@
 <template>
-    <!-- 顶栏 -->
-    <div v-if="win.withBar" class="top-bar" name="appbar">
-        <div class="space" />
-        <div class="controller">
-            <div class="min" @click="win.minimize()">
-                <font-awesome-icon :icon="['fas', 'minus']" />
-            </div>
-            <div class="max" @click="win.switchMaximize()">
-                <font-awesome-icon :icon="['far', 'square']" />
-            </div>
-            <div class="close" @click="win.close()">
-                <font-awesome-icon :icon="['fas', 'xmark']" />
-            </div>
-        </div>
-    </div>
-    <!-- 拖拽区域 -->
-    <div
-        v-if="backend.platform == 'darwin'"
-        class="controller mac-controller"
-    />
     <div id="base-app" ref="base-app">
         <div
             class="main-body"
@@ -103,15 +83,9 @@ import { getVersion, openLoginPan } from '@renderer/function/utils/systemUtil'
 import GlobalSessionSearchBar from '@renderer/components/GlobalSessionSearchBar.vue'
 import Viewer from '@renderer/components/Viewer.vue'
 import { vHide } from '@renderer/function/utils/vcmd'
-import {
-    useBackHoldup,
-    useFrame,
-    useKeyboard,
-} from '@renderer/function/utils/vuse'
+import { useBackHoldup, useFrame } from '@renderer/function/utils/vuse'
 import Chat from '@renderer/pages/Chat.vue'
 import SideBar from '@renderer/pages/SideBar.vue'
-import { backend } from '@renderer/runtime/backend'
-import win from '@renderer/runtime/win'
 import ContextMenus from '@renderer/components/menu/ContextMenus.vue'
 import Tooltips from '@renderer/components/tooltip/Tooltips.vue'
 import PopBoxes from '@renderer/components/popBox/PopBoxes.vue'
@@ -145,12 +119,7 @@ if (import.meta.env.DEV) {
     document.title = 'Stapxs QQ Lite X(Dev)'
 } else {
     const title = titleList[Math.floor(Math.random() * titleList.length)]
-    if (backend.platform == 'web') {
-        document.title = title + '- Stapxs QQ Lite X'
-    } else {
-        document.title = title
-        backend.call(undefined, 'win:setTitle', false, title)
-    }
+    document.title = title + '- Stapxs QQ Lite X'
 }
 //#endregion
 
@@ -169,11 +138,6 @@ window.onbeforeunload = () => {
     runtimeData.nowAdapter?.close()
     runtimeData.nowAdapter = undefined
 }
-
-useKeyboard('f12', () => {
-    if (!runtimeData.tags.dev) return
-    backend.call(undefined, 'win:openDevTools', false)
-})
 
 useFrame(() => {
     if (!baseApp.value) return
@@ -205,8 +169,6 @@ async function init() {
     window._AMapSecurityConfig = import.meta.env.VITE_APP_AMAP_SECRET
 
     //#region == 初始化功能 =====================================
-    App.createMenu() // Electron：创建菜单
-    App.createIpc() // Electron：创建 IPC 通信
     // 加载开发者相关功能
     if (import.meta.env.DEV) {
         document.title = 'Stapxs QQ Lite X (Dev)'
@@ -233,11 +195,6 @@ async function init() {
             (import.meta.env.DEV ? 'development' : 'production') +
             ' 模式。正在为您加载更多功能。',
     )
-    // 加载移动平台特性
-    App.loadMobile()
-    // 服务发现
-    backend.call('Onebot', 'sys:findService', false)
-    backend.call('OneBot', 'sys:frontLoaded', false)
     //#endregion
 
     //#region == popstate监听 ==================================
@@ -269,17 +226,13 @@ async function init() {
                 baseUrl: import.meta.env.VITE_APP_MU_ADDRESS,
                 websiteId: import.meta.env.VITE_APP_MU_ID,
             } as any
-            // 给页面添加一个来源域名方便在 electron 中获取
-            if (!backend.isWeb()) {
-                config.hostName = backend.type + '.stapxs.cn'
-            }
             Umami.initialize(config)
             // 上报一些应用基础信息
             App.sendIdentifyData({
                 app_version:
                     import.meta.env.VITE_APP_CLIENT_TAG + ',' + getVersion(),
-                os_version: backend.release,
-                os_arch: backend.arch,
+                os_version: await getDeviceInfo(),
+                os_arch: undefined,
             })
         }
     }
@@ -313,6 +266,52 @@ function rafLoop() {
     }
     requestAnimationFrame(rafLoop)
 }
+
+async function getDeviceInfo(): Promise<string> {
+	
+        let os = ''
+        let version = ''
+
+        // 优先使用 navigator.userAgentData（Chrome / Edge / Android）
+        if ((navigator as any).userAgentData) {
+            os = (navigator as any).userAgentData.platform || os
+            try {
+                const highEntropy = await (
+                    navigator as any
+                ).userAgentData.getHighEntropyValues(['platformVersion'])
+                version = highEntropy.platformVersion || version
+            } catch {
+                // 如果获取失败，保持 Unknown
+            }
+        } else {
+            // fallback: 使用 navigator.userAgent
+            const ua = navigator.userAgent
+
+            if (/Windows NT (\d+\.\d+)/.test(ua)) {
+                os = 'Windows'
+                version = /Windows NT (\d+\.\d+)/.exec(ua)?.[1] ?? 'Unknown'
+            } else if (/Mac OS X (\d+[_.]\d+[_.]?\d*)/.test(ua)) {
+                os = 'macOS'
+                version =
+                    /Mac OS X (\d+[_.]\d+[_.]?\d*)/
+                        .exec(ua)?.[1]
+                        ?.replaceAll('_', '.') ?? 'Unknown'
+            } else if (/Android (\d+(\.\d+)?)/.test(ua)) {
+                os = 'Android'
+                version = /Android (\d+(\.\d+)?)/.exec(ua)?.[1] ?? 'Unknown'
+            } else if (/iPhone OS (\d+[_.]\d+[_.]?\d*)/.test(ua)) {
+                os = 'iOS'
+                version =
+                    /iPhone OS (\d+[_.]\d+[_.]?\d*)/
+                        .exec(ua)?.[1]
+                        ?.replaceAll('_', '.') ?? 'Unknown'
+            } else if (/Linux/.test(ua)) {
+                os = 'Linux'
+                version = 'Unknown'
+            }
+        }
+		return `${os} ${version} (Web)`
+}
 //#endregion
 </script>
 
@@ -332,16 +331,5 @@ function rafLoop() {
 .appmsg-leave-to {
     transform: translateX(-20px);
     opacity: 0;
-}
-
-/* 标题栏变更动画 */
-.appbar-enter-active,
-.appbar-leave-active {
-    transition: all 0.2s;
-}
-
-.appbar-enter-from,
-.appbar-leave-to {
-    transform: translateY(-60px);
 }
 </style>

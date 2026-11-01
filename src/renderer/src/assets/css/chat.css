@@ -23,11 +23,6 @@ input {
     z-index: 1;
 }
 
-body.with-bar .chat-pan {
-    height: calc(100% - 40px);
-    top: 40px;
-}
-
 .chat-pan > div {
     z-index: 2;
 }
@@ -430,11 +425,6 @@ body.with-bar .chat-pan {
     top: 0;
     width: 100%;
     z-index: 10;
-}
-
-body.with-bar .msg-menu {
-    height: calc(100% + 40px);
-    margin-top: -40px;
 }
 
 .msg-menu-bg {
@@ -2294,11 +2284,6 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
 }
 
 @media (max-width: 700px) {
-    body.with-bar .chat-pan {
-        height: calc(100% - 115px);
-        top: 40px;
-    }
-
     /* AT 信息悬浮面板 */
     .member-info {
         max-width: 55%;

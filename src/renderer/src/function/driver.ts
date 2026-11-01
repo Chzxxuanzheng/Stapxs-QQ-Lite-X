@@ -10,8 +10,6 @@
  * 注:历史遗留问题,这里的Onebot指的是后端代理ws http之类的
  */
 
-import app from '@renderer/main'
-import { backend } from '@renderer/runtime/backend'
 import { logger, popInfo } from './base'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { openLoginPan } from './utils/systemUtil'
@@ -158,114 +156,6 @@ class NativeWs implements Ws {
 }
 const nativeWs = new NativeWs()
 
-interface BackendWsOnOpenData {
-    address: string
-}
-
-class BackendWs implements Ws {
-    private selfState: DriverState = DriverState.Disconnected
-    private onmessageHook?: (msg: OnMessageData) => void
-    private onErrorHook?: (err: OnCloseData) => void
-    //#region == 开启关闭 ============================================
-    open(url: string): Promise<boolean> {
-        if (this.selfState === DriverState.Connected)
-            throw new Error('WebSocket已存在，无法重复连接')
-        if (this.selfState === DriverState.Connecting)
-            throw new Error('WebSocket正在连接中，无法重复连接')
-        if (this.selfState === DriverState.Close)
-            throw new Error('WebSocket已关闭，请先重置')
-
-        this.selfState = DriverState.Connecting
-        return new Promise<boolean>((resolve) => {
-            let isConnected = false
-            const onopen = (_: any) => {
-                logger.info('WebSocket连接成功')
-                this.selfState = DriverState.Connected
-                isConnected = true
-                resolve(true)
-            }
-            const onclose = (data: OnCloseData) => {
-                this.selfState = DriverState.Disconnected
-                if (isConnected) return this.onClose(data)
-                else resolve(false)
-            }
-            this._onOpenHook = onopen
-            this._onCloseHook = onclose
-            this._onMessageHook = (message: OnMessageData) => {
-                this.onmessageHook?.(message)
-            }
-            backend.call('Onebot', 'onebot:connect', false, { url })
-        })
-    }
-    close(): Promise<void> {
-        let resolve!: (value: void | PromiseLike<void>) => void
-        const promise = new Promise<void>((r) => (resolve = r))
-        this.selfState = DriverState.Close
-        const onclose = (_: OnCloseData) => {
-            resolve()
-        }
-        this._onCloseHook = onclose
-        backend.call('Onebot', 'onebot:close', false)
-        popInfo.info(app.config.globalProperties.$t('正在断开链接……'))
-        return promise
-    }
-    //#endregion
-
-    //#region == 发送数据 ============================================
-    send(data: string): void {
-        backend.call('Onebot', 'onebot:send', false, data)
-    }
-    //#endregion
-
-    //#region == 自身状态 ============================================
-    get state(): DriverState {
-        return this.selfState
-    }
-    isConnected(): boolean {
-        return this.selfState === DriverState.Connected
-    }
-    onError(callback: (err: OnCloseData) => void): void {
-        this.onErrorHook = callback
-    }
-    onMessage(callback: (msg: OnMessageData) => void): void {
-        this.onmessageHook = callback
-    }
-    async reset(): Promise<void> {
-        if (this.selfState === DriverState.Disconnected) return
-        await this.close()
-        this.selfState = DriverState.Disconnected
-        this.onErrorHook = undefined
-        this.onmessageHook = undefined
-        this._onOpenHook = undefined
-        this._onMessageHook = undefined
-        this._onCloseHook = undefined
-    }
-    //#endregion
-
-    //#region == 私有方法 ============================================
-    // 处理退出
-    private onClose(data: OnCloseData) {
-        if (this.selfState === DriverState.Close) return
-        this.selfState = DriverState.Error
-        this.onErrorHook?.(data)
-    }
-    // 向后端添加监听
-    private _onOpenHook?: (data: BackendWsOnOpenData) => void
-    private _onMessageHook?: (message: OnMessageData) => void
-    private _onCloseHook?: (data: OnCloseData) => void
-    _onOpen(data: BackendWsOnOpenData) {
-        this._onOpenHook?.(data)
-    }
-    _onMessage(data: OnMessageData) {
-        this._onMessageHook?.(data)
-    }
-    _onClose(data: OnCloseData) {
-        this._onCloseHook?.(data)
-    }
-    //#endregion
-}
-export const backendWs = new BackendWs()
-
 interface Fetch {
     get(
         url: string,
@@ -322,32 +212,6 @@ class NativeFetch implements Fetch {
 }
 const nativeFetch = new NativeFetch()
 
-class BackendFetch implements Fetch {
-    async get(
-        url: string,
-        data: Record<string, any>,
-        header: Record<string, any>,
-    ): Promise<string> {
-        return await backend.call(undefined, 'onebot:get', true, {
-            url,
-            data,
-            header,
-        })
-    }
-    async post(
-        url: string,
-        data: Record<string, any>,
-        header: Record<string, any>,
-    ): Promise<string> {
-        return await backend.call(undefined, 'onebot:post', true, {
-            url,
-            data,
-            header,
-        })
-    }
-}
-const backendFetch = new BackendFetch()
-
 /**
  * 驱动器，直接用于和后端通信以及和适配器通信
  */
@@ -385,13 +249,8 @@ class Driver {
         this.retry = retry
         this.httpUrl = this.getUrl('http')
         this.wsUrl = this.getUrl('ws')
-        if (backend.isWeb()) {
-            this.ws = nativeWs
-            this.fetch = nativeFetch
-        } else {
-            this.ws = backendWs
-            this.fetch = backendFetch
-        }
+        this.ws = nativeWs
+        this.fetch = nativeFetch
 
         // 重置状态
         this.ws.reset()

@@ -1,6 +1,5 @@
 import { computed, toRaw } from 'vue'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { backend } from '@renderer/runtime/backend'
 
 /**
  * 走代理的url
@@ -24,7 +23,6 @@ export class ProxyUrl {
      * @returns
      */
     static proxy(raw: string): string {
-        if (backend.type !== 'web') return raw
         const runtimeData = useRuntimeData()
         if (!runtimeData.tags.canCors) return raw
         return ProxyUrl.proxyMain(raw)

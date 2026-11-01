@@ -414,11 +414,7 @@
                                     }}
                                 </a>
                             </div>
-                            <div
-                                v-else-if="item.type == 'poke'"
-                                v-once
-                                :class="showPock()"
-                            >
+                            <div v-else-if="item.type == 'poke'" v-once>
                                 <font-awesome-icon
                                     class="poke-hand"
                                     style="margin-right: 5px"
@@ -727,7 +723,6 @@ import {
     vUserRole,
     vTooltip,
 } from '@renderer/function/utils/vcmd'
-import { backend } from '@renderer/runtime/backend'
 import { defineComponent, provide, useTemplateRef } from 'vue'
 import LazyLottie from './LazyLottie.vue'
 import { vUserTooltip } from '@renderer/function/tooltip'
@@ -894,7 +889,6 @@ export default defineComponent({
     data() {
         const runtimeData = useRuntimeData()
         return {
-            backend,
             md: markdownit({ breaks: true }),
             isMe: false,
             isDebugMsg: runtimeData.sysConfig.debug_msg,
@@ -960,20 +954,7 @@ export default defineComponent({
             sendStatEvent('link_view', { domain: domain })
 
             let data = null as any
-            let finaLink = link
-            try {
-                finaLink = await backend.call(
-                    'Onebot',
-                    'sys:getFinalRedirectUrl',
-                    true,
-                    link,
-                )
-                if (!finaLink) {
-                    finaLink = link
-                }
-            } catch (_) {
-                /**/
-            }
+            const finaLink = link
             const showLinkList = {
                 bilibili: ['bilibili.com', 'b23.tv', 'bili2233.cn', 'acg.tv'],
                 music163: ['music.163.com', '163cn.tv'],
@@ -989,39 +970,17 @@ export default defineComponent({
             }
             // 通用 og 解析
             if (!data) {
-                if (!backend.isWeb()) {
-                    let html = await backend.call(
-                        'Onebot',
-                        'sys:getHtml',
-                        true,
-                        finaLink,
-                    )
-                    if (html) {
-                        const headEnd = html.indexOf('</head>')
-                        html = html.slice(0, headEnd)
-                        // 获取所有的 og meta 标签
-                        const ogRegex =
-                            /<meta\s+property="og:([^"]+)"\s+content="([^"]+)"\s*\/?>/g
-                        const ogTags = {} as { [key: string]: string }
-                        let match: string[] | null
-                        while ((match = ogRegex.exec(html)) !== null) {
-                            ogTags[`og:${match[1]}`] = match[2]
-                        }
-                        data = ogTags
-                    }
-                } else {
-                    // 获取链接预览
-                    const response = await fetch(
-                        `${import.meta.env.VITE_APP_LINK_VIEW}/${encodeURIComponent(link)}`,
-                    )
-                    if (response.ok) {
-                        const res = await response.json()
-                        if (
-                            res.status === undefined &&
-                            Object.keys(res).length > 0
-                        ) {
-                            data = res
-                        }
+                // 获取链接预览
+                const response = await fetch(
+                    `${import.meta.env.VITE_APP_LINK_VIEW}/${encodeURIComponent(link)}`,
+                )
+                if (response.ok) {
+                    const res = await response.json()
+                    if (
+                        res.status === undefined &&
+                        Object.keys(res).length > 0
+                    ) {
+                        data = res
                     }
                 }
             }
@@ -1138,44 +1097,6 @@ export default defineComponent({
                             txt.length > 300 ? txt.slice(0, 300) + '…' : txt
                     }
                 })
-        },
-
-        async showPock() {
-            const runtimeData = useRuntimeData()
-            // 如果是最后一条消息并且在最近发送
-            if (this.data.uuid != runtimeData.nowChat?.messageList.at(-1)?.uuid)
-                return
-            if (!this.data.time) return
-            if (
-                (new Date().getTime() - getViewTime(this.data.time.time)) /
-                    1000 <
-                5
-            )
-                return
-
-            let windowInfo = null as {
-                x: number
-                y: number
-                width: number
-                height: number
-            } | null
-            if (backend.isDesktop()) {
-                windowInfo = await backend.call(
-                    'Onebot',
-                    'win:getWindowInfo',
-                    true,
-                )
-            }
-            const message = document.getElementById('chat-' + this.data.uuid)
-            let item = document.getElementById('app')
-            if (backend.isDesktop()) {
-                item = message?.getElementsByClassName(
-                    'poke-hand',
-                )[0] as HTMLImageElement
-            }
-            // this.$nextTick(() => {
-            //     pokeAnime(item, windowInfo)
-            // })
         },
 
         getMdHTML(str: string, id: string) {

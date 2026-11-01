@@ -6,48 +6,16 @@
         <Icon animation />
         <p>{{ $t('连接到 协议端') }}</p>
         <form @submit.prevent @submit="connect">
-            <template
-                v-if="
-                    loginInfo.quickLogin == null ||
-                    loginInfo.quickLogin.length == 0
-                "
-            >
-                <label class="input">
-                    <font-awesome-icon :icon="['fas', 'link']" />
-                    <input
-                        id="sev_address"
-                        v-model="loginInfo.address"
-                        :placeholder="$t('连接地址')"
-                        class="ss-input"
-                        autocomplete="off"
-                    />
-                </label>
-            </template>
-            <div v-else class="ss-card quick-login">
-                <div class="title">
-                    <font-awesome-icon :icon="['fas', 'link']" />
-                    <span>{{ $t('来自局域网的服务') }}</span>
-                    <a @click="cancelQuickLogin">{{ $t('取消') }}</a>
-                </div>
-                <div class="list">
-                    <div
-                        v-for="item in loginInfo.quickLogin"
-                        :key="item.address + ':' + item.port"
-                        :class="
-                            loginInfo.quickLoginSelect ==
-                            item.address + ':' + item.port
-                                ? 'select'
-                                : ''
-                        "
-                        @click="
-                            selectQuickLogin(item.address + ':' + item.port)
-                        "
-                    >
-                        <span>{{ item.address }}:{{ item.port }}</span>
-                        <div><div /></div>
-                    </div>
-                </div>
-            </div>
+            <label class="input">
+                <font-awesome-icon :icon="['fas', 'link']" />
+                <input
+                    id="sev_address"
+                    v-model="loginInfo.address"
+                    :placeholder="$t('连接地址')"
+                    class="ss-input"
+                    autocomplete="off"
+                />
+            </label>
             <label class="input">
                 <font-awesome-icon :icon="['fas', 'lock']" />
                 <input
@@ -111,8 +79,6 @@ import Icon from '@renderer/components/Icon.vue'
 import HowToConnect from '@renderer/components/popBox/doc/HowToConnect.vue'
 import Options from '@renderer/pages/Options.vue'
 const loginInfo = shallowReactive({
-    quickLoginSelect: '',
-    quickLogin: shallowReactive([]) as { address: string; port: number }[],
     address: '',
     token: '',
 })
@@ -143,10 +109,6 @@ if (runtimeData.sysConfig.auto_connect) connect()
  */
 async function connect() {
     const main = async () => {
-        if (loginInfo.quickLoginSelect != '') {
-            // PS：快速连接的地址只会是局域网,没ssl,milky没做适配,所以默认 ob 协议
-            loginInfo.address = 'ob://' + loginInfo.quickLoginSelect
-        }
         const re = await login(loginInfo.address, loginInfo.token)
         if (!re) return
 
@@ -165,14 +127,6 @@ async function connect() {
     runLoginFunc.value = true
     await main()
     runLoginFunc.value = false
-}
-
-function selectQuickLogin(address: string) {
-    loginInfo.quickLoginSelect = address
-}
-
-function cancelQuickLogin() {
-    loginInfo.quickLogin.length = 0
 }
 
 /**

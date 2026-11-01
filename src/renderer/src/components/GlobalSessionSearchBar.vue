@@ -65,7 +65,6 @@ import { changeSession } from '@renderer/function/utils/msgUtil'
 import { hasPopBox } from '@renderer/function/utils/popBox'
 import { vSearch } from '@renderer/function/utils/vcmd'
 import { useKeyboard } from '@renderer/function/utils/vuse'
-import { backend } from '@renderer/runtime/backend'
 import {
     computed,
     nextTick,
@@ -193,8 +192,6 @@ useKeyboard('ctrl+e', () => {
     if (!runtimeData.nowAdapter) return
     if (hasPopBox()) return
 
-    // macOS 使用 Command + E
-    if (backend.platform === 'darwin') return
     open()
     return true
 })
@@ -204,8 +201,6 @@ useKeyboard('meta+e', () => {
     if (!runtimeData.nowAdapter) return
     if (hasPopBox()) return
 
-    // macOS 使用 Command + E
-    if (backend.platform !== 'darwin') return
     open()
     return true
 })

@@ -12,13 +12,13 @@ const migrationFunc = {
             'opt_dark',
             'opt_auto_dark',
             'theme_color',
-            'opt_auto_win_color',
+            'opt_auto_win_color', // 桌面端残留
             'background_img',
             'background_img_blur',
             'opt_fast_animation',
             'initial_scale',
             'fs_adaptation',
-            'opt_always_top',
+            'opt_always_top', // 桌面端残留
             'use_favicon_notice',
             'use_super_face',
             'hide_self_avatar',
@@ -35,7 +35,7 @@ const migrationFunc = {
             'show_response_message',
             'send_face',
             'send_key',
-            'close_browser',
+            'close_browser', // 桌面端残留
             'close_ga',
             'open_ga_bot',
             'dont_parse_delete',
@@ -179,26 +179,16 @@ export async function migration(
 export async function oldVersionCheck(): Promise<
     Record<string, any> | undefined
 > {
-    const backend = await import('@renderer/runtime/backend').then(
-        (mod) => mod.backend,
-    )
-    if (backend.type === 'electron') {
-        const data = await backend.call(undefined, 'opt:getAll', true)
-        // 登陆过的一定有address配置，通过该配置作为特征值
-        if (data['address']) return oldOptLoader(data)
-        return undefined
-    } else {
-        // eslint-disable-next-line no-restricted-globals
-        const str = localStorage.getItem('options')
-        if (!str) return undefined
-        try {
-            const data = JSON.parse(str)
-            if (data['_version']) return undefined
-            return oldOptLoader(data)
-        } catch {
-            const data = oldWebOptParser(str)
-            return oldOptLoader(data)
-        }
+    // eslint-disable-next-line no-restricted-globals
+    const str = localStorage.getItem('options')
+    if (!str) return undefined
+    try {
+        const data = JSON.parse(str)
+        if (data['_version']) return undefined
+        return oldOptLoader(data)
+    } catch {
+        const data = oldWebOptParser(str)
+        return oldOptLoader(data)
     }
 }
 

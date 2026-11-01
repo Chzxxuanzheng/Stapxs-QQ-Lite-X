@@ -1,15 +1,9 @@
 import app from '@renderer/main'
-import { backend } from '@renderer/runtime/backend'
 import { markRaw } from 'vue'
 import { AdapterInterface } from './adapter/interface'
 import { logger, popInfo } from './base'
 import { User } from './model/user'
-import {
-    reloadUsers,
-    sendIdentifyData,
-    sendStatEvent,
-    updateMenu,
-} from './utils/appUtil'
+import { reloadUsers, sendIdentifyData, sendStatEvent } from './utils/appUtil'
 
 const SSL_WHITE_LIST = new Set<string>(['localhost', '127.0.0.1'])
 
@@ -87,20 +81,8 @@ async function tryLogin(
         sendIdentifyData({ bot_version })
     }
 
-    // 显示账户菜单
-    updateMenu({
-        parent: 'account',
-        id: 'userName',
-        action: 'label',
-        value: loginData.nickname,
-    })
     const title = `${loginData.nickname}（${loginData.uin}）`
-    if (backend.type == 'web') {
-        document.title = title + '- Stapxs QQ Lite X'
-    } else {
-        document.title = title
-        backend.call(undefined, 'win:setTitle', false, title)
-    }
+    document.title = title + '- Stapxs QQ Lite X'
 
     // 跳转标签卡
     const barMsg = document.getElementById('bar-msg')

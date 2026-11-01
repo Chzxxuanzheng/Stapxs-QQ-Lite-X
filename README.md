@@ -18,7 +18,10 @@
 
 ---
 
-该项目正在开发，您可以通过[访问Demo](http://qqlite.leenet.xyz/test)来使用测试版网页。如果您想部署，可以参考下面的构建应用
+该项目正在开发，您可以通过[访问Demo](http://qqlite.leenet.xyz/test)来使用测试版网页。如果您想部署，可以参考下面的构建应用。
+
+> [!NOTE]
+> 由于本人精力有限，且桌面端使用人数不多，该项目不再提供桌面端支持！
 
 ## 📦️ 构建应用
 
@@ -62,68 +65,20 @@ pnpm lint
 pnpm build
 ```
 
-### > 构建 Electron 客户端
-
-在 `2.3.0` 版本后，Stapxs QQ Lite X 支持构建为 Electron 应用并补充部分平台特性的功能，你也可以自行构建。
-
-> 如果 Electron CLI 无法找到 Python bin，你可以将 `PYTHON_PATH` 导出到环境变量中，指向 Python 的可执行文件路径。
-
-下面是构建 Electron 应用的命令，构建结果将最终输出在 `dist_electron/out` 目录下：
-
-```bash
-# electron 运行本地调试
-pnpm dev:electron
-
-# electron 构建应用
-pnpm build:electron
-```
-
-### > 构建 Capacitor 应用
-
-在 `3.0.0` 版本及以后，Stapxs QQ Lite X 支持通过 Capacitor 构建为移动端应用并补充部分平台特性的功能，你也可以自行构建。
-
-#### Android
-
-> 如果 Capacitor CLI 无法寻找到 Android Studio 以及 Android SDK，你可以将 `CAPACITOR_ANDROID_STUDIO_PATH` 和 `ANDROID_HOME` 导出到环境变量中；
-> 它们分别指向 Android Studio 的可执行文件路径和 Android SDK 的路径。
-
-你可以使用 `pnpm open:android` 来打开 Android Studio。通过 Build -> Generate Signed Bundle or APK 来构建 APK 文件。
-
-你也可以直接使用 `pnpm build:android` 来构建 APK 文件。请检查修改 `capacitor.config.ts` 文件中的 `android.buildOptions` 中的 keyStore 配置。
-
-构建结果将最终输出在 `src/mobile/android/app/build/outputs/apk/release` 目录下。
-
-#### iOS
-
-你可以使用 `pnpm open:ios` 来打开 Xcode。通过 Product -> Archive 来构建 IPA 文件。
-
-你也可以直接使用 `pnpm build:ios` 来构建 IPA 文件。此构建方式将执行 `scripts/build-export-ipa.sh` 脚本，构建将使用钥匙串中的默认开发者证书，请确保你的开发者证书已经配置。
-
-XCode 的构建结果将最终输出在 `src/mobile/ios/build` 目录下，脚本构建结果将输出在 `dist_capacitor` 目录下。
-
 ### > 命令列表
 
 这儿是本项目的完整命令列表，你可以使用这些命令来快速构建和调试 Stapxs QQ Lite。
 
 **命令格式为 `pnpm <命令>`，其中 `<命令>`为列表中的一个：**
 
-| 命令           | 描述                         |
-| -------------- | ---------------------------- |
-| install        | 安装依赖                     |
-| lint           | 代码检查和自动格式化         |
-| update:icon    | 更新移动端应用图标集         |
-| update:version | 更新移动端应用版本号         |
-| dev            | 网页调试                     |
-| dev:electron   | Electron 调试                |
-| dev:ios        | iOS 调试                     |
-| dev:android    | 安卓调试                     |
-| open:ios       | 在 XCode 中打开项目          |
-| open:android   | 在 Android Studio 中打开项目 |
-| build          | 网页构建                     |
-| build:electron | 构建当前平台的应用           |
-| build:ios      | 构建 iOS 应用                |
-| build:android  | 构建 Android 应用            |
-| proxy          | 一个临时跨域代理服务器       |
+| 命令    | 描述                   |
+| ------- | ---------------------- |
+| install | 安装依赖               |
+| lint    | 代码检查和自动格式化   |
+| dev     | 网页调试               |
+| build   | 网页构建               |
+| preview | 预览网页构建产物       |
+| proxy   | 一个临时跨域代理服务器 |
 
 ## 🎉 鸣谢
 

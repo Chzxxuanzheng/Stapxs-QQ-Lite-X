@@ -49,20 +49,6 @@
                 </div>
             </div>
         </div>
-        <div v-if="backend.isMobile()" class="ss-card">
-            <header>{{ $t('图标') }}</header>
-            <div class="icon-list">
-                <div
-                    v-for="item in getIconList()"
-                    :key="item.name"
-                    :class="item.name === usedIcon ? 'selected' : ''"
-                    @click="changeIcon(item.name)"
-                >
-                    <img :src="item.icon" alt="" />
-                    <span>{{ $t(item.name != '' ? item.name : '默认') }}</span>
-                </div>
-            </div>
-        </div>
         <div class="ss-card">
             <header>{{ $t('主题与颜色') }}</header>
             <div class="opt-item">
@@ -78,66 +64,41 @@
                 </div>
                 <DarkModeSwitch v-model="runtimeData.sysConfig.opt_dark_mode" />
             </div>
-            <template v-if="!runtimeData.sysConfig.opt_auto_win_color">
-                <div class="opt-item">
-                    <div
-                        :class="{
-                            changed: !option.checkDefault('theme_color'),
-                        }"
-                    />
-                    <font-awesome-icon :icon="['fas', 'palette']" />
-                    <div>
-                        <span>{{ $t('主题色') }}</span>
-                        <span>{{ $t('换个心情 🎵 ~') }}</span>
-                    </div>
-                    <div class="theme-color-col">
-                        <label
-                            v-for="(name, index) in COLOR_NAMES"
-                            :key="'color_id_' + index"
-                            :title="name"
-                            class="ss-radio"
+            <div class="opt-item">
+                <div
+                    :class="{
+                        changed: !option.checkDefault('theme_color'),
+                    }"
+                />
+                <font-awesome-icon :icon="['fas', 'palette']" />
+                <div>
+                    <span>{{ $t('主题色') }}</span>
+                    <span>{{ $t('换个心情 🎵 ~') }}</span>
+                </div>
+                <div class="theme-color-col">
+                    <label
+                        v-for="(name, index) in COLOR_NAMES"
+                        :key="'color_id_' + index"
+                        :title="name"
+                        class="ss-radio"
+                    >
+                        <input
+                            type="radio"
+                            name="theme_color"
+                            :data-id="index"
+                            :checked="runtimeData.sysConfig.theme_color == index"
+                            @click="runtimeData.sysConfig.theme_color = index"
+                        />
+                        <div
+                            :style="
+                                'background: var(--color-main-' + index + ')'
+                            "
                         >
-                            <input
-                                type="radio"
-                                name="theme_color"
-                                :data-id="index"
-                                :checked="
-                                    runtimeData.sysConfig.theme_color == index
-                                "
-                                @click="
-                                    runtimeData.sysConfig.theme_color = index
-                                "
-                            />
-                            <div
-                                :style="
-                                    'background: var(--color-main-' +
-                                    index +
-                                    ')'
-                                "
-                            >
-                                <div />
-                            </div>
-                        </label>
-                    </div>
+                            <div />
+                        </div>
+                    </label>
                 </div>
-            </template>
-            <template v-if="backend.isDesktop() && browser.os != 'Linux'">
-                <div class="opt-item">
-                    <div
-                        :class="{
-                            changed: !option.checkDefault('opt_auto_win_color'),
-                        }"
-                    />
-                    <font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />
-                    <div>
-                        <span>{{ $t('自动跟随主题色') }}</span>
-                        <span>{{ $t('自动获取的主题色设置并应用') }}</span>
-                    </div>
-                    <Switch
-                        v-model="runtimeData.sysConfig.opt_auto_win_color"
-                    />
-                </div>
-            </template>
+            </div>
             <div class="opt-item">
                 <div
                     :class="{
@@ -325,80 +286,6 @@
                 </div>
                 <Switch v-model="runtimeData.sysConfig.opt_fast_animation" />
             </div>
-            <div v-if="isMobile() && !backend.isMobile()" class="opt-item">
-                <div
-                    :class="{
-                        changed: !option.checkDefault('initial_scale'),
-                    }"
-                />
-                <font-awesome-icon :icon="['fas', 'up-down-left-right']" />
-                <div>
-                    <span>{{ $t('缩放比例') }}</span>
-                    <span>{{ $t('调整页面在移动端的缩放比例') }}</span>
-                </div>
-                <div class="ss-range">
-                    <input
-                        v-model="runtimeData.sysConfig.initial_scale"
-                        :style="`background-size: ${(initialScaleShow - 0.5) / 0.01}% 100%`"
-                        type="range"
-                        min="0.5"
-                        max="1.5"
-                        step="0.01"
-                        name="initial_scale"
-                        @change="scaleSave"
-                        @input="setInitialScaleShow"
-                    />
-                    <span
-                        :style="`color: var(--color-font${initialScaleShow / 0.05})`"
-                    >
-                        {{ initialScaleShow }}</span
-                    >
-                </div>
-            </div>
-            <div v-if="isMobile() && !backend.isMobile()" class="opt-item">
-                <div
-                    :class="{
-                        changed: !option.checkDefault('fs_adaptation'),
-                    }"
-                />
-                <font-awesome-icon :icon="['fas', 'border-top-left']" />
-                <div>
-                    <span>{{ $t('圆角适配') }}</span>
-                    <span>{{ $t('适配全面屏设备防止四角出界') }}</span>
-                </div>
-                <div class="ss-range">
-                    <input
-                        v-model="runtimeData.sysConfig.fs_adaptation"
-                        :style="`background-size: ${(fsAdaptationShow / 50) * 100}% 100%;`"
-                        type="range"
-                        min="0"
-                        max="50"
-                        step="10"
-                        name="fs_adaptation"
-                        @input="setFsAdaptationShow"
-                    />
-                    <span
-                        :style="`color: var(--color-font${fsAdaptationShow / 50 > 0.5 ? '-r' : ''})`"
-                    >
-                        {{ fsAdaptationShow }} px
-                    </span>
-                </div>
-            </div>
-            <div v-if="backend.isDesktop()" class="opt-item">
-                <div
-                    :class="{
-                        changed: !option.checkDefault('opt_always_top'),
-                    }"
-                />
-                <font-awesome-icon :icon="['fas', 'angle-up']" />
-                <div>
-                    <span>{{ $t('置顶窗口') }}</span>
-                    <span>{{
-                        $t('你也不想想让 ta 知道你不在看消息吧 ~')
-                    }}</span>
-                </div>
-                <Switch v-model="runtimeData.sysConfig.opt_always_top" />
-            </div>
             <div class="opt-item">
                 <div
                     :class="{
@@ -498,23 +385,17 @@ import Switch from '@renderer/components/Switch.vue'
 import DarkModeSwitch from '@renderer/components/DarkModeSwitch.vue'
 
 import useOptionStore from '@renderer/state/option'
-import { toRaw, shallowRef, watchEffect } from 'vue'
-import { getDeviceType } from '@renderer/function/utils/systemUtil'
-import { BrowserInfo, detect } from 'detect-browser'
+import { shallowRef } from 'vue'
 import useRuntimeData from '@renderer/state/runtimeData'
 
 import { sendIdentifyData } from '@renderer/function/utils/appUtil'
 import {
-    closePopBox,
     ensurePopBox,
-    textPopBox,
     waitPopBox,
 } from '@renderer/function/utils/popBox'
-import { backend } from '@renderer/runtime/backend'
 import imageCompression from 'browser-image-compression'
 import languages from '../../assets/l10n/_l10nconfig.json'
 import app from '@renderer/main'
-import win from '@renderer/runtime/win'
 import { logger, popInfo } from '@renderer/function/base'
 
 const option = useOptionStore()
@@ -528,7 +409,6 @@ const COLOR_NAMES = [
     '坏猫黄',
     '玄素黑',
 ]
-const browser = detect() as BrowserInfo
 const isVibrancy = shallowRef(runtimeData.sysConfig.vibrancy)
 
 const { $t } = app.config.globalProperties
@@ -595,109 +475,6 @@ async function setBackground(event: Event) {
  */
 function removeBackground() {
     runtimeData.sysConfig.background_img = ''
-}
-//#endregion
-
-//#region == 手机相关 =============================================================
-
-const initialScaleShow = shallowRef<number>(0.5)
-const fsAdaptationShow = shallowRef<number>(0)
-const usedIcon = shallowRef<string>('')
-// 一次性初始化一次缩放级别
-watchEffect(() => {
-    initialScaleShow.value = toRaw(runtimeData.sysConfig.initial_scale)
-    fsAdaptationShow.value = toRaw(runtimeData.sysConfig.fs_adaptation)
-})
-// 获取当前使用的图标
-const Onebot = window.Capacitor?.Plugins?.Onebot
-if (Onebot) {
-    Onebot.addListener('onebot:icon', (data: any) => {
-        usedIcon.value = data.name.replace('AppIcon', '')
-    })
-    Onebot.getUsedIcon()
-}
-
-function scaleSave() {
-    // eslint-disable-next-line prefer-const
-    let makeSureBoxId: string
-    // 5 秒后自动取消防止误操作导致无法恢复
-    const timerId = setTimeout(() => {
-        runtimeData.sysConfig.initial_scale = 0.85
-        initialScaleShow.value = 0.85
-        closePopBox(makeSureBoxId)
-
-        textPopBox($t('缩放比例调整已取消，已恢复默认缩放比例。'), {
-            svg: 'up-down-left-right',
-            title: $t('确认缩放比例'),
-            button: [
-                {
-                    text: $t('取消'),
-                    master: true,
-                },
-            ],
-        })
-    }, 5000)
-    // 保存提醒
-    makeSureBoxId = textPopBox(
-        $t('点击确认以应用缩放比例，预览将在 5 秒后取消……'),
-        {
-            svg: 'up-down-left-right',
-            title: $t('确认缩放比例'),
-            button: [
-                {
-                    text: $t('确定'),
-                    fun: () => {
-                        clearTimeout(timerId)
-                    },
-                },
-            ],
-        },
-    )
-}
-
-function setInitialScaleShow(event: Event) {
-    const sender = event.target as HTMLInputElement
-    initialScaleShow.value = +sender.value
-}
-
-function setFsAdaptationShow(event: Event) {
-    const sender = event.target as HTMLInputElement
-    fsAdaptationShow.value = +sender.value
-}
-
-function isMobile() {
-    return getDeviceType() === 'Android' || getDeviceType() === 'iOS'
-}
-
-function getIconList() {
-    const iconList = import.meta.glob('@renderer/assets/img/icons/*.png', {
-        eager: true,
-    })
-    const iconListInfo = [] as { name: string; icon: any }[]
-    for (const key in iconList) {
-        const name = key.split('/').pop()?.split('.')[0].replace('AppIcon', '')
-        if (name || name === '') {
-            if (!win.darkMode && !name.endsWith('Dark')) {
-                iconListInfo.push({
-                    name: name,
-                    icon: (iconList[key] as any).default,
-                })
-            } else if (win.darkMode && name.endsWith('Dark')) {
-                iconListInfo.push({
-                    name: name.replace('Dark', ''),
-                    icon: (iconList[key] as any).default,
-                })
-            }
-        }
-    }
-    return iconListInfo
-}
-
-function changeIcon(name: string) {
-    backend.call('Onebot', 'changeIcon', false, {
-        name: name != '' ? name + 'AppIcon' : name,
-    })
-    usedIcon.value = name
 }
 //#endregion
 </script>

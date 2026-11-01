@@ -22,7 +22,6 @@ import {
 } from 'vue'
 import { MenuEventData } from '../elements/information'
 import { pastTimeFormat } from './systemUtil'
-import { backend } from '@renderer/runtime/backend'
 import { Msg } from '../model/msg'
 
 /**
@@ -351,21 +350,13 @@ export function useKeyboard(
 }
 
 function localStorageGetItem(key: string): string | null {
-    if (backend.type === 'electron') {
-        return backend.callSync('opt:get', key)
-    } else {
-        // eslint-disable-next-line no-restricted-globals
-        return localStorage.getItem(key)
-    }
+    // eslint-disable-next-line no-restricted-globals
+    return localStorage.getItem(key)
 }
 
 function localStorageSetItem(key: string, value: string): void {
-    if (backend.type === 'electron') {
-        backend.callSync('opt:store', { key, value })
-    } else {
-        // eslint-disable-next-line no-restricted-globals
-        localStorage.setItem(key, value)
-    }
+    // eslint-disable-next-line no-restricted-globals
+    localStorage.setItem(key, value)
 }
 
 /**

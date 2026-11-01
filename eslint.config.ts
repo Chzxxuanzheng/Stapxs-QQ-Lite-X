@@ -20,18 +20,10 @@ export default defineConfigWithVueTs(
     globalIgnores([
         'node_modules/**',
         'dist/**',
-        'dist_electron/**',
-        'dist_capacitor/**',
-        'out/**',
         'src/renderer/public/**',
         'src/renderer/src/assets/**',
-        'src/preload/**',
-        'src/mobile/**',
         '*.config.*',
         'proxy.js',
-
-        // 这个目录是个单独的项目，有自己的 eslint 配置
-        'ssqq.capacitor-onebot-connector/**',
     ]),
 
     ...pluginVue.configs['flat/essential'],

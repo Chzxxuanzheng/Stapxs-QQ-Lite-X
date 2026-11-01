@@ -8,8 +8,8 @@ import { IUser } from '../model/user'
 import { BubbleBox, SessionBox } from '../model/box'
 import { popBox } from './popBox'
 import app from '@renderer/main'
-import { backend } from '@renderer/runtime/backend'
 import { useSessionHistoryStore } from '@renderer/state/sessionHistory'
+import { Notify } from '../notify'
 
 /**
  * 发送消息
@@ -149,7 +149,7 @@ export function changeSession(session: Session, fromBox?: SessionBox) {
     }
 
     // 清理通知
-    backend.call(undefined, 'sys:closeAllNotice', false, session.id)
+    new Notify().closeAll(String(session.id))
 }
 
 /**

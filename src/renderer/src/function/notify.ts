@@ -1,11 +1,6 @@
 import app from '@renderer/main'
 import { NotifyInfo, NotificationElem } from './elements/system'
 import { jumpToSession } from './utils/appUtil'
-import {
-    LocalNotificationSchema,
-    DeliveredNotifications,
-} from '@capacitor/local-notifications'
-import { backend } from '@renderer/runtime/backend'
 import { Session } from './model/session'
 
 export class Notify {
@@ -35,44 +30,20 @@ export class Notify {
             this.closeAll(userId)
         }
         // 发送消息
-        if (backend.isDesktop()) {
-            backend.call(undefined, 'sys:sendNotice', false, info)
-        } else if (backend.isMobile()) {
-            const data = {
-                title: info.title,
-                body: info.body,
-                // id 相同的通知会被覆盖，这里使用用户 ID 作为通知 ID 便于覆盖
-                id: Number(info.tag.split('/')[0]),
-                schedule: {
-                    at: new Date(Date.now() + 100),
-                },
-                sound: backend.platform === 'ios' ? 'beep.wav' : 'beep.mp3',
-                actionTypeId: 'msgQuickReply',
-                extra: {
-                    userId: info.tag.split('/')[0],
-                    msgId: info.tag.split('/')[1],
-                    chatType: info.type,
-                },
-            } as LocalNotificationSchema
-            backend.call('LocalNotifications', 'schedule', false, {
-                notifications: [data],
-            })
-        } else {
-            // Safari：在 iOS 下，如果页面没有被创建为主屏幕，通知无法被调用
-            // 最见鬼的是它不是方法返回失败，而且整个 Notification 对象都没有
-            const isSupported = () =>
-                'Notification' in window &&
-                'serviceWorker' in navigator &&
-                'PushManager' in window
-            if (isSupported()) {
-                // 检查通知权限，老旧浏览器不支持这个功能
-                if (Notification.permission === 'default') {
-                    Notification.requestPermission(() => {
-                        this.sendNotice(info)
-                    })
-                } else if (Notification.permission !== 'denied') {
+        // Safari：在 iOS 下，如果页面没有被创建为主屏幕，通知无法被调用
+        // 最见鬼的是它不是方法返回失败，而且整个 Notification 对象都没有
+        const isSupported = () =>
+            'Notification' in window &&
+            'serviceWorker' in navigator &&
+            'PushManager' in window
+        if (isSupported()) {
+            // 检查通知权限，老旧浏览器不支持这个功能
+            if (Notification.permission === 'default') {
+                Notification.requestPermission(() => {
                     this.sendNotice(info)
-                }
+                })
+            } else if (Notification.permission !== 'denied') {
+                this.sendNotice(info)
             }
         }
     }
@@ -82,38 +53,20 @@ export class Notify {
      * @param info 通知信息
      */
     public notifySingle(info: NotifyInfo) {
-        if (backend.isDesktop()) {
-            backend.call(undefined, 'sys:sendNotice', false, info)
-        } else if (backend.isMobile()) {
-            const data = {
-                title: info.title,
-                body: info.body,
-                // id 为随机数，不会被覆盖；主要用于应用的通知
-                id: Math.floor(Math.random() * 100000),
-                schedule: {
-                    at: new Date(Date.now() + 100),
-                },
-                sound: backend.platform === 'ios' ? 'beep.wav' : 'beep.mp3',
-            } as LocalNotificationSchema
-            backend.call('LocalNotifications', 'schedule', false, {
-                notifications: [data],
-            })
-        } else {
-            // Safari：在 iOS 下，如果页面没有被创建为主屏幕，通知无法被调用
-            // 最见鬼的是它不是方法返回失败，而且整个 Notification 对象都没有
-            const isSupported = () =>
-                'Notification' in window &&
-                'serviceWorker' in navigator &&
-                'PushManager' in window
-            if (isSupported()) {
-                // 检查通知权限，老旧浏览器不支持这个功能
-                if (Notification.permission === 'default') {
-                    Notification.requestPermission(() => {
-                        this.sendNotice(info)
-                    })
-                } else if (Notification.permission !== 'denied') {
+        // Safari：在 iOS 下，如果页面没有被创建为主屏幕，通知无法被调用
+        // 最见鬼的是它不是方法返回失败，而且整个 Notification 对象都没有
+        const isSupported = () =>
+            'Notification' in window &&
+            'serviceWorker' in navigator &&
+            'PushManager' in window
+        if (isSupported()) {
+            // 检查通知权限，老旧浏览器不支持这个功能
+            if (Notification.permission === 'default') {
+                Notification.requestPermission(() => {
                     this.sendNotice(info)
-                }
+                })
+            } else if (Notification.permission !== 'denied') {
+                this.sendNotice(info)
             }
         }
     }
@@ -123,31 +76,12 @@ export class Notify {
      * @param userId 用户 ID
      */
     public async closeAll(userId: string) {
-        if (backend.isDesktop()) {
-            backend.call(undefined, 'sys:closeAllNotice', false, String(userId))
-        } else if (backend.isMobile()) {
-            const list = (await backend.call(
-                'LocalNotifications',
-                'getDeliveredNotifications',
-                true,
-            )) as unknown as DeliveredNotifications
-            if (list.notifications) {
-                list.notifications.forEach((item) => {
-                    if (item.extra.userId === userId) {
-                        backend.call('LocalNotifications', 'cancel', false, {
-                            notifications: [{ id: item.id }],
-                        })
-                    }
-                })
+        const keys = Object.keys(Notify.notifyList)
+        keys.forEach((key) => {
+            if (key.startsWith(userId)) {
+                this.close(key)
             }
-        } else {
-            const keys = Object.keys(Notify.notifyList)
-            keys.forEach((key) => {
-                if (key.startsWith(userId)) {
-                    this.close(key)
-                }
-            })
-        }
+        })
         delete Notify.userNotifyList[userId]
     }
 
@@ -155,20 +89,10 @@ export class Notify {
      * 关闭所有通知
      */
     public clear() {
-        if (backend.isDesktop()) {
-            backend.call(undefined, 'sys:clearNotice', false)
-        } else if (backend.isMobile()) {
-            backend.call(
-                'LocalNotifications',
-                'removeAllDeliveredNotifications',
-                false,
-            )
-        } else {
-            const keys = Object.keys(Notify.notifyList)
-            keys.forEach((key) => {
-                this.close(key)
-            })
-        }
+        const keys = Object.keys(Notify.notifyList)
+        keys.forEach((key) => {
+            this.close(key)
+        })
     }
 
     // ==============================
@@ -179,11 +103,7 @@ export class Notify {
      * @param tag 通知标签
      */
     private close(tag: string) {
-        if (backend.isDesktop()) {
-            backend.call(undefined, 'sys:closeNotice', false, tag)
-        } else {
-            Notify.notifyList[tag]?.close()
-        }
+        Notify.notifyList[tag]?.close()
     }
 
     /**
@@ -207,10 +127,6 @@ export class Notify {
                 if (session) jumpToSession(session, msg)
             }
             this.close(tag)
-            // MacOS：刷新 touchbar
-            if (backend.isDesktop()) {
-                backend.call(undefined, 'sys:newMessage', false)
-            }
         }
     }
 

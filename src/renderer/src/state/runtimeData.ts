@@ -5,7 +5,6 @@ import { defineStore } from 'pinia'
 import { computed, shallowReactive, shallowRef, ref, watchEffect } from 'vue'
 import useOptionStore from './option'
 import type { User } from '@renderer/function/model/user'
-import { backend } from '@renderer/runtime/backend'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 import { AdapterInterface } from '@renderer/function/adapter/interface'
 
@@ -43,10 +42,6 @@ const useRuntimeData = defineStore('runtimeData', () => {
             const thisId = testId
             tags.canCors = false
             const url = ProxyUrl.forceProxy(testUrl)
-            if (backend.type === 'electron') {
-                tags.canCors = true
-                return
-            }
             // 没有代理直接返回
             if (url === testUrl) return
             fetch(url, { method: 'HEAD' }).then((res) => {

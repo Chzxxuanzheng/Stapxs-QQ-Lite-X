@@ -55,11 +55,7 @@ function printLog(
     deep++
     const error = new Error()
     // 浏览器类型，用于判断是不是 webkit
-    let isWebkit = /webkit/i.test(navigator.userAgent)
-    if (window.electron != undefined) {
-        // electron 是 chrome，但是 userAgent 里面含有 webkit 字样
-        isWebkit = false
-    }
+    const isWebkit = /webkit/i.test(navigator.userAgent)
     // 从调用栈中获取调用者信息
     let from = undefined as string | undefined
     const stack = error.stack?.split('\n').at(deep)
@@ -91,15 +87,8 @@ function printLog(
         }
     }
     // 打印日志
-    // 如果存在 vconsole 就不打印带 css 样式的日志（它不支持）
-    // 因为在 capturer 下 from 是无意义的，所以也不显示
-    if (document.getElementById('__vconsole')) {
-        const { message } = buildLogParams(type, args, hidden, type)
-        logOutput(message.replaceAll('%c', ' | '), [], data, false)
-    } else {
-        const { message, styles } = buildLogParams(type, args, hidden, from)
-        logOutput(message, styles, data)
-    }
+    const { message, styles } = buildLogParams(type, args, hidden, from)
+    logOutput(message, styles, data)
 }
 
 function buildLogParams(

@@ -7,7 +7,7 @@
 
 <template>
     <div class="opt-page">
-        <div v-if="backend.isWeb()" class="ss-card">
+        <div class="ss-card">
             <header>{{ $t('兼容选项') }}</header>
             <div class="tip">
                 {{
@@ -173,26 +173,6 @@
                 />
             </div>
             <div v-if="runtimeData.tags.dev" class="opt-item">
-                <font-awesome-icon :icon="['fas', 'window-restore']" />
-                <div>
-                    <span>{{ $t('强制窗口状态') }}</span>
-                    <span>{{ $t('喵喵喵，喵呜——') }}</span>
-                </div>
-                <div class="select-wrapper">
-                    <select v-model="winState" @change="forceWinState">
-                        <option value="none">
-                            {{ $t('取消') }}
-                        </option>
-                        <option value="win">
-                            {{ $t('窗口') }}
-                        </option>
-                        <option value="tiling">
-                            {{ $t('平铺') }}
-                        </option>
-                    </select>
-                </div>
-            </div>
-            <div v-if="runtimeData.tags.dev" class="opt-item">
                 <font-awesome-icon :icon="['fas', 'trash']" />
                 <div>
                     <span>{{ $t('移除未使用的配置') }}</span>
@@ -248,22 +228,6 @@
                     {{ $t('执行') }}
                 </button>
             </div>
-            <template v-if="backend.isDesktop()">
-                <div class="opt-item">
-                    <font-awesome-icon :icon="['fas', 'power-off']" />
-                    <div>
-                        <span>{{ $t('重启应用') }}</span>
-                        <span>{{ $t('99% 的特性都能通过重启解决！') }}</span>
-                    </div>
-                    <button
-                        style="width: 100px; font-size: 0.8rem"
-                        class="ss-button"
-                        @click="restartapp"
-                    >
-                        {{ $t('执行') }}
-                    </button>
-                </div>
-            </template>
             <div class="opt-item">
                 <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
                 <div>
@@ -330,7 +294,6 @@ import { popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { BrowserInfo, detect } from 'detect-browser'
 import app, { uptime } from '@renderer/main'
-import { backend } from '@renderer/runtime/backend'
 import { computed, shallowRef } from 'vue'
 import driver from '@renderer/function/driver'
 import {
@@ -342,7 +305,6 @@ import {
     copyToClipboard,
     getVersion,
 } from '@renderer/function/utils/systemUtil'
-import win from '@renderer/runtime/win'
 import WelPan from '@renderer/components/popBox/WelPan.vue'
 
 const option = useOptionStore()
@@ -350,7 +312,6 @@ const option = useOptionStore()
 const $t = app.config.globalProperties.$t
 const runtimeData = useRuntimeData()
 const appmsg_text = shallowRef('')
-const winState = shallowRef<'none' | 'tiling' | 'win'>('none')
 
 const illegalProxyUrl = computed(() => {
     if (!runtimeData.sysConfig.proxyUrl) return false
@@ -370,63 +331,15 @@ function sendAbab() {
 }
 
 function printRuntime() {
-    if (backend.isMobile()) {
-        const switcher = document
-            .getElementById('__vconsole')
-            ?.getElementsByClassName('vc-switch')[0]
-        if (switcher) {
-            ;(switcher as HTMLDivElement).click()
-            // safeArea
-            backend.call('SafeArea', 'getSafeArea', true).then((safeArea) => {
-                if (safeArea) {
-                    const vcPanel = document
-                        .getElementById('__vconsole')
-                        ?.getElementsByClassName('vc-panel')[0]
-                    if (vcPanel) {
-                        // vc-content、vc-toolbar
-                        const vcContent = vcPanel.getElementsByClassName(
-                            'vc-content',
-                        )[0] as HTMLDivElement
-                        const vcToolbar = vcPanel.getElementsByClassName(
-                            'vc-toolbar',
-                        )[0] as HTMLDivElement
-                        if (vcContent && vcToolbar) {
-                            vcContent.style.marginBottom =
-                                safeArea.bottom + 'px'
-                            vcToolbar.style.marginBottom =
-                                safeArea.bottom + 'px'
-                        }
-                    }
-                }
-            })
-        }
-    }
     /* eslint-disable no-console */
     console.log('=========================')
     console.log(runtimeData)
     console.log('=========================')
     /* eslint-enable no-console */
-    if (!backend.isMobile()) {
-        backend.call(undefined, 'win:openDevTools', false)
-    }
 }
 
 async function printVersionInfo() {
     popInfo.info(app.config.globalProperties.$t('正在收集调试消息……'))
-
-    // 索要框架信息
-    const addInfo = await backend.call('Onebot', 'opt:getSystemInfo', true)
-    if (
-        backend.isMobile() &&
-        backend.function &&
-        'vConsole' in backend.function &&
-        backend.function.vConsole
-    ) {
-        addInfo.vconsole = [
-            'vConsole Version',
-            backend.function.vConsole.version ?? 'Not loaded',
-        ]
-    }
 
     const browser = detect() as BrowserInfo
     let info = '```\n'
@@ -439,41 +352,6 @@ async function printVersionInfo() {
         ['Browser Name', browser.name],
         ['Browser Version', browser.version],
     ] as [key: string, value: any][]
-    if (addInfo) {
-        const get = addInfo as { [key: string]: [string, string] }
-        for (const key in get) {
-            info += `    ${get[key][0]}  -> ${get[key][1]}\n`
-        }
-    }
-    // 获取安装信息，这儿主要判断几种已提交的包管理安装方式
-    if (backend.isDesktop() && backend.release) {
-        const process = globalThis.electron?.process
-        switch (process && process.platform) {
-            case 'linux': {
-                // archlinux
-                if (backend.release.toLowerCase().indexOf('arch') > 0) {
-                    let pacmanInfo = await backend.call(
-                        undefined,
-                        'sys:runCommand',
-                        true,
-                        'pacman -Q stapxs-qq-lite-bin',
-                    )
-                    if (pacmanInfo.success)
-                        systemInfo.push(['Install Type', 'aur'])
-                    else if (backend.function && 'invoke' in backend.function) {
-                        // 也有可能是 stapxs-qq-lite，这是我自己打的原生包
-                        pacmanInfo = await backend.function.invoke(
-                            'sys:runCommand',
-                            'pacman -Q stapxs-qq-lite',
-                        )
-                        if (pacmanInfo.success)
-                            systemInfo.push(['Install Type', 'pacman'])
-                    }
-                }
-                break
-            }
-        }
-    }
     info += 'System Info:\n'
     info += createVersionInfo(systemInfo)
 
@@ -483,7 +361,10 @@ async function printVersionInfo() {
             Math.floor(((Date.now() - uptime) / 1000) * 100) / 100 + ' s',
         ],
         ['Package Version', getVersion()],
-        ['Service Work', runtimeData.tags.sw],
+        [
+            'Service Work',
+            navigator.serviceWorker?.controller ? 'active' : 'inactive',
+        ],
     ] as [key: string, value: any][]
 
     info += 'Application Info:\n'
@@ -515,22 +396,6 @@ async function printVersionInfo() {
         ['Doc Width', document.getElementById('app')?.offsetWidth + ' px'],
     ] as [key: string, value: any][]
 
-    // capactior：索要 safeArea
-    if (backend.isMobile()) {
-        const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
-        if (safeArea) {
-            // 按照前端习惯，这儿的 safeArea 顺序是 top, right, bottom, left
-            const safeAreaStr =
-                safeArea.top +
-                ', ' +
-                safeArea.right +
-                ', ' +
-                safeArea.bottom +
-                ', ' +
-                safeArea.left
-            viewInfo.push(['Safe Area', safeAreaStr])
-        }
-    }
     info += 'View Info:\n'
     info += createVersionInfo(viewInfo)
 
@@ -655,12 +520,7 @@ async function resetApp() {
             .replace(/^ +/, '')
             .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/')
     }
-    backend.call(undefined, 'opt:clearAll', false)
     location.reload()
-}
-
-function restartapp() {
-    backend.call(undefined, 'win:relaunch', false)
 }
 
 // 查看配置文件
@@ -703,20 +563,6 @@ function createVersionInfo(data: [key: string, value: any][]) {
         info += `    ${key.padEnd(20)}-> ${value}\n`
     }
     return info
-}
-
-async function forceWinState() {
-    switch (winState.value) {
-        case 'none':
-            win._forceTilingState.value = undefined
-            break
-        case 'tiling':
-            win._forceTilingState.value = true
-            break
-        case 'win':
-            win._forceTilingState.value = false
-            break
-    }
 }
 
 function openWelcomeWindow() {

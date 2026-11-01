@@ -251,22 +251,6 @@
                 </div>
                 <div class="select-wrapper">
                     <select
-                        v-if="
-                            backend.platform === 'darwin' ||
-                            backend.platform === 'ios'
-                        "
-                        v-model="runtimeData.sysConfig.send_key"
-                        name="send_key"
-                        title="send_key"
-                    >
-                        <option value="none">Enter</option>
-                        <option value="shift">Shift + Enter (⇧)</option>
-                        <option value="ctrl">Control + Enter (⌃)</option>
-                        <option value="alt">Option + Enter (⌥)</option>
-                        <option value="meta">Command + Enter (⌘)</option>
-                    </select>
-                    <select
-                        v-else
                         v-model="runtimeData.sysConfig.send_key"
                         name="send_key"
                         title="send_key"
@@ -380,19 +364,6 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !option.checkDefault('close_browser'),
-                    }"
-                />
-                <font-awesome-icon :icon="['fas', 'globe']" />
-                <div>
-                    <span>{{ $t('禁用内置浏览器') }}</span>
-                    <span>{{ $t('让我看看你的浏览器 👀') }}</span>
-                </div>
-                <Switch v-model="runtimeData.sysConfig.close_browser" />
-            </div>
-            <div class="opt-item">
-                <div
-                    :class="{
                         changed: !option.checkDefault('close_ad'),
                     }"
                 />
@@ -478,7 +449,6 @@ import useOptionStore from '@renderer/state/option'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { popBox } from '@renderer/function/utils/popBox'
 import UmamiInfoPan from '@renderer/components/popBox/UmamiInfoPan.vue'
-import { backend } from '@renderer/runtime/backend'
 import { shallowRef } from 'vue'
 
 const option = useOptionStore()

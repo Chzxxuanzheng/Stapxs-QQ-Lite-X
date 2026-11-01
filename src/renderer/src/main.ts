@@ -22,7 +22,6 @@ import './assets/css/color.css'
 
 import { getPortableFileLang, getVersion } from './function/utils/systemUtil'
 import { useLocalStorage } from './function/utils/vuse'
-import { backend } from './runtime/backend'
 import win from './runtime/win'
 import useOptionStore from './state/option'
 // import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
@@ -98,7 +97,6 @@ console.log('[ SSystem Bootloader Loading …… core/ssqq-core ]')
 // 加载配置文件，挂在
 setTimeout(async () => {
     // 加载设置项
-    await backend.init() // Desktop：初始化客户端功能
     const option = useOptionStore()
     await option.init() // 载入设置项
     await win.init() // 初始化窗口信息

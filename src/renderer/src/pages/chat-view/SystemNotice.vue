@@ -132,16 +132,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import useRuntimeData from '@renderer/state/runtimeData'
 import { getTrueLang } from '@renderer/function/utils/systemUtil'
-import { backend } from '@renderer/runtime/backend'
 
 export default defineComponent({
     name: 'ChatSystemNotice',
     emits: ['userClick'],
     data() {
         return {
-            backend,
             trueLang: getTrueLang(),
             runtimeData: runtimeData,
             dev: import.meta.env.DEV,
