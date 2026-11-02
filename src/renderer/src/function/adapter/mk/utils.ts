@@ -57,7 +57,7 @@ export async function fileToBase64(file: File): Promise<string> {
     return btoa(binary)
 }
 
-type MilkyVersion = `${number}.${number}` | `${number}.${number}-${string}`
+export type MilkyVersion = `${number}.${number}` | `${number}.${number}-${string}`
 
 /**
  * 判断Milky版本是否合法

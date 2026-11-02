@@ -32,6 +32,7 @@ import {
     LoginInfo,
     MemberData,
     MfaceSegData,
+    MdSegData,
     MsgData,
     MsgEventData,
     PokeEventData,
@@ -66,17 +67,35 @@ import {
     XmlSeg,
 } from '@renderer/function/model/seg'
 import { queueWait } from '@renderer/function/utils/baseUtil'
-import * as MilkyTypeLib from '@saltify/milky-types'
-import {
-    Event,
+import useRuntimeData from '@renderer/state/runtimeData'
+import type {
+    ApiInput,
+    ApiOutput,
+    FriendNudgeEventData,
+    GetGroupFilesOutput,
+    GetHistoryMessagesOutput,
+    GroupDisbandEventData,
+    GroupEssenceMessage,
+    GroupMemberDecreaseEventData,
+    GroupMemberIncreaseEventData,
+    GroupMessageReactionEventData,
+    GroupMuteEventData,
+    GroupNudgeEventData,
     IncomingForwardedMessage,
     IncomingMessage,
     IncomingSegment,
+    MessageRecallEventData,
+    MilkyApiName,
+    MilkyEvent,
+    MilkyEventType,
+    MilkyReactionType,
     OutgoingForwardedMessage,
     OutgoingSegment,
-} from '@saltify/milky-types'
+    SendGroupMessageOutput,
+    SendPrivateMessageOutput,
+} from './types'
+import { parseApiInput, parseApiOutput, safeParseEvent } from './types'
 import { Component } from 'vue'
-import z from 'zod'
 import * as ISeg from './incomeSeg'
 import MkInfo from './MkInfo.vue'
 import * as OSeg from './outgoingSeg'
@@ -87,54 +106,11 @@ import {
     createSender,
     fileToBase64,
     getGender,
-    getProp,
     getRole,
     versionCompare,
 } from './utils'
+import type { MilkyVersion } from './utils'
 import { logger, popInfo } from '@renderer/function/base'
-
-type MilkyType = typeof MilkyTypeLib
-
-type ApiNames = keyof {
-    [K in keyof MilkyType as K extends `${infer N}${'Input' | 'Output'}`
-        ? N
-        : never]: 1
-}
-
-type ApiInfos = {
-    [K in ApiNames]: {
-        name: K
-        input: `${K}Input` extends keyof MilkyType
-            ? z.input<MilkyType[`${K}Input`]>
-            : Record<string, never>
-        output: `${K}Output` extends keyof MilkyType
-            ? z.output<MilkyType[`${K}Output`]>
-            : Record<string, never>
-    }
-}
-
-type ApiOutput<T extends ApiNames> = ApiInfos[T]['output']
-type ApiInput<T extends ApiNames> = ApiInfos[T]['input']
-
-type KeyOfEvents = keyof {
-    [K in keyof MilkyType as K extends `${infer N}Event` ? N : never]: any
-}
-
-type MkEvent<T extends KeyOfEvents> = z.infer<MilkyType[`${T}Event`]>
-
-interface MkOkResponse<T extends ApiNames> {
-    status: 'ok'
-    retcode: 0
-    data: ApiOutput<T>
-}
-
-interface MkErrorResponse {
-    status: 'failed'
-    retcode: number
-    message: string
-}
-
-type MkResponse<T extends ApiNames> = MkOkResponse<T> | MkErrorResponse
 
 // 定义 API 装饰器：在方法外层包裹 try/catch，失败时返回 undefined
 function api(_: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -151,8 +127,12 @@ function api(_: any, propertyKey: string, descriptor: PropertyDescriptor) {
 
 export class MilkyAdapter implements AdapterInterface {
     readonly name = 'Milky'
-    readonly version = '0.0.1'
+    readonly version = '0.0.2'
     readonly protocol = 'mk'
+    /**
+     * 协议端 Milky 版本，连接时判定一次
+     */
+    protected milkyVersion: MilkyVersion = '1.0'
 
     constructor() {
         this.init()
@@ -172,6 +152,7 @@ export class MilkyAdapter implements AdapterInterface {
         // this.segParsers['poke'] = this.pokeParser.bind(this)
         this.segParsers['xml'] = this.xmlParser.bind(this)
         this.segParsers['light_app'] = this.lightAppParser.bind(this)
+        this.segParsers['markdown'] = this.markdownParser.bind(this)
 
         this.segSerializer['text'] = this.textSerializer.bind(this)
         this.segSerializer['image'] = this.imageSerializer.bind(this)
@@ -195,6 +176,9 @@ export class MilkyAdapter implements AdapterInterface {
         this.eventProcessers['group_mute'] = this.groupBanEvent.bind(this)
         this.eventProcessers['message_recall'] = this.recallEvent.bind(this)
         this.eventProcessers['group_nudge'] = this.pokeEvent.bind(this)
+        this.eventProcessers['friend_nudge'] = this.friendPokeEvent.bind(this)
+        this.eventProcessers['group_disband'] =
+            this.groupDisbandEvent.bind(this)
         this.eventProcessers['group_message_reaction'] =
             this.groupMessageReaction.bind(this)
     }
@@ -228,6 +212,7 @@ export class MilkyAdapter implements AdapterInterface {
                 }),
             )
         }
+        this.milkyVersion = version
 
         // 根据协议段版本禁用不支持的API
         if (versionCompare(version, '1.1') === -1) {
@@ -403,7 +388,7 @@ export class MilkyAdapter implements AdapterInterface {
      */
     @api
     async getGroupEssence(group: GroupSession): Promise<EssenceData[]> {
-        const messages: ApiOutput<'GetGroupEssenceMessages'>['messages'] = []
+        const messages: GroupEssenceMessage[] = []
         for (let id = 0; true; id++) {
             const data = await this.callApi('GetGroupEssenceMessages', {
                 group_id: group.id,
@@ -414,22 +399,22 @@ export class MilkyAdapter implements AdapterInterface {
             if (data.is_end) break
         }
 
+		const buildEssenceSeg = async (item: GroupEssenceMessage) => ({
+			sender: createSender(item.sender_id, item.sender_name),
+			sender_time: item.message_time,
+			operator: createSender(
+				item.operator_id,
+				item.operator_name,
+			),
+			operator_time: item.operation_time,
+			content: (await this.parseSeg(
+				item.segments,
+			)) as EssenceSeg[],
+		})
+
         const out: Promise<EssenceData>[] = []
         for (const item of messages) {
-            out.push(
-                (async () => ({
-                    sender: createSender(item.sender_id, item.sender_name),
-                    sender_time: item.message_time,
-                    operator: createSender(
-                        item.operator_id,
-                        item.operator_name,
-                    ),
-                    operator_time: item.operation_time,
-                    content: (await this.parseSeg(
-                        item.segments,
-                    )) as EssenceSeg[],
-                }))(),
-            )
+            out.push(buildEssenceSeg(item))
         }
 
         return await Promise.all(out)
@@ -628,7 +613,7 @@ export class MilkyAdapter implements AdapterInterface {
      */
     @api
     async sendMsg(msg: Msg): Promise<string> {
-        let data: ApiOutput<'SendGroupMessage' | 'SendPrivateMessage'>
+        let data: SendGroupMessageOutput | SendPrivateMessageOutput
         if (msg.session?.type === 'group') {
             data = await this.callApi('SendGroupMessage', {
                 group_id: msg.session.id,
@@ -700,11 +685,21 @@ export class MilkyAdapter implements AdapterInterface {
      * @returns 返回是否成功
      */
     @api
-    async setResponse(msg: Msg, emojiId: string, add?: boolean): Promise<true> {
+    async setResponse(
+        msg: Msg,
+        emojiId: string,
+        add?: boolean,
+    ): Promise<true> {
+		const reactionType: MilkyReactionType = +emojiId < 1000 ? 'face' : 'emoji'
         await this.callApi('SendGroupMessageReaction', {
             group_id: msg.session!.id,
             message_seq: Number(msg.message_id),
             reaction: emojiId,
+            // 1.2 起才支持，低版本省略以走协议端默认值
+            reaction_type:
+                reactionType && versionCompare(this.milkyVersion, '1.2') !== -1
+                    ? reactionType
+                    : undefined, 
             is_add: add,
         })
 
@@ -898,6 +893,17 @@ export class MilkyAdapter implements AdapterInterface {
     @api
     async setSign(sign: string): Promise<true | undefined> {
         await this.callApi('SetBio', { new_bio: sign })
+        return true
+    }
+    /**
+     * 删除好友
+     * @param userId 好友id
+     */
+    @api
+    async deleteFriend(userId: number): Promise<true | false> {
+        // 1.1 起才支持
+        if (versionCompare(this.milkyVersion, '1.1') === -1) return false
+        await this.callApi('DeleteFriend', { user_id: userId })
         return true
     }
     //#endregion
@@ -1130,10 +1136,16 @@ export class MilkyAdapter implements AdapterInterface {
                 })
                 url = re.download_url
             } else if (msg?.message_scene === 'friend') {
+                const runtimeData = useRuntimeData()
                 const re = await this.callApi('GetPrivateFileDownloadUrl', {
                     user_id: msg.peer_id,
                     file_id: data.data.file_id,
                     file_hash: data.data.file_hash!,
+                    // 1.3 起才支持，低版本省略以走协议端默认值
+                    is_self_send:
+                        versionCompare(this.milkyVersion, '1.3') === -1
+                            ? undefined
+                            : msg.sender_id === runtimeData.loginInfo?.uin,
                 })
                 url = re.download_url
             } else {
@@ -1161,6 +1173,15 @@ export class MilkyAdapter implements AdapterInterface {
             type: 'xml',
             data: data.data.xml_payload,
             id: data.data.service_id.toString(),
+        }
+    }
+    async markdownParser(
+        data: ISeg.MarkdownSeg,
+        _?: IncomingMessage,
+    ): Promise<MdSegData> {
+        return {
+            type: 'md',
+            content: data.data.content,
         }
     }
     async lightAppParser(
@@ -1209,10 +1230,7 @@ export class MilkyAdapter implements AdapterInterface {
     //#endregion
 
     //#region == 序列化 =============================
-    segSerializer: Record<
-        string,
-        (data: any) => Promise<z.input<OutgoingSegment>>
-    > = {}
+    segSerializer: Record<string, (data: any) => Promise<OutgoingSegment>> = {}
     async serializeSeg(seg: Seg): Promise<OutgoingSegment>
     async serializeSeg(seg: Seg[]): Promise<OutgoingSegment[]>
     async serializeSeg(
@@ -1222,7 +1240,7 @@ export class MilkyAdapter implements AdapterInterface {
             return Promise.all(seg.map((d) => this.serializeSeg(d)))
         } else {
             const serializer = this.segSerializer[seg.type]
-            if (serializer) return OutgoingSegment.parse(await serializer(seg))
+            if (serializer) return await serializer(seg)
             return this.unmatchSerializer(seg)
         }
     }
@@ -1248,6 +1266,8 @@ export class MilkyAdapter implements AdapterInterface {
             type: 'face',
             data: {
                 face_id: seg.id.toString(),
+                // 1.1 起新增字段，非超级表情；省略时协议端按默认值 false 处理
+                is_large: false,
             },
         }
     }
@@ -1383,11 +1403,11 @@ export class MilkyAdapter implements AdapterInterface {
 
     //#region == 事件处理 ===========================================
     eventProcessers: Record<
-        Event['event_type'],
-        (event: Event, data: any) => Promise<EventData | undefined>
+        MilkyEventType,
+        (event: MilkyEvent, data: any) => Promise<EventData | undefined>
     > = {} as any
     async messageReceiveEvent(
-        event: Event,
+        event: MilkyEvent,
         data: IncomingMessage,
     ): Promise<MsgEventData> {
         const process = async (data: IncomingMessage) => {
@@ -1407,8 +1427,8 @@ export class MilkyAdapter implements AdapterInterface {
         )
     }
     async groupMemberIncreaseEvent(
-        event: Event,
-        data: MkEvent<'GroupMemberIncrease'>,
+        event: MilkyEvent,
+        data: GroupMemberIncreaseEventData,
     ): Promise<JoinEventData> {
         return {
             type: 'join',
@@ -1427,8 +1447,8 @@ export class MilkyAdapter implements AdapterInterface {
         }
     }
     async groupMemberDecreaseEvent(
-        event: Event,
-        data: MkEvent<'GroupMemberDecrease'>,
+        event: MilkyEvent,
+        data: GroupMemberDecreaseEventData,
     ): Promise<LeaveEventData> {
         return {
             type: 'leave',
@@ -1442,8 +1462,8 @@ export class MilkyAdapter implements AdapterInterface {
         }
     }
     async groupBanEvent(
-        event: Event,
-        data: MkEvent<'GroupMute'>,
+        event: MilkyEvent,
+        data: GroupMuteEventData,
     ): Promise<BanEventData | BanLiftEventData> {
         if (data.duration > 0) {
             return {
@@ -1471,8 +1491,8 @@ export class MilkyAdapter implements AdapterInterface {
         }
     }
     async recallEvent(
-        event: Event,
-        data: MkEvent<'MessageRecall'>,
+        event: MilkyEvent,
+        data: MessageRecallEventData,
     ): Promise<RecallEventData> {
         return {
             type: 'recall',
@@ -1488,8 +1508,8 @@ export class MilkyAdapter implements AdapterInterface {
         }
     }
     async pokeEvent(
-        event: Event,
-        data: MkEvent<'GroupNudge'>,
+        event: MilkyEvent,
+        data: GroupNudgeEventData,
     ): Promise<PokeEventData> {
         return {
             type: 'poke',
@@ -1508,8 +1528,8 @@ export class MilkyAdapter implements AdapterInterface {
         }
     }
     async groupMessageReaction(
-        event: Event,
-        data: MkEvent<'GroupMessageReaction'>,
+        event: MilkyEvent,
+        data: GroupMessageReactionEventData,
     ): Promise<ResponseEventData> {
         return {
             type: 'response',
@@ -1522,11 +1542,60 @@ export class MilkyAdapter implements AdapterInterface {
             emojiId: data.face_id,
             add: data.is_add,
             time: event.time,
+
+        }
+    }
+    async friendPokeEvent(
+        event: MilkyEvent,
+        data: FriendNudgeEventData,
+    ): Promise<PokeEventData> {
+        const runtimeData = useRuntimeData()
+        const selfId = runtimeData.loginInfo?.uin ?? 0
+        return {
+            type: 'poke',
+            session: {
+                id: data.user_id,
+                type: 'user',
+            },
+            sender: createSender(data.is_self_send ? selfId : data.user_id),
+            target: createSender(data.is_self_receive ? selfId : data.user_id),
+            action: data.display_action ?? '戳了戳',
+            suffix: data.display_suffix ?? '',
+            ico:
+                data.display_action_img_url ??
+                'https://tianquan.gtimg.cn/nudgeaction/item/0/expression.jpg',
+            time: event.time,
+        }
+    }
+    async groupDisbandEvent(
+        event: MilkyEvent,
+        data: GroupDisbandEventData,
+    ): Promise<LeaveEventData> {
+        const runtimeData = useRuntimeData()
+        const selfId = runtimeData.loginInfo?.uin ?? data.operator_id
+        return {
+            type: 'leave',
+            session: {
+                id: data.group_id,
+                type: 'group',
+            },
+            // 群解散视同自身被移出群聊
+            user: createSender(selfId),
+            operator: createSender(data.operator_id),
+            time: event.time,
         }
     }
 
     async handleEvent(json: string): Promise<void> {
-        const data = Event.parse(JSON.parse(json))
+        let raw: unknown
+        try {
+            raw = JSON.parse(json)
+        } catch {
+            logger.error(new Error('事件解析失败'), json)
+            return
+        }
+        const data = safeParseEvent(raw)
+        if (!data) return
         const processor = this.eventProcessers[data.event_type]
         if (!processor) return
         const eventData = await processor(data, data.data)
@@ -1536,29 +1605,23 @@ export class MilkyAdapter implements AdapterInterface {
     //#endregion
 
     //#region == 私有工具 ===========================================
-    protected async callApi<T extends ApiNames>(
-        apiName: T,
-        args: ApiInput<T>,
-    ): Promise<ApiOutput<T>> {
-        const inputCheck = getProp(MilkyTypeLib, `${apiName}Input`) as
-            | undefined
-            | z.ZodTypeAny
-        let sendArg = {}
-        if (inputCheck) sendArg = inputCheck.parse(args) as Record<string, any>
+    protected async callApi<K extends MilkyApiName>(
+        apiName: K,
+        args: ApiInput<K>,
+    ): Promise<ApiOutput<K>> {
+        const sendArg = parseApiInput(apiName, args)
         const api = camelCaseToUnderline(apiName)
-        const json = await driver.post(`api/${api}`, sendArg)
+        const json = await driver.post(
+            `api/${api}`,
+            sendArg as Record<string, any>,
+        )
         if (!json) throw new Error('未与协议段连接')
-        const data = JSON.parse(json) as MkResponse<T>
-        if (data.status === 'ok') {
-            const outputCheck = getProp(MilkyTypeLib, `${apiName}Output`) as
-                | undefined
-                | z.ZodTypeAny
-            if (outputCheck) {
-                return outputCheck.parse(data.data) as ApiOutput<T>
-            }
-            return {}
-        }
-
+        const data = JSON.parse(json) as
+            | { status: 'ok'; retcode: 0; data: unknown }
+            | { status: 'failed'; retcode: number; message: string }
+			
+        if (data.status === 'ok')
+            return parseApiOutput(apiName, data.data)
         throw new Error(
             `API调用失败: ${data.message} (retcode: ${data.retcode})`,
         )
@@ -1569,7 +1632,7 @@ export class MilkyAdapter implements AdapterInterface {
         session: Session,
         startId: number | undefined,
         limit: number,
-    ): Promise<ApiOutput<'GetHistoryMessages'>> {
+    ): Promise<GetHistoryMessagesOutput> {
         const data = await this.callApi('GetHistoryMessages', {
             message_scene: this.getScene(session.type),
             peer_id: session.id,
@@ -1603,7 +1666,7 @@ export class MilkyAdapter implements AdapterInterface {
                 return 'temp'
         }
     }
-    protected parseFiles(data: ApiOutput<'GetGroupFiles'>): FilesData {
+    protected parseFiles(data: GetGroupFilesOutput): FilesData {
         return {
             files: data.files.map((file) => ({
                 file_id: file.file_id,
