@@ -8,7 +8,7 @@
 
 <template>
     <div ref="rootRef" :class="['msg-img', pos, type, state]" :style="boxStyle">
-		<Transition name="fade-out-in">
+		<Transition name="fade-out-in" mode="out-in">
 			<font-awesome-icon
 				v-if="state === 'loading'"
 				:icon="['fas', 'spinner']"
@@ -68,6 +68,12 @@ const src = getUrl(seg.imgData.src)
 const naturalWidth = shallowRef(seg instanceof ImgSeg ? (seg.width ?? 0) : 0)
 const naturalHeight = shallowRef(seg instanceof ImgSeg ? (seg.height ?? 0) : 0)
 
+console.log({
+	url: seg.imgData.src,
+	width: seg instanceof ImgSeg ? (seg.width ?? 0) : 0,
+	height: seg instanceof ImgSeg ? (seg.height ?? 0) : 0
+})
+
 function initType(): 'image' | 'face' | 'mface' | 'long-image' {
     if (seg instanceof MfaceSeg) return 'mface'
     if (seg.isFace) return 'face'
@@ -90,7 +96,7 @@ const type = shallowRef<'image' | 'face' | 'mface' | 'long-image'>(initType())
  *     图片就绪后又被撑开，是整个聊天列表高度突变的直接原因。
  */
 const boxStyle = computed(() => {
-    if (type.value !== 'image') return undefined
+    if (!(seg instanceof ImgSeg)) return undefined
     const w = naturalWidth.value
     const h = naturalHeight.value
     if (!(w > 0 && h > 0)) return undefined
