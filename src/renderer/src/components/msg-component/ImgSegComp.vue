@@ -7,56 +7,45 @@
 -->
 
 <template>
-    <div ref="rootRef" :class="['msg-img', pos, type, state]" :style="boxStyle">
+	<div ref="rootRef" :class="['msg-img', pos, type, state]" :style="boxStyle">
 		<Transition name="fade-out-in" mode="out-in">
-			<font-awesome-icon
-				v-if="state === 'loading'"
-				:icon="['fas', 'spinner']"
-				spin
-			/>
-			<img
-				v-else-if="state === 'loaded'"
-				:alt="seg.summary"
-				:title="seg.summary"
-				:src="src"
-				:width="naturalWidth || undefined"
-				:height="naturalHeight || undefined"
-				@click="imgClick"
-			/>
+			<font-awesome-icon v-if="state === 'loading'" :icon="['fas', 'spinner']" spin />
+			<img v-else-if="state === 'loaded'" :alt="seg.summary" :title="seg.summary" :src="src"
+				:width="naturalWidth || undefined" :height="naturalHeight || undefined" @click="imgClick" />
 			<div v-else class="fail-load">
 				<font-awesome-icon :icon="['fas', 'face-frown']" />
 				{{ $t('加载图片失败') }}
 				<a :href="src" target="_blank">{{ $t('预览图片') }}</a>
 			</div>
 		</Transition>
-    </div>
+	</div>
 </template>
 
 <script setup lang="ts">
 import { ImgSeg, MfaceSeg } from '@renderer/function/model/seg'
 import {
-    computed,
-    inject,
-    nextTick,
-    shallowRef,
-    TemplateRef,
-    useTemplateRef,
+	computed,
+	inject,
+	nextTick,
+	shallowRef,
+	TemplateRef,
+	useTemplateRef,
 } from 'vue'
 import Viewer from '../Viewer.vue'
 
 const { seg, pos } = defineProps<{
-    seg: ImgSeg | MfaceSeg
-    pos: 'alone' | 'top' | 'middle' | 'bottom'
+	seg: ImgSeg | MfaceSeg
+	pos: 'alone' | 'top' | 'middle' | 'bottom'
 }>()
 
 const emit = defineEmits<{
-    imageLoaded: [height: number]
+	imageLoaded: [height: number]
 }>()
 
 const rootRef = useTemplateRef<HTMLDivElement>('rootRef')
 
 const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
-    inject('viewer')!
+	inject('viewer')!
 
 /**
  * 本组件是一次性的：seg / pos 挂载后不会再被替换，所以资源地址只在 setup
@@ -68,23 +57,17 @@ const src = getUrl(seg.imgData.src)
 const naturalWidth = shallowRef(seg instanceof ImgSeg ? (seg.width ?? 0) : 0)
 const naturalHeight = shallowRef(seg instanceof ImgSeg ? (seg.height ?? 0) : 0)
 
-console.log({
-	url: seg.imgData.src,
-	width: seg instanceof ImgSeg ? (seg.width ?? 0) : 0,
-	height: seg instanceof ImgSeg ? (seg.height ?? 0) : 0
-})
-
 function initType(): 'image' | 'face' | 'mface' | 'long-image' {
-    if (seg instanceof MfaceSeg) return 'mface'
-    if (seg.isFace) return 'face'
-    const w = naturalWidth.value
-    const h = naturalHeight.value
-    return w > 0 && h / w > 3 ? 'long-image' : 'image'
+	if (seg instanceof MfaceSeg) return 'mface'
+	if (seg.isFace) return 'face'
+	const w = naturalWidth.value
+	const h = naturalHeight.value
+	return w > 0 && h / w > 3 ? 'long-image' : 'image'
 }
 
 /** 只有会真正变化的两项才需要响应式：渲染分支与 class 切换 */
 const state = shallowRef<'loading' | 'loaded' | 'error'>(
-    src ? 'loading' : 'error',
+	src ? 'loading' : 'error',
 )
 const type = shallowRef<'image' | 'face' | 'mface' | 'long-image'>(initType())
 
@@ -96,11 +79,11 @@ const type = shallowRef<'image' | 'face' | 'mface' | 'long-image'>(initType())
  *     图片就绪后又被撑开，是整个聊天列表高度突变的直接原因。
  */
 const boxStyle = computed(() => {
-    if (!(seg instanceof ImgSeg)) return undefined
-    const w = naturalWidth.value
-    const h = naturalHeight.value
-    if (!(w > 0 && h > 0)) return undefined
-    return { '--img-w': `${w}`, '--img-h': `${h}` }
+	if (!(seg instanceof ImgSeg)) return undefined
+	const w = naturalWidth.value
+	const h = naturalHeight.value
+	if (!(w > 0 && h > 0)) return undefined
+	return { '--img-w': `${w}`, '--img-h': `${h}` }
 })
 
 function init() {
@@ -118,19 +101,19 @@ async function initImg() {
 	}
 
 	if (loadResult) {
-        // 加载前的高度，用于让父级纠正滚动位置
-        const beforeHeight = rootRef.value?.getBoundingClientRect().height ?? 0
+		// 加载前的高度，用于让父级纠正滚动位置
+		const beforeHeight = rootRef.value?.getBoundingClientRect().height ?? 0
 
-        state.value = 'loaded'
+		state.value = 'loaded'
 
-        // 通知父级图片撑开的高度，用于纠正滚动位置
-        nextTick(() => {
-            const afterHeight =
-                rootRef.value?.getBoundingClientRect().height ?? 0
-            emit('imageLoaded', afterHeight - beforeHeight)
-        })
+		// 通知父级图片撑开的高度，用于纠正滚动位置
+		nextTick(() => {
+			const afterHeight =
+				rootRef.value?.getBoundingClientRect().height ?? 0
+			emit('imageLoaded', afterHeight - beforeHeight)
+		})
 	} else {
-        state.value = 'error'
+		state.value = 'error'
 	}
 }
 
@@ -164,7 +147,7 @@ async function loadedImg(): Promise<boolean> {
 			resolve(false)
 		}
 
-    img.src = src
+		img.src = src
 	})
 }
 
@@ -174,16 +157,16 @@ void init()
  * 图片点击
  */
 function imgClick() {
-    viewer.value?.open(seg.imgData)
+	viewer.value?.open(seg.imgData)
 }
 
 function getUrl(url: string): string {
-    if (!url) return ''
-    if (url.startsWith('http')) return url
-    if (url.startsWith('data:')) return url
-    if (url.startsWith('base64://')) {
-        return url.replace('base64://', 'data:image/png;base64,')
-    }
-    throw new Error('Unsupported image url format:' + url)
+	if (!url) return ''
+	if (url.startsWith('http')) return url
+	if (url.startsWith('data:')) return url
+	if (url.startsWith('base64://')) {
+		return url.replace('base64://', 'data:image/png;base64,')
+	}
+	throw new Error('Unsupported image url format:' + url)
 }
 </script>
