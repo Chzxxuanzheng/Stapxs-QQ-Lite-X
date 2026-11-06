@@ -143,11 +143,9 @@ export async function parseLinks(links: string[]): Promise<LinkInfo | undefined>
 			if (info) {
 				finished = true
 				resolve(info)
-				console.log(links, '求解结果:', info)
 				return
 			}
 			if (remaining === 0) {
-				console.log('求解失败:', links)
 				resolve(undefined)
 			}
 		}
@@ -180,11 +178,8 @@ export async function parseLink(link: string): Promise<LinkInfo | undefined> {
 	}
 
 	try {
-		const re = await linkParsers[type](url)
-		// console.log('link: ', link, '结果:', re)
-		return re
+		return await linkParsers[type](url)
 	} catch {
-		// console.log('link: ', link, '失败')
 		return undefined
 	}
 }

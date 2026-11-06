@@ -5,22 +5,6 @@
  * @Version: 1.2 - 按一次性组件精简状态；占位尺寸规则下沉到 CSS
  * @Description: 图片消息的单独组件，主要用于处理图片加载完成后的消息尺寸刷新问题
 -->
-
-<template>
-	<div ref="rootRef" :class="['msg-img', pos, type, state]" :style="boxStyle">
-		<Transition name="fade-out-in" mode="out-in">
-			<font-awesome-icon v-if="state === 'loading'" :icon="['fas', 'spinner']" spin />
-			<img v-else-if="state === 'loaded'" :alt="seg.summary" :title="seg.summary" :src="src"
-				:width="naturalWidth || undefined" :height="naturalHeight || undefined" @click="imgClick" />
-			<div v-else class="fail-load">
-				<font-awesome-icon :icon="['fas', 'face-frown']" />
-				{{ $t('加载图片失败') }}
-				<a :href="src" target="_blank">{{ $t('预览图片') }}</a>
-			</div>
-		</Transition>
-	</div>
-</template>
-
 <script setup lang="ts">
 import { ImgSeg, MfaceSeg } from '@renderer/function/model/seg'
 import {
@@ -170,3 +154,18 @@ function getUrl(url: string): string {
 	throw new Error('Unsupported image url format:' + url)
 }
 </script>
+
+<template>
+	<div ref="rootRef" :class="['msg-img', pos, type, state, { 'msg-inline': seg.inline }]" :style="boxStyle">
+		<Transition name="fade-out-in" mode="out-in">
+			<font-awesome-icon v-if="state === 'loading'" :icon="['fas', 'spinner']" spin />
+			<img v-else-if="state === 'loaded'" :alt="seg.summary" :title="seg.summary" :src="src"
+				:width="naturalWidth || undefined" :height="naturalHeight || undefined" @click="imgClick" />
+			<div v-else class="fail-load">
+				<font-awesome-icon :icon="['fas', 'face-frown']" />
+				{{ $t('加载图片失败') }}
+				<a :href="src" target="_blank">{{ $t('预览图片') }}</a>
+			</div>
+		</Transition>
+	</div>
+</template>

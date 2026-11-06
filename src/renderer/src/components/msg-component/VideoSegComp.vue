@@ -2,7 +2,7 @@
 import { VideoSeg } from '@renderer/function/model/seg';
 
 const { seg } = defineProps<{
-    seg: VideoSeg
+	seg: VideoSeg
 }>()
 
 const timeoutMs = 10_000
@@ -60,10 +60,10 @@ async function refreshResource() {
 </script>
 
 <template>
-	<div class="msg-video">
+	<div class="msg-video" :class="{ 'msg-inline': seg.inline }">
 		<video playsinline controls muted autoplay @error="refreshResource">
 			<source :src="seg.url" type="video/mp4" />
 			现在还有不支持 video tag 的浏览器吗？
 		</video>
 	</div>
-</template>	
+</template>
