@@ -61,34 +61,24 @@
 							:aria-label="data.icon.desc" :icon="['fas', data.icon.icon]" />
 					</div>
 				</div>
-				<div v-menu.prevent="(event) => $emit('showMsgMenu', event, data)
-					" v-move="moveOptions" :class="{
-						main: true,
-						'not-exist': !data.exist && dimNonExistentMsg,
-					}" @v-move-left.prevent="$emit('leftMove', data)" @v-move-right.prevent="$emit('rightMove', data)">
-					<!-- 消息体 -->
-					<template v-if="msgSpeicalType === 'space'">
-						<span class="msg-text" style="opacity: 0.5">{{
-							$t('空消息')
-						}}</span>
-					</template>
+				<div v-menu.prevent="(event) => $emit('showMsgMenu', event, data)" v-move="moveOptions" :class="{
+					main: true,
+					'not-exist': !data.exist && dimNonExistentMsg,
+				}" @v-move-left.prevent="$emit('leftMove', data)" @v-move-right.prevent="$emit('rightMove', data)">
+					<!-- 空消息 -->
+					<span v-if="msgSpecialType === 'space'" class="msg-text" style="opacity: 0.5">
+						{{ $t('空消息') }}
+					</span>
 					<!-- 超级表情 -->
-					<template v-else-if="msgSpeicalType === 'super-face'">
-						<div class="msg-super-face" style="--height: 35vh">
-							<LazyLottie :animation-link="(data.message[0] as FaceSeg).face!
-								.superValue!
-								" :title="(data.message[0] as FaceSeg).face!
-									.description
-									" />
-						</div>
-					</template>
+					<div v-else-if="msgSpecialType === 'super-face'" class="msg-super-face" style="--height: 35vh">
+						<LazyLottie :animation-link="(data.message[0] as FaceSeg).face!.superValue!"
+							:title="(data.message[0] as FaceSeg).face!.description" />
+					</div>
+					<VideoSegComp v-else-if="msgSpecialType === 'video'" :seg="data.message[0] as VideoSeg" />
+					<ForwardSegComp v-else-if="msgSpecialType === 'forward'" :seg="data.message[0] as ForwardSeg" />
 					<!-- 卡片消息 -->
-					<template v-else-if="msgSpeicalType === 'json'">
-						<JsonSegComp :seg="data.message[0] as JsonSeg" />
-					</template>
-					<template v-else-if="msgSpeicalType === 'xml'">
-						<XmlSegComp :seg="data.message[0] as XmlSeg" />
-					</template>
+					<JsonSegComp v-else-if="msgSpecialType === 'json'" :seg="data.message[0] as JsonSeg" />
+					<XmlSegComp v-else-if="msgSpecialType === 'xml'" :seg="data.message[0] as XmlSeg" />
 					<!-- 常规消息 -->
 					<template v-else>
 						<div v-for="(item, index) in data.message" :key="data.uuid + '-m-' + index" :class="{
@@ -213,52 +203,6 @@
 									</span>
 								</div>
 							</div>
-							<VideoSegComp v-else-if="item instanceof VideoSeg" :seg="item" />
-							<template v-else-if="item instanceof ForwardSeg">
-								<div v-tooltip="msgPrevTooltip(
-									item.content ?? $t('加载消息中...'),
-								)
-									" class="msg-raw-forward" @click="openMerge(item)">
-									<span>{{ $t('合并转发消息') }}</span>
-									<div class="forward-msg">
-										<div v-if="!item.content">
-											<div class="loading" style="opacity: 0.9">
-												<font-awesome-icon :icon="['fas', 'spinner']" />
-												{{ $t('加载中') }}
-											</div>
-										</div>
-										<div v-else-if="!item.id">
-											<div class="loading" style="opacity: 0.9">
-												<font-awesome-icon :icon="['fas', 'spinner']" />
-												{{ $t('发送中') }}
-											</div>
-										</div>
-										<div v-for="(i, indexItem) in item.content.slice(0, 3)"
-											v-else-if="item.content.length > 0" :key="'raw-forward-' + indexItem">
-											{{ i.sender.name }}:
-											<span :key="'raw-forward-item-' + i.uuid
-												">
-												{{ i.plaintext() }}
-											</span>
-										</div>
-										<div v-else>
-											{{ $t('加载失败') }}
-										</div>
-									</div>
-									<div>
-										<span v-if="item.content !== undefined">
-											{{
-												$t('查看 {count} 条转发消息', {
-													count: item.content.length,
-												})
-											}}
-										</span>
-										<span v-else>
-											{{ $t('聊天记录') }}
-										</span>
-									</div>
-								</div>
-							</template>
 							<div v-else-if="item instanceof ReplySeg" v-tooltip="msgPrevTooltip(
 								data.session?.getMsgById(item.id)
 									? [
@@ -286,13 +230,9 @@
 							<div v-else-if="item instanceof ErrorSeg" class="msg-unknown">
 								( {{ $t('加载失败') }} )
 							</div>
-							<span v-else class="msg-unknown">{{
-								'( ' +
-								$t('不支持的消息') +
-								': ' +
-								item.type +
-								' )'
-							}}</span>
+							<span v-else class="msg-unknown">
+								{{ `（${$t('不支持的消息')}: ${item.type}）` }}
+							</span>
 						</div>
 					</template>
 					<!-- 链接预览框 -->
@@ -400,6 +340,7 @@ import useRuntimeData from '@renderer/state/runtimeData'
 import { getCm } from '@renderer/function/utils/baseUtil'
 import VideoSegComp from './msg-component/VideoSegComp.vue'
 import MsgLinkPreview from './msg-component/MsgLinkPreview.vue'
+import ForwardSegComp from './msg-component/ForwardSegComp.vue'
 
 //#region == 声明变量 ================================================================
 const {
@@ -495,19 +436,23 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
 	},
 }
 
-let msgSpeicalType: 'space' | 'normally' | 'super-face' | 'json' | 'xml' =
+let msgSpecialType: 'space' | 'normally' | 'super-face' | 'json' | 'xml' | 'forward' | 'video' =
 	'normally'
 
 if (data.message.length === 0) {
-	msgSpeicalType = 'space'
+	msgSpecialType = 'space'
 } else if (data.message.length === 1) {
 	const seg = data.message[0]
 	if (seg instanceof FaceSeg && seg.face?.hasSuper) {
-		msgSpeicalType = 'super-face'
+		msgSpecialType = 'super-face'
 	} else if (seg instanceof JsonSeg) {
-		msgSpeicalType = 'json'
+		msgSpecialType = 'json'
 	} else if (seg instanceof XmlSeg) {
-		msgSpeicalType = 'xml'
+		msgSpecialType = 'xml'
+	} else if (seg instanceof ForwardSeg) {
+		msgSpecialType = 'forward'
+	} else if (seg instanceof VideoSeg) {
+		msgSpecialType = 'video'
 	}
 }
 
@@ -552,7 +497,6 @@ defineExpose({
 <script lang="ts">
 export default defineComponent({
 	name: 'MsgBody',
-	inject: ['viewer', 'mergePan'],
 	data() {
 		const runtimeData = useRuntimeData()
 		return {
@@ -590,17 +534,6 @@ export default defineComponent({
 				return
 			}
 			scrollToMsgFunc(msg, true)
-		},
-
-		findLink(): string | undefined {
-			for (const seg of this.data.message) {
-				if (seg instanceof TxtSeg) {
-					if (seg.links.length > 0) {
-						return seg.links[0]
-					}
-				}
-			}
-			return undefined
 		},
 
 		/**
@@ -680,15 +613,6 @@ export default defineComponent({
 			}
 
 			return id
-		},
-
-		openMerge(seg: ForwardSeg) {
-			if (!seg.id) {
-				popInfo.error(this.$t('请先等发送完成...'))
-				return
-			}
-			if (!this.mergePan) return
-				; (this.mergePan as any).openMergeMsg(seg)
 		},
 	},
 })
