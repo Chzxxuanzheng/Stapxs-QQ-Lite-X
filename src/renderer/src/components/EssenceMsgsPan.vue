@@ -84,11 +84,10 @@
 import { FaceSeg, ImgSeg, TxtSeg } from '@renderer/function/model/seg'
 import { GroupSession } from '@renderer/function/model/session'
 import EmojiFace from './EmojiFace.vue'
-import { watchEffect, inject, TemplateRef } from 'vue'
-import Viewer from './Viewer.vue'
+import { watchEffect } from 'vue'
+import { useViewer } from '@renderer/function/utils/vuse.js'
 
-const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
-	inject('viewer')!
+const viewer = useViewer()
 
 const { session } = defineProps<{
 	session: GroupSession
@@ -102,7 +101,6 @@ watchEffect(() => {
 })
 
 function viewImg(seg: ImgSeg): void {
-	if (!viewer.value) return
-	viewer.value.open(seg.imgData)
+	viewer?.value?.open(seg.imgData)
 }
 </script>

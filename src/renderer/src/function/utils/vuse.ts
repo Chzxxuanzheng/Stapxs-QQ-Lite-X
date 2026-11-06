@@ -23,6 +23,8 @@ import {
 import { MenuEventData } from '../elements/information'
 import { pastTimeFormat } from './systemUtil'
 import { Msg } from '../model/msg'
+import Viewer from '@renderer/components/Viewer.vue'
+import MergePan from '@renderer/components/MergePan.vue'
 
 /**
  * 用来封装一个停留事件的处理, 支持传递额外上下文
@@ -460,4 +462,18 @@ export function useCurrentMsg(): Msg | undefined {
 	const data = inject('message-content')
 	if (data instanceof Msg) return data
 	return undefined
+}
+
+export function useViewer():
+	| TemplateRef<undefined | InstanceType<typeof Viewer>>
+	| undefined {
+	return inject<TemplateRef<undefined | InstanceType<typeof Viewer>>>(
+		'viewer',
+	)
+}
+
+export function useMergePan():
+	| TemplateRef<InstanceType<typeof MergePan>>
+	| undefined {
+	return inject<TemplateRef<InstanceType<typeof MergePan>>>('mergePan')
 }

@@ -14,19 +14,17 @@
 </template>
 
 <script setup lang="ts">
-import Viewer from '@renderer/components/Viewer.vue'
 import { logger } from '@renderer/function/base'
 import { Img } from '@renderer/function/model/img'
 import { JsonSeg } from '@renderer/function/model/seg'
-import { inject, TemplateRef } from 'vue'
+import { useViewer } from '@renderer/function/utils/vuse'
 import * as z from 'zod'
 
 const { seg } = defineProps<{
 	seg: JsonSeg
 }>()
 
-const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
-	inject('viewer')!
+const viewer = useViewer()
 
 const base64Code = z.base64().transform((str) => {
 	const binary = atob(str)
@@ -86,7 +84,6 @@ if (!success) {
 }
 
 function viewImg(): void {
-	if (!viewer.value) return
-	viewer.value.open(new Img(data.img!.url))
+	viewer?.value?.open(new Img(data.img!.url))
 }
 </script>

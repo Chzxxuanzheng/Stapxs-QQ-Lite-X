@@ -1,22 +1,20 @@
 <script setup lang="ts">
-import Viewer from '@renderer/components/Viewer.vue'
 import { Img } from '@renderer/function/model/img'
 import { LinkInfo } from '@renderer/function/utils/linkViewUtil'
-import { inject } from 'vue'
+import { useViewer } from '@renderer/function/utils/vuse'
 
 const { info } = defineProps<{
 	info: LinkInfo & { type: 'og' }
 }>()
 
-const viewer = inject<InstanceType<typeof Viewer>>('viewer')
+const viewer = useViewer()
 
 /**
  * 图片点击
  * @param img
  */
 function imgClick(img: string) {
-	if (!viewer) return
-	viewer.open(new Img(img))
+	viewer?.value?.open(new Img(img))
 }
 </script>
 

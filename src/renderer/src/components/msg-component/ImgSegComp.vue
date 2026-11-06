@@ -7,15 +7,8 @@
 -->
 <script setup lang="ts">
 import { ImgSeg, MfaceSeg } from '@renderer/function/model/seg'
-import {
-	computed,
-	inject,
-	nextTick,
-	shallowRef,
-	TemplateRef,
-	useTemplateRef,
-} from 'vue'
-import Viewer from '../Viewer.vue'
+import { computed, nextTick, shallowRef, useTemplateRef } from 'vue'
+import { useViewer } from '@renderer/function/utils/vuse.js'
 
 const { seg, pos } = defineProps<{
 	seg: ImgSeg | MfaceSeg
@@ -28,8 +21,7 @@ const emit = defineEmits<{
 
 const rootRef = useTemplateRef<HTMLDivElement>('rootRef')
 
-const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
-	inject('viewer')!
+const viewer = useViewer()
 
 /**
  * 本组件是一次性的：seg / pos 挂载后不会再被替换，所以资源地址只在 setup
@@ -141,7 +133,7 @@ void init()
  * 图片点击
  */
 function imgClick() {
-	viewer.value?.open(seg.imgData)
+	viewer?.value?.open(seg.imgData)
 }
 
 function getUrl(url: string): string {

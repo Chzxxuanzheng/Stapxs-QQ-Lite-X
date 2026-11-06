@@ -9,14 +9,15 @@
 import { Ann } from '@renderer/function/model/ann'
 import { openLink } from '@renderer/function/utils/appUtil'
 import { parseUrlFromMsg } from '@renderer/function/utils/baseUtil'
-import { computed, inject, nextTick, onMounted, shallowRef } from 'vue'
+import { useViewer } from '@renderer/function/utils/vuse'
+import { computed, nextTick, onMounted, shallowRef } from 'vue'
 
 const { data, index } = defineProps<{
 	data: Ann
 	index: number
 }>()
 
-const viewer = inject('viewer')
+const viewer = useViewer()
 
 const showAll = shallowRef(false)
 const needShow = shallowRef(true)
@@ -83,7 +84,7 @@ onMounted(() => {
 					img: true,
 					all: showAll,
 				}"
-				@click.stop="(viewer as any)?.open(data.imgData!)"
+				@click.stop="viewer?.open(data.imgData!)"
 			/>
 		</div>
 		<span v-show="needShow && !showAll">{{ $t('点击展开') }}</span>
