@@ -104,7 +104,7 @@
                 </template> -->
 			</div>
 		</div>
-		<BcTab v-if="chat instanceof GroupSession" class="chat-info-tab">
+		<Tab v-if="chat instanceof GroupSession" class="chat-info-tab">
 			<div :name="$t('成员')">
 				<div class="chat-info-tab-member">
 					<template v-if="chat.memsLoaded">
@@ -235,7 +235,7 @@
 					/>
 				</div>
 			</div>
-		</BcTab>
+		</Tab>
 		<div
 			v-if="configMember && chat instanceof GroupSession"
 			class="ss-card user-config show"
@@ -328,7 +328,7 @@
 <script setup lang="ts">
 import BulletinBody from '@renderer/components/BulletinBody.vue'
 import app from '@renderer/main'
-import BcTab from 'vue3-bcui/packages/bc-tab'
+import Tab from '@renderer/components/Tab.vue'
 import OptInfo from '@renderer/pages/options/OptInfo.vue'
 
 import { Role } from '@renderer/function/adapter/enmu'

@@ -7,7 +7,7 @@
 
 <template>
 	<div class="ss-card face-pan">
-		<BcTab>
+		<Tab>
 			<div icon="fa-solid fa-face-laugh-squint">
 				<div class="system-face-bar">
 					<template v-if="recentEmojisList.length > 0">
@@ -165,7 +165,7 @@
 					</div>
 				</div>
 			</div>
-		</BcTab>
+		</Tab>
 	</div>
 </template>
 
@@ -174,7 +174,7 @@ import { computed, ComputedRef, Ref, shallowRef } from 'vue'
 
 import Emoji from '@renderer/function/model/emoji'
 import { FaceSeg, ImgSeg, Seg, TxtSeg } from '@renderer/function/model/seg'
-import BcTab from 'vue3-bcui/packages/bc-tab'
+import Tab from '@renderer/components/Tab.vue'
 import EmojiFace from './EmojiFace.vue'
 import { VueCompData } from '@renderer/function/elements/vueComp'
 import CustomFaceTooltip from './tooltip/CustomFaceTooltip.vue'
