@@ -7,75 +7,75 @@
 -->
 
 <template>
-    <div class="info-pan-set" style="padding: 0">
-        <!-- 公用设置 -->
-        <!-- 群设置 -->
-        <template v-if="chat instanceof GroupSession">
-            <div
-                v-if="
-                    chat.getMe().role == 'owner' || chat.getMe().role == 'admin'
-                "
-                class="opt-item"
-            >
-                <font-awesome-icon :icon="['fas', 'pen']" />
-                <div>
-                    <span>{{ $t('群聊名称') }}</span>
-                    <span>{{ $t('“你们真是害人不浅呐你们这个群”') }}</span>
-                </div>
-                <input
-                    v-model="nowChatName"
-                    class="ss-input"
-                    style="width: 150px"
-                    type="text"
-                    @keyup="setGroupName"
-                />
-            </div>
-            <div class="opt-item">
-                <font-awesome-icon :icon="['fas', 'note-sticky']" />
-                <div>
-                    <span>{{ $t('我的群昵称') }}</span>
-                    <span>{{ $t('￡爺↘僞ηι慹著彡') }}</span>
-                </div>
-                <input
-                    v-model="meCard"
-                    class="ss-input"
-                    style="width: 150px"
-                    type="text"
-                    @change="
-                        meCard !== chat.getMe().card?.toString()
-                            ? emit('update_member_card', chat.getMe(), meCard)
-                            : undefined
-                    "
-                />
-            </div>
-            <div class="opt-item">
-                <font-awesome-icon :icon="['fas', 'bell']" />
-                <div>
-                    <span>{{ $t('通知群消息') }}</span>
-                    <span>{{ $t('快来水群快来水群！') }}</span>
-                </div>
-                <label class="ss-switch">
-                    <input
-                        :value="chat.notice"
-                        type="checkbox"
-                        name="opt_dark"
-                        @change="setGroupNotice"
-                    />
-                    <div>
-                        <div />
-                    </div>
-                </label>
-            </div>
+	<div class="info-pan-set" style="padding: 0">
+		<!-- 公用设置 -->
+		<!-- 群设置 -->
+		<template v-if="chat instanceof GroupSession">
+			<div
+				v-if="
+					chat.getMe().role == 'owner' || chat.getMe().role == 'admin'
+				"
+				class="opt-item"
+			>
+				<font-awesome-icon :icon="['fas', 'pen']" />
+				<div>
+					<span>{{ $t('群聊名称') }}</span>
+					<span>{{ $t('“你们真是害人不浅呐你们这个群”') }}</span>
+				</div>
+				<input
+					v-model="nowChatName"
+					class="ss-input"
+					style="width: 150px"
+					type="text"
+					@keyup="setGroupName"
+				/>
+			</div>
+			<div class="opt-item">
+				<font-awesome-icon :icon="['fas', 'note-sticky']" />
+				<div>
+					<span>{{ $t('我的群昵称') }}</span>
+					<span>{{ $t('￡爺↘僞ηι慹著彡') }}</span>
+				</div>
+				<input
+					v-model="meCard"
+					class="ss-input"
+					style="width: 150px"
+					type="text"
+					@change="
+						meCard !== chat.getMe().card?.toString()
+							? emit('update_member_card', chat.getMe(), meCard)
+							: undefined
+					"
+				/>
+			</div>
+			<div class="opt-item">
+				<font-awesome-icon :icon="['fas', 'bell']" />
+				<div>
+					<span>{{ $t('通知群消息') }}</span>
+					<span>{{ $t('快来水群快来水群！') }}</span>
+				</div>
+				<label class="ss-switch">
+					<input
+						:value="chat.notice"
+						type="checkbox"
+						name="opt_dark"
+						@change="setGroupNotice"
+					/>
+					<div>
+						<div />
+					</div>
+				</label>
+			</div>
 
-            <button
-                class="ss-button"
-                style="width: calc(100% - 60px); margin: 10px 30px 0 30px"
-                @click="leaveGroup()"
-            >
-                {{ $t('退出群聊') }}
-            </button>
-        </template>
-    </div>
+			<button
+				class="ss-button"
+				style="width: calc(100% - 60px); margin: 10px 30px 0 30px"
+				@click="leaveGroup()"
+			>
+				{{ $t('退出群聊') }}
+			</button>
+		</template>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -94,10 +94,10 @@ import { shallowRef, watch } from 'vue'
 const { $t } = app.config.globalProperties
 const runtimeData = useRuntimeData()
 const { chat } = defineProps<{
-    chat: GroupSession
+	chat: GroupSession
 }>()
 const emit = defineEmits<{
-    update_member_card: [mem: Member, value: string]
+	update_member_card: [mem: Member, value: string]
 }>()
 
 const meCard = shallowRef(chat.getMe().card?.toString() ?? '')
@@ -106,16 +106,16 @@ const nowChatName = shallowRef(chat.showName ?? '')
 
 //#region == 变量更新 ================================================================
 watch(
-    () => chat.showName,
-    (newName) => {
-        nowChatName.value = newName ?? ''
-    },
+	() => chat.showName,
+	(newName) => {
+		nowChatName.value = newName ?? ''
+	},
 )
 watch(
-    () => chat.getMe().card,
-    (newCard) => {
-        meCard.value = newCard?.toString() ?? ''
-    },
+	() => chat.getMe().card,
+	(newCard) => {
+		meCard.value = newCard?.toString() ?? ''
+	},
 )
 //#endregion
 
@@ -125,9 +125,9 @@ watch(
  * @param event 输入事件
  */
 function setGroupNotice(event: Event) {
-    const status = (event.target as HTMLInputElement).checked
-    if (!(chat instanceof GroupSession)) return
-    chat.setNotice(status)
+	const status = (event.target as HTMLInputElement).checked
+	if (!(chat instanceof GroupSession)) return
+	chat.setNotice(status)
 }
 
 /**
@@ -135,47 +135,47 @@ function setGroupNotice(event: Event) {
  * @param event 按键事件
  */
 async function setGroupName(event: KeyboardEvent) {
-    if (!chat) return
-    if (event.key === 'Enter') {
-        if (!runtimeData.nowAdapter?.setGroupName) {
-            popInfo.info($t('当前适配器不支持设置群名称'))
-            return
-        }
-        await runtimeData.nowAdapter.setGroupName(chat, nowChatName.value)
+	if (!chat) return
+	if (event.key === 'Enter') {
+		if (!runtimeData.nowAdapter?.setGroupName) {
+			popInfo.info($t('当前适配器不支持设置群名称'))
+			return
+		}
+		await runtimeData.nowAdapter.setGroupName(chat, nowChatName.value)
 
-        await checkSetChatInfoResult()
-    }
+		await checkSetChatInfoResult()
+	}
 }
 
 /**
  * 退出群聊
  */
 async function leaveGroup() {
-    const ensure = await ensurePopBox($t('确定要退出群聊吗？'))
+	const ensure = await ensurePopBox($t('确定要退出群聊吗？'))
 
-    if (!ensure) return
+	if (!ensure) return
 
-    if (!runtimeData.nowAdapter?.leaveGroup) {
-        popInfo.info($t('当前适配器不支持退出群聊'))
-        return
-    }
-    await runtimeData.nowAdapter.leaveGroup(chat)
+	if (!runtimeData.nowAdapter?.leaveGroup) {
+		popInfo.info($t('当前适配器不支持退出群聊'))
+		return
+	}
+	await runtimeData.nowAdapter.leaveGroup(chat)
 
-    await checkSetChatInfoResult()
+	await checkSetChatInfoResult()
 }
 
 async function checkSetChatInfoResult() {
-    const done = waitPopBox($t('正在确认操作……'))
-    await delay(1000)
-    await reloadUsers(false)
-    done()
+	const done = waitPopBox($t('正在确认操作……'))
+	await delay(1000)
+	await reloadUsers(false)
+	done()
 }
 //#endregion
 </script>
 
 <style scoped>
 .opt-item:hover input[type='text'] {
-    background: var(--color-card-2);
-    transition: background 0.2s;
+	background: var(--color-card-2);
+	transition: background 0.2s;
 }
 </style>

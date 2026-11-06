@@ -10,22 +10,35 @@
 -->
 
 <template>
-	<div :id="'chat-' + data.uuid" ref="msgMain" :class="{
-		message: true,
-		left: direction === 'left',
-		right: direction === 'right',
-		selected: selected,
-		'without-avatar': withoutAvatar,
-	}">
-		<img v-if="direction === 'left'" v-hide="!showAvatar" v-user-tooltip="() => data.sender" v-menu.prevent="(event) => emit('showUserMenu', event, data.sender)
-			" class="avatar" :src="data.sender.face" :alt="data.sender.name"
-			@dblclick="emit('senderDoubleClick', data.sender)" />
+	<div
+		:id="'chat-' + data.uuid"
+		ref="msgMain"
+		:class="{
+			message: true,
+			left: direction === 'left',
+			right: direction === 'right',
+			selected: selected,
+			'without-avatar': withoutAvatar,
+		}"
+	>
+		<img
+			v-if="direction === 'left'"
+			v-hide="!showAvatar"
+			v-user-tooltip="() => data.sender"
+			v-menu.prevent="(event) => emit('showUserMenu', event, data.sender)"
+			class="avatar"
+			:src="data.sender.face"
+			:alt="data.sender.name"
+			@dblclick="emit('senderDoubleClick', data.sender)"
+		/>
 		<div v-if="direction === 'right'" class="message-space" />
-		<div :class="{
-			'message-body': true,
-			special: special,
-			'hide-face': !showAvatar,
-		}">
+		<div
+			:class="{
+				'message-body': true,
+				special: special,
+				'hide-face': !showAvatar,
+			}"
+		>
 			<div class="message-info">
 				<!-- 一帮头衔之类的 -->
 				<template v-if="data.sender instanceof Member && showAvatar">
@@ -51,55 +64,103 @@
 				</a>
 			</div>
 			<div class="message-content">
-				<div v-if="data.icon && showIcon && direction === 'right'" :class="{
-					rotate: data.icon.rotate,
-					icon: true,
-					left: true,
-				}">
+				<div
+					v-if="data.icon && showIcon && direction === 'right'"
+					:class="{
+						rotate: data.icon.rotate,
+						icon: true,
+						left: true,
+					}"
+				>
 					<div @click="data.iconClick">
-						<font-awesome-icon :style="{ color: data.icon.color }" :title="data.icon.desc"
-							:aria-label="data.icon.desc" :icon="['fas', data.icon.icon]" />
+						<font-awesome-icon
+							:style="{ color: data.icon.color }"
+							:title="data.icon.desc"
+							:aria-label="data.icon.desc"
+							:icon="['fas', data.icon.icon]"
+						/>
 					</div>
 				</div>
-				<div v-menu.prevent="(event) => emit('showMsgMenu', event, data)" v-move="moveOptions" :class="{
-					main: true,
-					'not-exist': !data.exist && dimNonExistentMsg,
-				}" @v-move-left.prevent="emit('leftMove', data)" @v-move-right.prevent="emit('rightMove', data)">
+				<div
+					v-menu.prevent="(event) => emit('showMsgMenu', event, data)"
+					v-move="moveOptions"
+					:class="{
+						main: true,
+						'not-exist': !data.exist && dimNonExistentMsg,
+					}"
+					@v-move-left.prevent="emit('leftMove', data)"
+					@v-move-right.prevent="emit('rightMove', data)"
+				>
 					<!-- 空消息 -->
-					<span v-if="data.message.length === 0" class="msg-space" style="opacity: 0.5">
+					<span
+						v-if="data.message.length === 0"
+						class="msg-space"
+						style="opacity: 0.5"
+					>
 						{{ $t('空消息') }}
 					</span>
 					<!-- 常规消息 -->
-					<Segs :segs="data.message" :show-to-me="showToMe"
-						@imageLoaded="(height) => emit('imageLoaded', height)" />
+					<Segs
+						:segs="data.message"
+						:show-to-me="showToMe"
+						@imageLoaded="(height) => emit('imageLoaded', height)"
+					/>
 					<!-- 链接预览框 -->
-					<MsgLinkPreview v-if="data.linkPreview" :info="data.linkPreview" />
+					<MsgLinkPreview
+						v-if="data.linkPreview"
+						:info="data.linkPreview"
+					/>
 				</div>
-				<div v-if="data.icon && showIcon && direction === 'left'" :class="{
-					rotate: data.icon.rotate,
-					icon: true,
-				}">
+				<div
+					v-if="data.icon && showIcon && direction === 'left'"
+					:class="{
+						rotate: data.icon.rotate,
+						icon: true,
+					}"
+				>
 					<div @click="data.iconClick">
-						<font-awesome-icon :style="{ color: data.icon.color }" :title="data.icon.desc"
-							:aria-label="data.icon.desc" :icon="['fas', data.icon.icon]" />
+						<font-awesome-icon
+							:style="{ color: data.icon.color }"
+							:title="data.icon.desc"
+							:aria-label="data.icon.desc"
+							:icon="['fas', data.icon.icon]"
+						/>
 					</div>
 				</div>
 			</div>
 		</div>
-		<img v-if="direction === 'right'" v-hide="!showAvatar" v-menu.prevent="(event) => emit('showUserMenu', event, data.sender)
-			" v-user-tooltip="() => data.sender" class="avatar" :src="data.sender.face" :alt="data.sender.name"
-			@dblclick="emit('senderDoubleClick', data.sender)" />
-		<div v-if="data.emojis && Object.keys(data.emojis).length > 0" class="emoji-like">
+		<img
+			v-if="direction === 'right'"
+			v-hide="!showAvatar"
+			v-menu.prevent="(event) => emit('showUserMenu', event, data.sender)"
+			v-user-tooltip="() => data.sender"
+			class="avatar"
+			:src="data.sender.face"
+			:alt="data.sender.name"
+			@dblclick="emit('senderDoubleClick', data.sender)"
+		/>
+		<div
+			v-if="data.emojis && Object.keys(data.emojis).length > 0"
+			class="emoji-like"
+		>
 			<div class="emoji-space" />
 			<div class="emoji-like-body">
 				<TransitionGroup name="emoji-like">
-					<template v-for="(info, id) in data.emojis as Record<
-						string,
-						number[]
-					>" :key="'respond-' + data.uuid + '-' + id">
-						<div :class="{
-							'me-send': runtimeData.loginInfo && info.includes(runtimeData.loginInfo?.uin),
-						}" @click="emit('emojiClick', id as string, data)">
+					<template
+						v-for="(info, id) in data.emojis as Record<
+							string,
+							number[]
+						>"
+						:key="'respond-' + data.uuid + '-' + id"
+					>
+						<div
+							:class="{
+								'me-send':
+									runtimeData.loginInfo &&
+									info.includes(runtimeData.loginInfo?.uin),
+							}"
+							@click="emit('emojiClick', id as string, data)"
+						>
 							<EmojiFace :emoji="Emoji.get(Number(id))" />
 							<span>{{ info.length }}</span>
 						</div>
@@ -110,7 +171,10 @@
 		<div class="message-ex-info">
 			<div v-if="direction === 'right'" class="space" />
 			<div class="content">
-				<template v-for="info in exInfo" :key="data.uuid + '-exinfo-' + info">
+				<template
+					v-for="info in exInfo"
+					:key="data.uuid + '-exinfo-' + info"
+				>
 					<a v-if="info === 'msgId'">
 						msgId: {{ data.message_id }}
 					</a>
@@ -146,7 +210,6 @@ import { getCm } from '@renderer/function/utils/baseUtil'
 import MsgLinkPreview from './msg-component/MsgLinkPreview.vue'
 import app from '@renderer/main.js'
 import Segs from './msg-component/Segs.vue'
-
 
 //#region == 声明变量 ================================================================
 const {

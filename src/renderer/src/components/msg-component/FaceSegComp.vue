@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FaceSeg } from '@renderer/function/model/seg';
-import EmojiFace from '../EmojiFace.vue';
+import { FaceSeg } from '@renderer/function/model/seg'
+import EmojiFace from '../EmojiFace.vue'
 
 const { seg } = defineProps<{
 	seg: FaceSeg
@@ -8,5 +8,9 @@ const { seg } = defineProps<{
 </script>
 
 <template>
-	<EmojiFace :emoji="seg.face" class="msg-face" :class="{ 'msg-inline': seg.inline }" />
+	<EmojiFace
+		:emoji="seg.face"
+		class="msg-face"
+		:class="{ 'msg-inline': seg.inline }"
+	/>
 </template>

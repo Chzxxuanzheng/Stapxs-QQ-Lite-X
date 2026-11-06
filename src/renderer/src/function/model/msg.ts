@@ -160,7 +160,7 @@ export class Msg extends Message {
 			if (!(seg instanceof TxtSeg)) continue
 			links.push(...seg.links)
 		}
-		void parseLinks(links).then(info => {
+		void parseLinks(links).then((info) => {
 			if (!info) return
 			this.linkPreview = info
 		})

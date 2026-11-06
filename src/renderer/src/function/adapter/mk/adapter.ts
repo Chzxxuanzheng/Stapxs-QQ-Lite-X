@@ -407,14 +407,9 @@ export class MilkyAdapter implements AdapterInterface {
 		const buildEssenceSeg = async (item: GroupEssenceMessage) => ({
 			sender: createSender(item.sender_id, item.sender_name),
 			sender_time: item.message_time,
-			operator: createSender(
-				item.operator_id,
-				item.operator_name,
-			),
+			operator: createSender(item.operator_id, item.operator_name),
 			operator_time: item.operation_time,
-			content: (await this.parseSeg(
-				item.segments,
-			)) as EssenceSeg[],
+			content: (await this.parseSeg(item.segments)) as EssenceSeg[],
 		})
 
 		const out: Promise<EssenceData>[] = []
@@ -690,12 +685,9 @@ export class MilkyAdapter implements AdapterInterface {
 	 * @returns 返回是否成功
 	 */
 	@api
-	async setResponse(
-		msg: Msg,
-		emojiId: string,
-		add?: boolean,
-	): Promise<true> {
-		const reactionType: MilkyReactionType = +emojiId < 1000 ? 'face' : 'emoji'
+	async setResponse(msg: Msg, emojiId: string, add?: boolean): Promise<true> {
+		const reactionType: MilkyReactionType =
+			+emojiId < 1000 ? 'face' : 'emoji'
 		await this.callApi('SendGroupMessageReaction', {
 			group_id: msg.session!.id,
 			message_seq: Number(msg.message_id),
@@ -1074,14 +1066,16 @@ export class MilkyAdapter implements AdapterInterface {
 		data: ISeg.FaceSeg,
 		_?: IncomingMessage,
 	): Promise<FaceSegData | SuperFaceSegData> {
-		if (data.data.is_large) return {
-			type: 'super-face',
-			id: Number(data.data.face_id)
-		}
-		else return {
-			type: 'face',
-			id: Number(data.data.face_id),
-		}
+		if (data.data.is_large)
+			return {
+				type: 'super-face',
+				id: Number(data.data.face_id),
+			}
+		else
+			return {
+				type: 'face',
+				id: Number(data.data.face_id),
+			}
 	}
 	async v1FaceParser(
 		data: ISeg.FaceSeg,
@@ -1436,6 +1430,7 @@ export class MilkyAdapter implements AdapterInterface {
 		event: MilkyEvent,
 		data: IncomingMessage,
 	): Promise<MsgEventData> {
+		// oxlint-disable-next-line no-shadow
 		const process = async (data: IncomingMessage) => {
 			const msgData = await this.parseMsg(data)
 			const out: MsgEventData = {
@@ -1568,7 +1563,6 @@ export class MilkyAdapter implements AdapterInterface {
 			emojiId: data.face_id,
 			add: data.is_add,
 			time: event.time,
-
 		}
 	}
 	async friendPokeEvent(
@@ -1636,9 +1630,9 @@ export class MilkyAdapter implements AdapterInterface {
 		args: ApiInput<K>,
 	): Promise<ApiOutput<K>> {
 		const sendArg = parseApiInput(apiName, args)
-		const api = camelCaseToUnderline(apiName)
+		const apiPath = camelCaseToUnderline(apiName)
 		const json = await driver.post(
-			`api/${api}`,
+			`api/${apiPath}`,
 			sendArg as Record<string, any>,
 		)
 		if (!json) throw new Error('未与协议段连接')
@@ -1646,8 +1640,7 @@ export class MilkyAdapter implements AdapterInterface {
 			| { status: 'ok'; retcode: 0; data: unknown }
 			| { status: 'failed'; retcode: number; message: string }
 
-		if (data.status === 'ok')
-			return parseApiOutput(apiName, data.data)
+		if (data.status === 'ok') return parseApiOutput(apiName, data.data)
 		throw new Error(
 			`API调用失败: ${data.message} (retcode: ${data.retcode})`,
 		)

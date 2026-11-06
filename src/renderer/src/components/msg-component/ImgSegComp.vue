@@ -156,11 +156,26 @@ function getUrl(url: string): string {
 </script>
 
 <template>
-	<div ref="rootRef" :class="['msg-img', pos, type, state, { 'msg-inline': seg.inline }]" :style="boxStyle">
+	<div
+		ref="rootRef"
+		:class="['msg-img', pos, type, state, { 'msg-inline': seg.inline }]"
+		:style="boxStyle"
+	>
 		<Transition name="fade-out-in" mode="out-in">
-			<font-awesome-icon v-if="state === 'loading'" :icon="['fas', 'spinner']" spin />
-			<img v-else-if="state === 'loaded'" :alt="seg.summary" :title="seg.summary" :src="src"
-				:width="naturalWidth || undefined" :height="naturalHeight || undefined" @click="imgClick" />
+			<font-awesome-icon
+				v-if="state === 'loading'"
+				:icon="['fas', 'spinner']"
+				spin
+			/>
+			<img
+				v-else-if="state === 'loaded'"
+				:alt="seg.summary"
+				:title="seg.summary"
+				:src="src"
+				:width="naturalWidth || undefined"
+				:height="naturalHeight || undefined"
+				@click="imgClick"
+			/>
 			<div v-else class="fail-load">
 				<font-awesome-icon :icon="['fas', 'face-frown']" />
 				{{ $t('加载图片失败') }}

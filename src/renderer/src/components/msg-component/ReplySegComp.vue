@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ReplySeg } from '@renderer/function/model/seg';
+import { ReplySeg } from '@renderer/function/model/seg'
 import { vTooltip } from '@renderer/function/utils/vcmd'
-import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue';
-import { Msg } from '@renderer/function/model/msg';
-import { VueCompData } from '@renderer/function/elements/vueComp.js';
-import { useCurrentMsg } from '@renderer/function/utils/vuse';
-import { computed } from 'vue';
-import { popInfo } from '@renderer/function/base.js';
-import { scrollToMsg } from '@renderer/function/utils/appUtil.js';
-import app from '@renderer/main.js';
+import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue'
+import { Msg } from '@renderer/function/model/msg'
+import { VueCompData } from '@renderer/function/elements/vueComp.js'
+import { useCurrentMsg } from '@renderer/function/utils/vuse'
+import { computed } from 'vue'
+import { popInfo } from '@renderer/function/base.js'
+import { scrollToMsg } from '@renderer/function/utils/appUtil.js'
+import app from '@renderer/main.js'
 
 const { seg } = defineProps<{
-	seg: ReplySeg,
+	seg: ReplySeg
 }>()
 
 const $t = app.config.globalProperties.$t
@@ -46,8 +46,14 @@ function scrollToReplyMsg() {
 </script>
 
 <template>
-	<div v-tooltip="() => msgPrevTooltip(replyMsg ? [replyMsg] : $t('加载消息失败'))" class="msg-reply"
-		@click="scrollToReplyMsg()" :class="{ 'msg-inline': seg.inline }">
+	<div
+		v-tooltip="
+			() => msgPrevTooltip(replyMsg ? [replyMsg] : $t('加载消息失败'))
+		"
+		class="msg-reply"
+		@click="scrollToReplyMsg()"
+		:class="{ 'msg-inline': seg.inline }"
+	>
 		<font-awesome-icon :icon="['fas', 'reply']" />
 		<span :class="{ 'msg-unknown': !replyMsg }" style="cursor: pointer">
 			{{ replyMsg?.plaintext() ?? $t('（查看回复消息）') }}

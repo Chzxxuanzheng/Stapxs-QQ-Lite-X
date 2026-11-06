@@ -1,7 +1,7 @@
 import type {
-    IncomingMarkdownSeg,
-    IncomingSegment,
-    IncomingSegmentV1,
+	IncomingMarkdownSeg,
+	IncomingSegment,
+	IncomingSegmentV1,
 } from './types'
 
 // 具体的接收消息段类型（1.3.0 当前形态）
@@ -26,6 +26,6 @@ export type FaceSegV1 = Extract<IncomingSegmentV1, { type: 'face' }>
 export type ReplySegV1 = Extract<IncomingSegmentV1, { type: 'reply' }>
 export type ForwardSegV1 = Extract<IncomingSegmentV1, { type: 'forward' }>
 export type MarketFaceSegV1 = Extract<
-    IncomingSegmentV1,
-    { type: 'market_face' }
+	IncomingSegmentV1,
+	{ type: 'market_face' }
 >

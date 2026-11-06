@@ -13,24 +13,36 @@
 				<font-awesome-icon :icon="['fas', 'language']" />
 				<div>
 					<span>{{ $t('简体中文') }}</span>
-					<span class="author">{{ $t('作者：') }}{{ $t('Stapx Steve') }}</span>
+					<span class="author"
+						>{{ $t('作者：') }}{{ $t('Stapx Steve') }}</span
+					>
 					<span>{{
 						$t('你好世界！这是 Stapxs QQ Lite 的默认简体中文。')
 					}}</span>
 				</div>
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('language'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('language'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'earth-asia']" />
 				<div>
 					<span>{{ $t('语言（Language）') }}</span>
 					<span>{{ $t('喵喵喵喵？') }}</span>
 				</div>
 				<div class="select-wrapper">
-					<select v-model="runtimeData.sysConfig.language" name="language" title="language">
-						<option v-for="item in languages" :key="item.value" :value="item.value">
+					<select
+						v-model="runtimeData.sysConfig.language"
+						name="language"
+						title="language"
+					>
+						<option
+							v-for="item in languages"
+							:key="item.value"
+							:value="item.value"
+						>
 							{{ item.name }}
 						</option>
 					</select>
@@ -40,9 +52,11 @@
 		<div class="ss-card">
 			<header>{{ $t('主题与颜色') }}</header>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('opt_dark_mode'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('opt_dark_mode'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'moon']" />
 				<div>
 					<span>{{ $t('亮暗模式') }}</span>
@@ -51,31 +65,48 @@
 				<DarkModeSwitch v-model="runtimeData.sysConfig.opt_dark_mode" />
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('theme_color'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('theme_color'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'palette']" />
 				<div>
 					<span>{{ $t('主题色') }}</span>
 					<span>{{ $t('换个心情 🎵 ~') }}</span>
 				</div>
 				<div class="theme-color-col">
-					<label v-for="(name, index) in COLOR_NAMES" :key="'color_id_' + index" :title="name"
-						class="ss-radio">
-						<input type="radio" name="theme_color" :data-id="index"
-							:checked="runtimeData.sysConfig.theme_color == index"
-							@click="runtimeData.sysConfig.theme_color = index" />
-						<div :style="'background: var(--color-main-' + index + ')'
-							">
+					<label
+						v-for="(name, index) in COLOR_NAMES"
+						:key="'color_id_' + index"
+						:title="name"
+						class="ss-radio"
+					>
+						<input
+							type="radio"
+							name="theme_color"
+							:data-id="index"
+							:checked="
+								runtimeData.sysConfig.theme_color == index
+							"
+							@click="runtimeData.sysConfig.theme_color = index"
+						/>
+						<div
+							:style="
+								'background: var(--color-main-' + index + ')'
+							"
+						>
 							<div />
 						</div>
 					</label>
 				</div>
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('vibrancy'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('vibrancy'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'window-maximize']" />
 				<div>
 					<span>{{ $t('透明模式') }}</span>
@@ -86,52 +117,76 @@
 				<Switch v-model="isVibrancy" @click="changeVibrancy" />
 			</div>
 			<div v-if="runtimeData.sysConfig.vibrancy" class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('background_img'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('background_img'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'image']" />
 				<div>
 					<span>{{ $t('背景图片') }}</span>
 					<span>{{ $t('嘿嘿嘿（痴呆') }}</span>
 				</div>
 				<div class="file-choice">
-					<div class="choice-btn" @click="($refs.choiceImg as any)?.click()">
+					<div
+						class="choice-btn"
+						@click="($refs.choiceImg as any)?.click()"
+					>
 						{{
 							runtimeData.sysConfig.background_img
 								? $t('更换背景')
 								: $t('上传背景')
 						}}
-						<input ref="choiceImg" type="file" style="display: none" name="background_img" accept="image/*"
-							@change="setBackground($event)" />
+						<input
+							ref="choiceImg"
+							type="file"
+							style="display: none"
+							name="background_img"
+							accept="image/*"
+							@change="setBackground($event)"
+						/>
 					</div>
-					<div v-if="runtimeData.sysConfig.background_img !== ''" class="rm-btn" @click="removeBackground">
+					<div
+						v-if="runtimeData.sysConfig.background_img !== ''"
+						class="rm-btn"
+						@click="removeBackground"
+					>
 						<font-awesome-icon :icon="['fas', 'xmark']" />
 					</div>
 				</div>
 			</div>
 			<div v-if="runtimeData.sysConfig.background_img" class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('background_img_blur'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('background_img_blur'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'o']" />
 				<div>
 					<span>{{ $t('背景模糊') }}</span>
 					<span>{{ $t('什么都看不见了（恼') }}</span>
 				</div>
 				<div class="ss-range">
-					<input v-model="runtimeData.sysConfig.background_img_blur"
-						:style="`background-size: ${runtimeData.sysConfig.background_img_blur}% 100%;`" type="range"
-						name="background_img_blur" />
+					<input
+						v-model="runtimeData.sysConfig.background_img_blur"
+						:style="`background-size: ${runtimeData.sysConfig.background_img_blur}% 100%;`"
+						type="range"
+						name="background_img_blur"
+					/>
 					<span
-						:style="`color: var(--color-font${runtimeData.sysConfig.background_img_blur > 50 ? '-r' : ''})`">
+						:style="`color: var(--color-font${runtimeData.sysConfig.background_img_blur > 50 ? '-r' : ''})`"
+					>
 						{{ runtimeData.sysConfig.background_img_blur }}
-						px</span>
+						px</span
+					>
 				</div>
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('auto_hide_side_bar'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('auto_hide_side_bar'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'barcode']" />
 				<div>
 					<span>{{ $t('自动隐藏侧边栏') }}</span>
@@ -140,8 +195,11 @@
 					}}</span>
 				</div>
 				<div class="select-wrapper">
-					<select v-model="runtimeData.sysConfig.auto_hide_side_bar" name="auto_hide_side_bar"
-						title="auto_hide_side_bar">
+					<select
+						v-model="runtimeData.sysConfig.auto_hide_side_bar"
+						name="auto_hide_side_bar"
+						title="auto_hide_side_bar"
+					>
 						<option value="none">
 							{{ $t('禁用（默认）') }}
 						</option>
@@ -155,9 +213,11 @@
 				</div>
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('side_bar_width'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('side_bar_width'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'arrows-left-right']" />
 				<div>
 					<span>{{ $t('侧边栏宽度') }}</span>
@@ -166,18 +226,28 @@
 					}}</span>
 				</div>
 				<div class="ss-range">
-					<input v-model="runtimeData.sysConfig.side_bar_width"
+					<input
+						v-model="runtimeData.sysConfig.side_bar_width"
 						:style="`background-size: ${(runtimeData.sysConfig.side_bar_width - 250) / 7.5}% 100%;`"
-						min="250" max="1000" type="range" name="side_bar_width" />
-					<span :style="`color: var(--color-font${runtimeData.sysConfig.side_bar_width > 625 ? '-r' : ''})`">
+						min="250"
+						max="1000"
+						type="range"
+						name="side_bar_width"
+					/>
+					<span
+						:style="`color: var(--color-font${runtimeData.sysConfig.side_bar_width > 625 ? '-r' : ''})`"
+					>
 						{{ runtimeData.sysConfig.side_bar_width }}
-						px</span>
+						px</span
+					>
 				</div>
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('hide_chat_head'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('hide_chat_head'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'clapperboard']" />
 				<div>
 					<span>{{ $t('隐藏聊天顶栏') }}</span>
@@ -186,9 +256,11 @@
 				<Switch v-model="runtimeData.sysConfig.hide_chat_head" />
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('hide_chat_bottom'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('hide_chat_bottom'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'rectangle-list']" />
 				<div>
 					<span>{{ $t('隐藏发送栏') }}</span>
@@ -200,9 +272,11 @@
 		<div class="ss-card">
 			<header>{{ $t('页面') }}</header>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('opt_fast_animation'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('opt_fast_animation'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'car-side']" />
 				<div>
 					<span>{{ $t('更快的动画速度') }}</span>
@@ -215,9 +289,11 @@
 				<Switch v-model="runtimeData.sysConfig.opt_fast_animation" />
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('merge_forward_width'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('merge_forward_width'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'text-width']" />
 				<div>
 					<span>{{ $t('固定合并转发宽度') }}</span>
@@ -226,9 +302,11 @@
 				<Switch v-model="runtimeData.sysConfig.merge_forward_width" />
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('use_favicon_notice'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('use_favicon_notice'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'bell']" />
 				<div>
 					<span>{{ $t('在图标上显示通知') }}</span>
@@ -237,9 +315,11 @@
 				<Switch v-model="runtimeData.sysConfig.use_favicon_notice" />
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('hide_self_avatar'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('hide_self_avatar'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'user']" />
 				<div>
 					<span>{{ $t('隐藏自己的头像') }}</span>
@@ -250,9 +330,11 @@
 				<Switch v-model="runtimeData.sysConfig.hide_self_avatar" />
 			</div>
 			<div class="opt-item">
-				<div :class="{
-					changed: !option.checkDefault('self_msg_direction'),
-				}" />
+				<div
+					:class="{
+						changed: !option.checkDefault('self_msg_direction'),
+					}"
+				/>
 				<font-awesome-icon :icon="['fas', 'chart-bar']" />
 				<div>
 					<span>{{ $t('自己消息位置') }}</span>
@@ -261,8 +343,11 @@
 					</span>
 				</div>
 				<div class="select-wrapper">
-					<select v-model="runtimeData.sysConfig.self_msg_direction" name="self_msg_direction"
-						title="self_msg_direction">
+					<select
+						v-model="runtimeData.sysConfig.self_msg_direction"
+						name="self_msg_direction"
+						title="self_msg_direction"
+					>
 						<option value="left">
 							{{ $t('左边') }}
 						</option>
@@ -293,10 +378,7 @@ import { shallowRef } from 'vue'
 import useRuntimeData from '@renderer/state/runtimeData'
 
 import { sendIdentifyData } from '@renderer/function/utils/appUtil'
-import {
-	ensurePopBox,
-	waitPopBox,
-} from '@renderer/function/utils/popBox'
+import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
 import imageCompression from 'browser-image-compression'
 import languages from '../../assets/l10n/_l10nconfig.json'
 import app from '@renderer/main'
@@ -352,10 +434,10 @@ async function setBackground(event: Event) {
 			const compressedFile = await imageCompression(img, options)
 			logger.info(
 				'图片压缩成功，原大小：' +
-				img.size / 1024 / 1024 +
-				' MB，压缩后大小：' +
-				compressedFile.size / 1024 / 1024 +
-				' MB',
+					img.size / 1024 / 1024 +
+					' MB，压缩后大小：' +
+					compressedFile.size / 1024 / 1024 +
+					' MB',
 			)
 			img = compressedFile
 		} catch (error) {

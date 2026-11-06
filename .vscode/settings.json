@@ -1,54 +1,47 @@
 {
-    "cSpell.words": [
-        "Anns",
-        "atall",
-        "ciallo",
-        "invitor",
-        "Lillia",
-        "Lltb",
-        "Mface",
-        "multimsg",
-        "ntqq",
-        "Onebot",
-        "Persistedstate",
-        "popboxes",
-        "recalc",
-        "retcode",
-        "Rkey",
-        "saltify",
-        "Segs",
-        "Stapxs",
-        "ungroup",
-        "uuidv",
-        "vcmd",
-        "vuse",
-        "xmark"
-    ],
-    "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact",
-        "vue"
-    ],
-    "[css]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode" // 这样你的 CSS 就会有空格了
-    },
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
-    },
-    "typescript.experimental.useTsgo": false,
-    "typescript.native-preview.tsdk": "node_modules/@typescript/native-preview",
-    "[javascript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
+	"cSpell.words": [
+		"Anns",
+		"atall",
+		"ciallo",
+		"invitor",
+		"Lillia",
+		"Lltb",
+		"Mface",
+		"multimsg",
+		"ntqq",
+		"Onebot",
+		"Persistedstate",
+		"popboxes",
+		"recalc",
+		"retcode",
+		"Rkey",
+		"saltify",
+		"Segs",
+		"Stapxs",
+		"ungroup",
+		"uuidv",
+		"vcmd",
+		"vuse",
+		"xmark"
+	],
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.oxc": "explicit"
+	},
+	"typescript.experimental.useTsgo": false,
+	"typescript.native-preview.tsdk": "node_modules/@typescript/native-preview",
 	"typescript.tsdk": "node_modules/typescript/lib",
-	"[vue]": {
-		"editor.defaultFormatter": "Vue.volar"
+	"[css]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},
 	"[typescript]": {
-		"editor.defaultFormatter": "vscode.typescript-language-features"
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[vue]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
 	}
 }

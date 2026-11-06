@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Seg } from '@renderer/function/model/seg';
+import { Seg } from '@renderer/function/model/seg'
 
 const { seg: _seg } = defineProps<{
 	seg: Seg

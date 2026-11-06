@@ -1,0 +1,32 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"singleQuote": true,
+	"semi": false,
+	"tabWidth": 4,
+	"useTabs": true,
+	"printWidth": 80,
+	"trailingComma": "all",
+	"arrowParens": "always",
+	"endOfLine": "lf",
+	"insertFinalNewline": true,
+	"sortPackageJson": false,
+	"sortImports": false,
+	"ignorePatterns": [
+		"node_modules/**",
+		"dist/**",
+		"src/renderer/public/**",
+		"src/renderer/src/assets/**",
+		"plugin/**",
+		"ssqq.npx-web-quick-start/**",
+		"proxy.js",
+		"**/*.config.*"
+	],
+	"overrides": [
+		{
+			"files": ["**/*.yml", "**/*.yaml"],
+			"options": {
+				"useTabs": true
+			}
+		}
+	]
+}

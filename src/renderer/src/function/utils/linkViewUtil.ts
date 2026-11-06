@@ -10,21 +10,25 @@ const specialLinkList = {
 	music163: ['music.163.com', '163cn.tv'],
 } as const
 
-const specialLinkType = Object.keys(specialLinkList) as (keyof typeof specialLinkList)[]
+const specialLinkType = Object.keys(
+	specialLinkList,
+) as (keyof typeof specialLinkList)[]
 
 type LinkType = 'og' | keyof typeof specialLinkList
 
-const stapxsOgApiSchema = z.object({
-	'og:description': z.string().optional(),
-	'og:image': z.string().optional(),
-	'og:site_name': z.string().optional(),
-	'og:title': z.string().optional(),
-}).transform(o => ({
-	desc: o['og:description'],
-	img: o['og:image'],
-	site: o['og:site_name'],
-	title: o['og:title']
-}))
+const stapxsOgApiSchema = z
+	.object({
+		'og:description': z.string().optional(),
+		'og:image': z.string().optional(),
+		'og:site_name': z.string().optional(),
+		'og:title': z.string().optional(),
+	})
+	.transform((o) => ({
+		desc: o['og:description'],
+		img: o['og:image'],
+		site: o['og:site_name'],
+		title: o['og:title'],
+	}))
 
 const bilibiliApiSchema = z.object({
 	code: z.literal(0),
@@ -36,14 +40,14 @@ const bilibiliApiSchema = z.object({
 		desc: z.string(),
 		owner: z.object({
 			name: z.string(),
-			face: z.url()
+			face: z.url(),
 		}),
 		stat: z.object({
 			view: z.number(),
 			favorite: z.number(),
 			coin: z.number(),
-			like: z.number()
-		})
+			like: z.number(),
+		}),
 	}),
 })
 
@@ -53,23 +57,27 @@ const bilibiliApiSchema = z.object({
  */
 export const music163SongDetailSchema = z.object({
 	code: z.number(),
-	songs: z.array(z.object({
-		id: z.number(),
-		name: z.string(),
-		// 歌手列表
-		ar: z.array(z.object({
+	songs: z.array(
+		z.object({
 			id: z.number(),
 			name: z.string(),
-		})),
-		// 专辑信息
-		al: z.object({
-			id: z.number(),
-			name: z.string(),
-			picUrl: z.string(),
+			// 歌手列表
+			ar: z.array(
+				z.object({
+					id: z.number(),
+					name: z.string(),
+				}),
+			),
+			// 专辑信息
+			al: z.object({
+				id: z.number(),
+				name: z.string(),
+				picUrl: z.string(),
+			}),
+			// 歌曲时长（毫秒）
+			dt: z.number(),
 		}),
-		// 歌曲时长（毫秒）
-		dt: z.number(),
-	})),
+	),
 })
 
 /**
@@ -78,18 +86,23 @@ export const music163SongDetailSchema = z.object({
  */
 export const music163SongUrlSchema = z.object({
 	code: z.number(),
-	data: z.array(z.object({
-		id: z.number(),
-		// 无版权或获取失败时为 null
-		url: z.string().nullable(),
-		br: z.number().optional(),
-		size: z.number().optional(),
-		// 免费试听片段，无试听限制时为 null
-		freeTrialInfo: z.object({
-			start: z.number(),
-			end: z.number(),
-		}).nullable().optional(),
-	})),
+	data: z.array(
+		z.object({
+			id: z.number(),
+			// 无版权或获取失败时为 null
+			url: z.string().nullable(),
+			br: z.number().optional(),
+			size: z.number().optional(),
+			// 免费试听片段，无试听限制时为 null
+			freeTrialInfo: z
+				.object({
+					start: z.number(),
+					end: z.number(),
+				})
+				.nullable()
+				.optional(),
+		}),
+	),
 })
 
 type OgLinkInfo = {
@@ -111,7 +124,7 @@ type BiliBiliLinkInfo = {
 	owner: {
 		face: ProxyUrl
 		name: string
-	},
+	}
 	view: number
 	coin: number
 	favorite: number
@@ -130,10 +143,12 @@ type Music163LinkInfo = {
 
 export type LinkInfo = OgLinkInfo | BiliBiliLinkInfo | Music163LinkInfo
 
-export async function parseLinks(links: string[]): Promise<LinkInfo | undefined> {
+export async function parseLinks(
+	links: string[],
+): Promise<LinkInfo | undefined> {
 	if (links.length === 0) return undefined
 
-	return new Promise<LinkInfo | undefined>(resolve => {
+	return new Promise<LinkInfo | undefined>((resolve) => {
 		let finished = false
 		let remaining = links.length
 
@@ -151,7 +166,7 @@ export async function parseLinks(links: string[]): Promise<LinkInfo | undefined>
 		}
 
 		for (const link of links) {
-			void parseLink(link).then(info => {
+			void parseLink(link).then((info) => {
 				done(info)
 			})
 		}
@@ -193,10 +208,10 @@ const linkParsers = {
 
 		if (!data) return undefined
 
-		if (!data.title && !data.desc && !data.img && !data.site) return undefined
+		if (!data.title && !data.desc && !data.img && !data.site)
+			return undefined
 
 		return data
-
 	},
 
 	async bilibili(url: URL) {
@@ -210,9 +225,17 @@ const linkParsers = {
 		if (!bv) return undefined
 
 		logger.info(`[linkView] 获取到 bilibili 链接：${bv}`)
-		const infoApi = ProxyUrl.proxy(`https://api.bilibili.com/x/web-interface/wbi/view?bvid=${bv}`)
-		const { data, error } = bilibiliApiSchema.safeParse(await getApi(infoApi))
-		console.log(error)
+		const infoApi = ProxyUrl.proxy(
+			`https://api.bilibili.com/x/web-interface/wbi/view?bvid=${bv}`,
+		)
+		const { data, error } = bilibiliApiSchema.safeParse(
+			await getApi(infoApi),
+		)
+		if (error)
+			logger.error(
+				error instanceof Error ? error : null,
+				`[linkView] bilibili 数据解析失败：${error}`,
+			)
 		if (!data) return undefined
 		logger.info(`[linkView] 预览 bilibili 链接成功：${data.data.title}`)
 
@@ -230,7 +253,7 @@ const linkParsers = {
 			view: data.data.stat.view,
 			coin: data.data.stat.coin,
 			favorite: data.data.stat.favorite,
-			like: data.data.stat.like
+			like: data.data.stat.like,
 		} satisfies BiliBiliLinkInfo
 	},
 
@@ -242,29 +265,44 @@ const linkParsers = {
 		logger.info(`[linkView] 获取获取网易云音乐歌曲 ID：${id}`)
 		const baseUrl = import.meta.env.VITE_APP_163_MUSIC_API
 		try {
-			const [responseDetail, responseUrl] = await Promise.all([getApi(baseUrl + '/song/detail?ids=' + id), getApi(baseUrl + '/song/url?id=' + id)])
-			const detail = music163SongDetailSchema.safeParse(responseDetail).data?.songs.at(0)
-			const url = music163SongUrlSchema.safeParse(responseUrl).data?.data.at(0)
+			const [responseDetail, responseUrl] = await Promise.all([
+				getApi(baseUrl + '/song/detail?ids=' + id),
+				getApi(baseUrl + '/song/url?id=' + id),
+			])
+			const detailInfo = music163SongDetailSchema
+				.safeParse(responseDetail)
+				.data?.songs.at(0)
+			const urlInfo = music163SongUrlSchema
+				.safeParse(responseUrl)
+				.data?.data.at(0)
 
-			if (!detail || !url) return undefined
+			if (!detailInfo || !urlInfo) return undefined
 
 			return {
 				type: 'music163',
 				sub_type: 'song',
-				cover: new ProxyUrl(detail.al.picUrl),
-				name: detail.name,
-				authors: detail.ar.map(i => i.name),
-				freeRange: url.freeTrialInfo ? [url.freeTrialInfo.start, url.freeTrialInfo.end] : undefined,
-				playLink: url.url ? new ProxyUrl(url.url) : undefined
+				cover: new ProxyUrl(detailInfo.al.picUrl),
+				name: detailInfo.name,
+				authors: detailInfo.ar.map((i) => i.name),
+				freeRange: urlInfo.freeTrialInfo
+					? [urlInfo.freeTrialInfo.start, urlInfo.freeTrialInfo.end]
+					: undefined,
+				playLink: urlInfo.url ? new ProxyUrl(urlInfo.url) : undefined,
 			}
 		} catch (error) {
 			logger.error(error as Error, '[linkView] 预览网易云音乐失败')
 			return undefined
 		}
-	}
-} as const satisfies Record<LinkType, (url: URL) => Promise<LinkInfo | undefined>>
+	},
+} as const satisfies Record<
+	LinkType,
+	(url: URL) => Promise<LinkInfo | undefined>
+>
 
-async function checkOgImg(url: URL, img?: string): Promise<{ img?: ProxyUrl, large: boolean }> {
+async function checkOgImg(
+	url: URL,
+	img?: string,
+): Promise<{ img?: ProxyUrl; large: boolean }> {
 	if (!img) return { large: false }
 
 	// 不标准连接
@@ -284,23 +322,27 @@ async function checkOgImg(url: URL, img?: string): Promise<{ img?: ProxyUrl, lar
 
 	const imgUrl = new ProxyUrl(img)
 
-	return new Promise(r => {
+	return new Promise((r) => {
+		// oxlint-disable-next-line no-shadow
 		const img = new Image()
-		img.onload = () => r({
-			large: img.naturalWidth > img.naturalHeight,
-			img: imgUrl,
-		})
+		img.onload = () =>
+			r({
+				large: img.naturalWidth > img.naturalHeight,
+				img: imgUrl,
+			})
 
-		img.onerror = () => r({
-			large: false,
-		})
+		img.onerror = () =>
+			r({
+				large: false,
+			})
 
 		img.src = imgUrl.url
 	})
-
 }
 
-async function fetchOgLinkInfoFromCors(url: URL): Promise<OgLinkInfo | undefined> {
+async function fetchOgLinkInfoFromCors(
+	url: URL,
+): Promise<OgLinkInfo | undefined> {
 	try {
 		const data = await fetch(ProxyUrl.proxy(url.toString()))
 		if (!data.ok) return undefined
@@ -308,7 +350,9 @@ async function fetchOgLinkInfoFromCors(url: URL): Promise<OgLinkInfo | undefined
 		const html = await data.text()
 		const doc = new DOMParser().parseFromString(html, 'text/html')
 		const getMeta = (key: string) =>
-			doc.querySelector(`meta[property="${key}"]`)?.getAttribute('content') ??
+			doc
+				.querySelector(`meta[property="${key}"]`)
+				?.getAttribute('content') ??
 			doc.querySelector(`meta[name="${key}"]`)?.getAttribute('content') ??
 			undefined
 
@@ -325,7 +369,7 @@ async function fetchOgLinkInfoFromCors(url: URL): Promise<OgLinkInfo | undefined
 			site: getMeta('og:site_name'),
 			title: title,
 			desc: desc,
-			... await checkOgImg(url, imgUrl)
+			...(await checkOgImg(url, imgUrl)),
 		}
 	} catch (error) {
 		logger.error(error as Error, '[linkView] 预览链接失败')
@@ -333,7 +377,9 @@ async function fetchOgLinkInfoFromCors(url: URL): Promise<OgLinkInfo | undefined
 	}
 }
 
-async function fetchOgLinkInfoFromStapxsServer(url: URL): Promise<OgLinkInfo | undefined> {
+async function fetchOgLinkInfoFromStapxsServer(
+	url: URL,
+): Promise<OgLinkInfo | undefined> {
 	// 获取链接预览
 	const res = await getApi(
 		`${import.meta.env.VITE_APP_LINK_VIEW}/${encodeURIComponent(url.toString())}`,
@@ -348,6 +394,6 @@ async function fetchOgLinkInfoFromStapxsServer(url: URL): Promise<OgLinkInfo | u
 		site: data.site,
 		title: data.title,
 		desc: data.desc,
-		... await checkOgImg(url, data.img)
+		...(await checkOgImg(url, data.img)),
 	}
 }

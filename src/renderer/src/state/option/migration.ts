@@ -178,7 +178,7 @@ export async function migration(
 export async function oldVersionCheck(): Promise<
 	Record<string, any> | undefined
 > {
-	// eslint-disable-next-line no-restricted-globals
+	// oxlint-disable-next-line no-restricted-globals
 	const str = localStorage.getItem('options')
 	if (!str) return undefined
 	try {

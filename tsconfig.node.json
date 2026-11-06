@@ -1,24 +1,24 @@
 {
-    "include": ["vite.config.*", "plugin/**/*"],
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "NodeNext",
-        "moduleResolution": "nodenext",
-        "sourceMap": false,
-        "strict": true,
-        "jsx": "preserve",
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitAny": false,
-        "noImplicitReturns": true,
-        "composite": true,
-        "allowImportingTsExtensions": true,
-        "emitDeclarationOnly": true,
-        "types": ["node"]
-    }
+	"include": ["vite.config.*", "plugin/**/*"],
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "nodenext",
+		"sourceMap": false,
+		"strict": true,
+		"jsx": "preserve",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitAny": false,
+		"noImplicitReturns": true,
+		"composite": true,
+		"allowImportingTsExtensions": true,
+		"emitDeclarationOnly": true,
+		"types": ["node"]
+	}
 }

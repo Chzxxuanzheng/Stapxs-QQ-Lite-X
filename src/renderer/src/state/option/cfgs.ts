@@ -104,7 +104,7 @@ export const OptionInfos = {
 			)
 			const meta = document.getElementsByName('theme-color')[0]
 			if (meta) {
-				; (meta as HTMLMetaElement).content = getComputedStyle(
+				;(meta as HTMLMetaElement).content = getComputedStyle(
 					document.documentElement,
 				).getPropertyValue('--color-main-' + id)
 			}
@@ -148,10 +148,10 @@ export const OptionInfos = {
 		onChange: (value: number) => {
 			const viewport = document.getElementById('viewport')
 			if (viewport && value && value >= 0.5 && value <= 1.5) {
-				; (viewport as any).content =
+				;(viewport as any).content =
 					`width=device-width, initial-scale=${value}, maximum-scale=5, user-scalable=0`
 			} else {
-				; (viewport as any).content =
+				;(viewport as any).content =
 					'width=device-width, initial-scale=0.85, maximum-scale=5, user-scalable=0'
 			}
 		},

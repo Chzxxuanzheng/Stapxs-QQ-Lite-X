@@ -13,15 +13,15 @@ import FriendMenu from '@renderer/components/menu/FriendMenu.vue'
 import { VueCompData } from '../elements/vueComp'
 
 export interface ContextMenuData {
-    id: string
-    pos: { x: number; y: number }
-    compData: VueCompData<Component>
-    controller: ContextMenuController
+	id: string
+	pos: { x: number; y: number }
+	compData: VueCompData<Component>
+	controller: ContextMenuController
 }
 
 export type ContextMenuController = {
-    finish: Promise<any>
-    close: (ret?: any) => void
+	finish: Promise<any>
+	close: (ret?: any) => void
 }
 
 export const resolveMap = new Map<string, (arg?: any) => void>()
@@ -35,21 +35,21 @@ export const contextMenus = shallowRef<ContextMenuData[]>([])
  * @param args 传递给右键菜单的参数
  */
 export function openContextMenu<T extends Component>(
-    pos: { x: number; y: number },
-    compData: VueCompData<T>,
+	pos: { x: number; y: number },
+	compData: VueCompData<T>,
 ): ContextMenuController {
-    const id = crypto.randomUUID()
-    const controller = contextControllerMaker(id)
-    contextMenus.value = [
-        ...contextMenus.value,
-        {
-            id,
-            pos,
-            compData,
-            controller,
-        },
-    ]
-    return controller
+	const id = crypto.randomUUID()
+	const controller = contextControllerMaker(id)
+	contextMenus.value = [
+		...contextMenus.value,
+		{
+			id,
+			pos,
+			compData,
+			controller,
+		},
+	]
+	return controller
 }
 
 /**
@@ -58,11 +58,11 @@ export function openContextMenu<T extends Component>(
  * @param ret 关闭时返回的值
  */
 export function closeContextMenu(id: string, ret?: any): void {
-    const resolve = resolveMap.get(id)
-    if (!resolve) throw new Error(`无法找到 ID 为 ${id} 的右键菜单`)
-    resolve(ret)
-    resolveMap.delete(id)
-    contextMenus.value = contextMenus.value.filter((menu) => menu.id !== id)
+	const resolve = resolveMap.get(id)
+	if (!resolve) throw new Error(`无法找到 ID 为 ${id} 的右键菜单`)
+	resolve(ret)
+	resolveMap.delete(id)
+	contextMenus.value = contextMenus.value.filter((menu) => menu.id !== id)
 }
 
 /**
@@ -70,18 +70,18 @@ export function closeContextMenu(id: string, ret?: any): void {
  * @param id 对应的id
  */
 function contextControllerMaker(id: string): ContextMenuController {
-    const promise = new Promise<any>((resolve) => {
-        resolveMap.set(id, resolve)
-    })
-    return {
-        finish: promise,
-        close: (ret?: any) => closeContextMenu(id, ret),
-    }
+	const promise = new Promise<any>((resolve) => {
+		resolveMap.set(id, resolve)
+	})
+	return {
+		finish: promise,
+		close: (ret?: any) => closeContextMenu(id, ret),
+	}
 }
 
 export const friendMenuInfo = shallowReactive<{
-    session?: Session
-    box?: SessionBox
+	session?: Session
+	box?: SessionBox
 }>({ session: undefined, box: undefined })
 
 /**
@@ -93,28 +93,28 @@ export const friendMenuInfo = shallowReactive<{
  * @param box 盒子
  */
 export function openFriendMenu(
-    x: number,
-    y: number,
-    from: 'message' | 'friend',
-    session?: Session,
-    box?: SessionBox,
+	x: number,
+	y: number,
+	from: 'message' | 'friend',
+	session?: Session,
+	box?: SessionBox,
 ): ContextMenuController {
-    friendMenuInfo.session = session
-    friendMenuInfo.box = box
-    const controller = openContextMenu(
-        { x, y },
-        {
-            comp: markRaw(FriendMenu),
-            props: {
-                from,
-                session,
-                box,
-            },
-        },
-    )
-    controller.finish.then(() => {
-        friendMenuInfo.session = undefined
-        friendMenuInfo.box = undefined
-    })
-    return controller
+	friendMenuInfo.session = session
+	friendMenuInfo.box = box
+	const controller = openContextMenu(
+		{ x, y },
+		{
+			comp: markRaw(FriendMenu),
+			props: {
+				from,
+				session,
+				box,
+			},
+		},
+	)
+	controller.finish.then(() => {
+		friendMenuInfo.session = undefined
+		friendMenuInfo.box = undefined
+	})
+	return controller
 }

@@ -12,27 +12,27 @@ import InputPopBox from '@renderer/components/popBox/InputPopBox.vue'
 import { VueCompData } from '../elements/vueComp'
 
 export interface PopBoxButton {
-    master?: boolean // 是否高亮（主按钮）
-    fun?:
-        | (() => void | Promise<void>)
-        | ((event: Event) => void | Promise<void>) // 按钮回调
-    text: string // 按钮文本
-    noClose?: boolean // 是否不退出弹窗
+	master?: boolean // 是否高亮（主按钮）
+	fun?:
+		| (() => void | Promise<void>)
+		| ((event: Event) => void | Promise<void>) // 按钮回调
+	text: string // 按钮文本
+	noClose?: boolean // 是否不退出弹窗
 }
 
 export type AbsCompPopBoxData = {
-    svg?: string // 弹窗图标
-    title?: string // 弹窗标题（缺省将没有标题栏和关闭按钮）
-    full?: boolean // 是否填充整个页面
-    button?: PopBoxButton[]
-    allowAutoClose?: boolean // 是否允许自带的关闭操作
-    onClose?: () => void // 关闭回调
+	svg?: string // 弹窗图标
+	title?: string // 弹窗标题（缺省将没有标题栏和关闭按钮）
+	full?: boolean // 是否填充整个页面
+	button?: PopBoxButton[]
+	allowAutoClose?: boolean // 是否允许自带的关闭操作
+	onClose?: () => void // 关闭回调
 }
 
 export type PopBoxData<T extends Component> = AbsCompPopBoxData & VueCompData<T>
 
 export const popBoxList: { id: string; data: PopBoxData<Component> }[] =
-    shallowReactive([])
+	shallowReactive([])
 
 /**
  * 关闭一个弹窗
@@ -40,10 +40,10 @@ export const popBoxList: { id: string; data: PopBoxData<Component> }[] =
  * @returns
  */
 export function closePopBox(id: string) {
-    const index = popBoxList.findIndex((item) => item.id === id)
-    if (index === -1) return
-    popBoxList[index].data.onClose?.()
-    popBoxList.splice(index, 1)
+	const index = popBoxList.findIndex((item) => item.id === id)
+	if (index === -1) return
+	popBoxList[index].data.onClose?.()
+	popBoxList.splice(index, 1)
 }
 
 /**
@@ -51,7 +51,7 @@ export function closePopBox(id: string) {
  * @returns
  */
 export function hasPopBox(): boolean {
-    return popBoxList.length > 0
+	return popBoxList.length > 0
 }
 
 /**
@@ -60,13 +60,13 @@ export function hasPopBox(): boolean {
  * @return 弹窗的唯一标识符
  */
 export function popBox<T extends Component>(config: PopBoxData<T>): string {
-    const id = crypto.randomUUID()
-    config.comp = markRaw(config.comp)
-    popBoxList.push({
-        id,
-        data: config,
-    })
-    return id
+	const id = crypto.randomUUID()
+	config.comp = markRaw(config.comp)
+	popBoxList.push({
+		id,
+		data: config,
+	})
+	return id
 }
 
 /**
@@ -77,14 +77,14 @@ export function popBox<T extends Component>(config: PopBoxData<T>): string {
  * @deprecated 纯文本请使用 `textPopBox`, 或者 tsx + `popBox` 替代
  */
 export function htmlPopBox(
-    html: string,
-    config: AbsCompPopBoxData = {},
+	html: string,
+	config: AbsCompPopBoxData = {},
 ): string {
-    const data: PopBoxData<() => VNode> = {
-        comp: () => h('div', { innerHTML: html }),
-        ...config,
-    }
-    return popBox(data)
+	const data: PopBoxData<() => VNode> = {
+		comp: () => h('div', { innerHTML: html }),
+		...config,
+	}
+	return popBox(data)
 }
 
 /**
@@ -94,14 +94,14 @@ export function htmlPopBox(
  * @returns 弹窗唯一标识符
  */
 export function textPopBox(
-    text: string,
-    config: AbsCompPopBoxData = {},
+	text: string,
+	config: AbsCompPopBoxData = {},
 ): string {
-    const data: PopBoxData<() => VNode> = {
-        comp: () => h('div', [h('span', text)]),
-        ...config,
-    }
-    return popBox(data)
+	const data: PopBoxData<() => VNode> = {
+		comp: () => h('div', [h('span', text)]),
+		...config,
+	}
+	return popBox(data)
 }
 
 /**
@@ -112,33 +112,33 @@ export function textPopBox(
  * @returns
  */
 export async function ensurePopBox(
-    text: string,
-    mainButtonName?: string,
-    closeButtonName?: string,
+	text: string,
+	mainButtonName?: string,
+	closeButtonName?: string,
 ): Promise<boolean> {
-    const { $t } = app.config.globalProperties
-    if (!mainButtonName) mainButtonName = $t('确定')
-    if (!closeButtonName) closeButtonName = $t('取消')
-    let resolve: (value: boolean) => void
-    const promise = new Promise<boolean>((res) => {
-        resolve = res
-    })
-    textPopBox(text, {
-        title: $t('提醒'),
-        button: [
-            {
-                text: closeButtonName,
-                master: true,
-                fun: () => resolve(false),
-            },
-            {
-                text: mainButtonName,
-                fun: () => resolve(true),
-            },
-        ],
-        allowAutoClose: false,
-    })
-    return promise
+	const { $t } = app.config.globalProperties
+	if (!mainButtonName) mainButtonName = $t('确定')
+	if (!closeButtonName) closeButtonName = $t('取消')
+	let resolve: (value: boolean) => void
+	const promise = new Promise<boolean>((res) => {
+		resolve = res
+	})
+	textPopBox(text, {
+		title: $t('提醒'),
+		button: [
+			{
+				text: closeButtonName,
+				master: true,
+				fun: () => resolve(false),
+			},
+			{
+				text: mainButtonName,
+				fun: () => resolve(true),
+			},
+		],
+		allowAutoClose: false,
+	})
+	return promise
 }
 
 /**
@@ -148,27 +148,27 @@ export async function ensurePopBox(
  * @returns
  */
 export async function noticePopBox(
-    text: string,
-    buttonName?: string,
+	text: string,
+	buttonName?: string,
 ): Promise<void> {
-    const { $t } = app.config.globalProperties
-    if (!buttonName) buttonName = $t('知道了')
+	const { $t } = app.config.globalProperties
+	if (!buttonName) buttonName = $t('知道了')
 
-    let resolve: () => void
-    const promise = new Promise<void>((res) => {
-        resolve = res
-    })
-    textPopBox(text, {
-        svg: 'triangle-exclamation',
-        title: $t('提醒'),
-        button: [
-            {
-                text: buttonName,
-                fun: () => resolve(),
-            },
-        ],
-    })
-    return promise
+	let resolve: () => void
+	const promise = new Promise<void>((res) => {
+		resolve = res
+	})
+	textPopBox(text, {
+		svg: 'triangle-exclamation',
+		title: $t('提醒'),
+		button: [
+			{
+				text: buttonName,
+				fun: () => resolve(),
+			},
+		],
+	})
+	return promise
 }
 
 /**
@@ -177,41 +177,41 @@ export async function noticePopBox(
  * @returns
  */
 export async function inputPopBox(config: {
-    title?: string
-    svg?: string
-    placeholder?: string
-    value?: string
+	title?: string
+	svg?: string
+	placeholder?: string
+	value?: string
 }): Promise<string | undefined> {
-    const { $t } = app.config.globalProperties
-    config.title = config.title ?? $t('输入')
-    const model = { value: config.value ?? '' }
-    return new Promise((resolve) => {
-        popBox({
-            title: config.title,
-            svg: config.svg,
-            comp: InputPopBox,
-            props: {
-                placeholder: config.placeholder ?? '',
-                complete: resolve,
-            },
-            model: markRaw(model),
-            button: [
-                {
-                    text: $t('确定'),
-                    master: true,
-                    fun: () => {
-                        resolve(config.value)
-                    },
-                },
-                {
-                    text: $t('取消'),
-                    fun: () => {
-                        resolve(undefined)
-                    },
-                },
-            ],
-        })
-    })
+	const { $t } = app.config.globalProperties
+	config.title = config.title ?? $t('输入')
+	const model = { value: config.value ?? '' }
+	return new Promise((resolve) => {
+		popBox({
+			title: config.title,
+			svg: config.svg,
+			comp: InputPopBox,
+			props: {
+				placeholder: config.placeholder ?? '',
+				complete: resolve,
+			},
+			model: markRaw(model),
+			button: [
+				{
+					text: $t('确定'),
+					master: true,
+					fun: () => {
+						resolve(config.value)
+					},
+				},
+				{
+					text: $t('取消'),
+					fun: () => {
+						resolve(undefined)
+					},
+				},
+			],
+		})
+	})
 }
 
 /**
@@ -221,20 +221,20 @@ export async function inputPopBox(config: {
  * @returns
  */
 export function waitPopBox(
-    content: string,
-    config: {
-        title?: string
-        svg?: string
-    } = {},
+	content: string,
+	config: {
+		title?: string
+		svg?: string
+	} = {},
 ): () => void {
-    const { $t } = app.config.globalProperties
-    const popBoxId = textPopBox(content, {
-        title: config.title ?? $t('操作'),
-        svg: config.svg,
-        allowAutoClose: false,
-    })
+	const { $t } = app.config.globalProperties
+	const popBoxId = textPopBox(content, {
+		title: config.title ?? $t('操作'),
+		svg: config.svg,
+		allowAutoClose: false,
+	})
 
-    return () => {
-        closePopBox(popBoxId)
-    }
+	return () => {
+		closePopBox(popBoxId)
+	}
 }

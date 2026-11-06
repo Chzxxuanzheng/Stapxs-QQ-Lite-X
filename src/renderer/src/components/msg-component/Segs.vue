@@ -38,7 +38,7 @@ import ForwardSegComp from '@renderer/components/msg-component/ForwardSegComp.vu
 import useRuntimeData from '@renderer/state/runtimeData'
 
 const { segs, showToMe = false } = defineProps<{
-	segs: Seg[],
+	segs: Seg[]
 	showToMe?: boolean
 }>()
 
@@ -65,13 +65,29 @@ const runtimeData = useRuntimeData()
 		</span>
 		<TxtSegComp v-if="seg instanceof TxtSeg" :seg="seg" />
 		<MdSegComp v-else-if="seg instanceof MdSeg" :seg="seg" />
-		<ImgSegComp v-else-if="seg instanceof ImgSeg" :pos="getSegPos(seg)" :seg="seg"
-			@image-loaded="(height) => emit('imageLoaded', height)" />
-		<ImgSegComp v-else-if="seg instanceof MfaceSeg" :pos="getSegPos(seg)" :seg="seg"
-			@image-loaded="(height) => emit('imageLoaded', height)" />
+		<ImgSegComp
+			v-else-if="seg instanceof ImgSeg"
+			:pos="getSegPos(seg)"
+			:seg="seg"
+			@image-loaded="(height) => emit('imageLoaded', height)"
+		/>
+		<ImgSegComp
+			v-else-if="seg instanceof MfaceSeg"
+			:pos="getSegPos(seg)"
+			:seg="seg"
+			@image-loaded="(height) => emit('imageLoaded', height)"
+		/>
 		<FaceSegComp v-else-if="seg instanceof FaceSeg" :seg="seg" />
-		<AtSegComp v-else-if="seg instanceof AtSeg" :seg="seg" :show-to-me="showToMe" />
-		<AtAllSegComp v-else-if="seg instanceof AtAllSeg" :seg="seg" :show-to-me="showToMe" />
+		<AtSegComp
+			v-else-if="seg instanceof AtSeg"
+			:seg="seg"
+			:show-to-me="showToMe"
+		/>
+		<AtAllSegComp
+			v-else-if="seg instanceof AtAllSeg"
+			:seg="seg"
+			:show-to-me="showToMe"
+		/>
 		<!-- 单个消息 -->
 		<FileSegComp v-else-if="seg instanceof FileSeg" :seg="seg" />
 		<ReplySegComp v-else-if="seg instanceof ReplySeg" :seg="seg" />

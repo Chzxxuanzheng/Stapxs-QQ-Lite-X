@@ -1,16 +1,16 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Debug Renderer Process",
-            "port": 9222,
-            "request": "attach",
-            "type": "chrome",
-            "webRoot": "${workspaceFolder}/src/renderer",
-            "timeout": 60000,
-            "presentation": {
-                "hidden": true
-            }
-        }
-    ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Debug Renderer Process",
+			"port": 9222,
+			"request": "attach",
+			"type": "chrome",
+			"webRoot": "${workspaceFolder}/src/renderer",
+			"timeout": 60000,
+			"presentation": {
+				"hidden": true
+			}
+		}
+	]
 }

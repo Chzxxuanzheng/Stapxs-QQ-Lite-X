@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LinkInfo } from '@renderer/function/utils/linkViewUtil';
-import { computed, shallowRef, useTemplateRef, watchEffect } from 'vue';
+import { LinkInfo } from '@renderer/function/utils/linkViewUtil'
+import { computed, shallowRef, useTemplateRef, watchEffect } from 'vue'
 
 const { info } = defineProps<{
 	info: LinkInfo & { type: 'music163' }
@@ -102,16 +102,45 @@ const percent = computed(() => {
 		</header>
 		<hr />
 		<div class="audio">
-			<audio :src="info.playLink?.url" @loadedmetadata="audioLoaded()" @timeupdate="audioUpdate()" ref="audio" />
-			<font-awesome-icon v-if="status === 'loading'" :icon="['fas', 'spinner']" spin />
-			<font-awesome-icon v-else-if="status === 'pause'" :icon="['fas', 'play']" @click="audioControl()" />
-			<font-awesome-icon v-else-if="status === 'play'" :icon="['fas', 'pause']" @click="audioControl()" />
-			<font-awesome-icon v-else-if="status === 'error'" :icon="['fas', 'face-frown']" />
-			<input value="0" min="0" step="0.1" type="range" @input="audioChange()" ref="input" />
+			<audio
+				:src="info.playLink?.url"
+				@loadedmetadata="audioLoaded()"
+				@timeupdate="audioUpdate()"
+				ref="audio"
+			/>
+			<font-awesome-icon
+				v-if="status === 'loading'"
+				:icon="['fas', 'spinner']"
+				spin
+			/>
+			<font-awesome-icon
+				v-else-if="status === 'pause'"
+				:icon="['fas', 'play']"
+				@click="audioControl()"
+			/>
+			<font-awesome-icon
+				v-else-if="status === 'play'"
+				:icon="['fas', 'pause']"
+				@click="audioControl()"
+			/>
+			<font-awesome-icon
+				v-else-if="status === 'error'"
+				:icon="['fas', 'face-frown']"
+			/>
+			<input
+				value="0"
+				min="0"
+				step="0.1"
+				type="range"
+				@input="audioChange()"
+				ref="input"
+			/>
 			<div class="progress-bar">
 				<div :style="{ '--percent': percent }" />
 			</div>
-			<span>{{ formatTime(currentTime) }} / {{ formatTime(maxTime) }}</span>
+			<span
+				>{{ formatTime(currentTime) }} / {{ formatTime(maxTime) }}</span
+			>
 		</div>
 	</div>
 </template>

@@ -560,7 +560,10 @@ export class OneBotAdapter implements AdapterInterface {
 			isFace: false,
 		}
 	}
-	async faceParser(data: ObFaceSeg, msg?: ObMsg): Promise<FaceSegData | SuperFaceSegData> {
+	async faceParser(
+		data: ObFaceSeg,
+		msg?: ObMsg,
+	): Promise<FaceSegData | SuperFaceSegData> {
 		const id = Number(data.data.id)
 		if (msg?.message.length === 1 && Emoji.superList.includes(id))
 			return { type: 'super-face', id }

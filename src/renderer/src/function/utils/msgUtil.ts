@@ -17,13 +17,13 @@ import { Notify } from '../notify'
  * @param msg 消息体
  */
 export function sendMsgRaw(session: Session, msg: Seg[]): SelfMsg {
-    // 预览消息 =======================================================
-    const preMsg = SelfMsg.create(msg, session)
-    // 添加进会话
-    session.addMessage(preMsg)
-    // 发送消息
-    preMsg.send()
-    return preMsg
+	// 预览消息 =======================================================
+	const preMsg = SelfMsg.create(msg, session)
+	// 添加进会话
+	session.addMessage(preMsg)
+	// 发送消息
+	preMsg.send()
+	return preMsg
 }
 
 // /**
@@ -108,14 +108,14 @@ export function sendMsgRaw(session: Session, msg: Seg[]): SelfMsg {
  * @param timeNow 当前消息的时间戳（13 位）
  */
 export function isShowTime(
-    timePrv: number | undefined,
-    timeNow: number | undefined,
-    alwaysShow = false,
+	timePrv: number | undefined,
+	timeNow: number | undefined,
+	alwaysShow = false,
 ): boolean {
-    if (alwaysShow) return true
-    if (!timePrv || !timeNow) return false
-    // 五分钟 13 位时间戳相差 300 000
-    return timeNow - timePrv >= 300000
+	if (alwaysShow) return true
+	if (!timePrv || !timeNow) return false
+	// 五分钟 13 位时间戳相差 300 000
+	return timeNow - timePrv >= 300000
 }
 
 /**
@@ -123,42 +123,42 @@ export function isShowTime(
  * @param session 会话对象
  */
 export function changeSession(session: Session, fromBox?: SessionBox) {
-    const runtimeData = useRuntimeData()
-    runtimeData.nowBox = fromBox
-    if (runtimeData.nowChat === session) return
-    if (!session.isActive) session.activate()
-    runtimeData.nowChat = session
+	const runtimeData = useRuntimeData()
+	runtimeData.nowBox = fromBox
+	if (runtimeData.nowChat === session) return
+	if (!session.isActive) session.activate()
+	runtimeData.nowChat = session
 
-    const history = useSessionHistoryStore()
-    history.add(session)
+	const history = useSessionHistoryStore()
+	history.add(session)
 
-    // 补加列表没有的会话时,盒子切换
-    if (!fromBox && !session.alwaysTop) {
-        const box = session.boxes.at(0)
+	// 补加列表没有的会话时,盒子切换
+	if (!fromBox && !session.alwaysTop) {
+		const box = session.boxes.at(0)
 
-        // 自己有收纳盒,应当会自己出现在自己的收纳盒中
-        if (box) {
-            runtimeData.nowBox = box
-        } else if (
-            session instanceof GroupSession &&
-            runtimeData.sysConfig.bubble_sort_user
-        ) {
-            // 群收纳盒特殊适配
-            runtimeData.nowBox = BubbleBox.instance
-        }
-    }
+		// 自己有收纳盒,应当会自己出现在自己的收纳盒中
+		if (box) {
+			runtimeData.nowBox = box
+		} else if (
+			session instanceof GroupSession &&
+			runtimeData.sysConfig.bubble_sort_user
+		) {
+			// 群收纳盒特殊适配
+			runtimeData.nowBox = BubbleBox.instance
+		}
+	}
 
-    // 清理通知
-    new Notify().closeAll(String(session.id))
+	// 清理通知
+	new Notify().closeAll(String(session.id))
 }
 
 /**
  * 关闭当前会话
  */
 export function closeSession() {
-    const runtimeData = useRuntimeData()
-    runtimeData.nowChat = undefined
-    runtimeData.nowBox = undefined
+	const runtimeData = useRuntimeData()
+	runtimeData.nowChat = undefined
+	runtimeData.nowBox = undefined
 }
 
 /**
@@ -166,10 +166,10 @@ export function closeSession() {
  * @param user 用户/用户id
  */
 export function isImportant(user: IUser | number): boolean {
-    if (typeof user !== 'number') user = user.user_id
-    const userSession = UserSession.getSessionById(user)
-    if (!userSession) return false
-    return userSession.sessionClass.id === 9999
+	if (typeof user !== 'number') user = user.user_id
+	const userSession = UserSession.getSessionById(user)
+	if (!userSession) return false
+	return userSession.sessionClass.id === 9999
 }
 
 /**
@@ -177,19 +177,19 @@ export function isImportant(user: IUser | number): boolean {
  * @param msgList 消息列表
  */
 export async function singleForward(msgList: Msg[]) {
-    const $t = app.config.globalProperties.$t
-    const ForwardPan = (
-        await import('@renderer/components/popBox/ForwardPan.vue')
-    ).default
-    popBox({
-        title: $t('转发消息'),
-        svg: 'fa-arrows-turn-right',
-        comp: ForwardPan,
-        props: {
-            msgs: msgList,
-            type: 'single',
-        },
-    })
+	const $t = app.config.globalProperties.$t
+	const ForwardPan = (
+		await import('@renderer/components/popBox/ForwardPan.vue')
+	).default
+	popBox({
+		title: $t('转发消息'),
+		svg: 'fa-arrows-turn-right',
+		comp: ForwardPan,
+		props: {
+			msgs: msgList,
+			type: 'single',
+		},
+	})
 }
 
 /**
@@ -197,19 +197,19 @@ export async function singleForward(msgList: Msg[]) {
  * @param msgList 消息列表
  */
 export async function mergeForward(msgList: Msg[]) {
-    const $t = app.config.globalProperties.$t
-    const ForwardPan = (
-        await import('@renderer/components/popBox/ForwardPan.vue')
-    ).default
-    popBox({
-        title: $t('合并转发消息'),
-        svg: 'fa-share-from-square',
-        comp: ForwardPan,
-        props: {
-            msgs: msgList,
-            type: 'merge',
-        },
-    })
+	const $t = app.config.globalProperties.$t
+	const ForwardPan = (
+		await import('@renderer/components/popBox/ForwardPan.vue')
+	).default
+	popBox({
+		title: $t('合并转发消息'),
+		svg: 'fa-share-from-square',
+		comp: ForwardPan,
+		props: {
+			msgs: msgList,
+			type: 'merge',
+		},
+	})
 }
 
 /**
@@ -218,25 +218,25 @@ export async function mergeForward(msgList: Msg[]) {
  * @returns 图标数量
  */
 export function qqLevelIcons(level) {
-    const result = {
-        crown: 0, // 皇冠
-        sun: 0, // 太阳
-        moon: 0, // 月亮
-        star: 0, // 星星
-    }
+	const result = {
+		crown: 0, // 皇冠
+		sun: 0, // 太阳
+		moon: 0, // 月亮
+		star: 0, // 星星
+	}
 
-    result.crown = Math.floor(level / 64)
-    level %= 64
+	result.crown = Math.floor(level / 64)
+	level %= 64
 
-    result.sun = Math.floor(level / 16)
-    level %= 16
+	result.sun = Math.floor(level / 16)
+	level %= 16
 
-    result.moon = Math.floor(level / 4)
-    level %= 4
+	result.moon = Math.floor(level / 4)
+	level %= 4
 
-    result.star = level
+	result.star = level
 
-    return result
+	return result
 }
 
 /**
@@ -245,27 +245,27 @@ export function qqLevelIcons(level) {
  * @returns 表情字符串
  */
 export function qqLevelToEmoji(level) {
-    const rawLevel = level
-    if (level <= 0) return level
+	const rawLevel = level
+	if (level <= 0) return level
 
-    const crown = Math.floor(level / 64)
-    level %= 64
+	const crown = Math.floor(level / 64)
+	level %= 64
 
-    const sun = Math.floor(level / 16)
-    level %= 16
+	const sun = Math.floor(level / 16)
+	level %= 16
 
-    const moon = Math.floor(level / 4)
-    level %= 4
+	const moon = Math.floor(level / 4)
+	level %= 4
 
-    const star = level
+	const star = level
 
-    return (
-        '👑'.repeat(crown) +
-        '☀️'.repeat(sun) +
-        '🌙'.repeat(moon) +
-        '⭐️'.repeat(star) +
-        '（' +
-        rawLevel +
-        '）'
-    )
+	return (
+		'👑'.repeat(crown) +
+		'☀️'.repeat(sun) +
+		'🌙'.repeat(moon) +
+		'⭐️'.repeat(star) +
+		'（' +
+		rawLevel +
+		'）'
+	)
 }
