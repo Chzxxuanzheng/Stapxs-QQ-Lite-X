@@ -594,6 +594,7 @@
 }
 
 .msg-link-view {
+	max-width: calc(100% - 20px);
     display: flex;
     flex-direction: row;
     background: #00000017;
@@ -604,7 +605,8 @@
     min-width: calc(100% - 20px);
 }
 
-.msg-link-view > div.bar {
+.msg-link-view.og > hr.bar {
+	all: unset;
     width: 5px;
     min-width: 5px;
     background: #00000030;
@@ -612,16 +614,16 @@
     margin-right: 7px;
 }
 
-.msg-link-view > div.bar.me {
+.special .msg-link-view.og > hr.bar {
     background: var(--color-font-r);
     opacity: 0.6;
 }
 
-.msg-link-view > div {
+.msg-link-view.og > div {
     display: flex;
 }
 
-.msg-link-view > div > img {
+.msg-link-view.og > div > img {
     border-radius: 7px;
     margin-right: 7px;
     min-height: 5rem;
@@ -629,7 +631,7 @@
     max-width: 50%;
 }
 
-.msg-link-view > div > div.body {
+.msg-link-view.og > div > div.body {
     flex-direction: column;
     display: flex;
 }
@@ -639,27 +641,233 @@
     margin-bottom: 0;
 }
 
-.msg-link-view > div > div.body span {
+.msg-link-view.og > div > div.body span {
     font-size: 0.9rem;
 }
 
-.msg-link-view > div > div.body span:nth-child(3) {
+.msg-link-view.og > div > div.body span:nth-child(3) {
     font-size: 0.8rem;
     opacity: 0.7;
 }
 
-.msg-link-view.large > div {
+.msg-link-view.og.large > div {
     flex-direction: column-reverse;
     align-items: center;
     display: flex;
 }
 
-.msg-link-view.large > div > img {
+.msg-link-view.og.large > div > img {
     margin-bottom: 5px;
     border-radius: 7px;
     max-width: 100%;
     max-height: unset;
     margin-top: 15px;
+}
+
+.msg-link-view.bilibili {
+	flex-direction: column;
+}
+
+.msg-link-view.bilibili>div.user {
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.msg-link-view.bilibili>div.user>img {
+	width: 20px;
+	border-radius: 100%;
+	border: 2px solid transparent;
+	outline: 2px solid var(--color-card);
+}
+
+.msg-link-view.bilibili>div.user>span {
+	flex: 1;
+	margin-left: 10px;
+	margin-right: 40px;
+}
+
+.msg-link-view.bilibili>div.user>span.time {
+	color: var(--color-font-2);
+	font-size: 0.8rem;
+	margin-left: auto;
+	margin-right: 0;
+}
+
+.special .msg-link-view.bilibili>div.user>span.time {
+	color: var(--color-font-r);
+	opacity: 0.6;
+}
+
+.msg-link-view.bilibili>img {
+	margin-bottom: 10px;
+	max-width: 100%;
+	width: fit-content;
+}
+
+.msg-link-view.bilibili>span.desc {
+	color: var(--color-font-2);
+	font-size: 0.8rem;
+	max-height: 4rem;
+	overflow-y: scroll;
+}
+
+.special .msg-link-view.bilibili>span.desc {
+	color: var(--color-font-r);
+	opacity: 0.6;
+}
+
+.msg-link-view.bilibili>a::-webkit-scrollbar {
+	background: transparent;
+}
+
+.msg-link-view.bilibili>div.data {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	font-size: 0.8rem;
+	margin-top: 10px;
+	justify-content: space-around;
+	opacity: 0.7;
+}
+
+.msg-link-view.music163 {
+	flex-direction: column;
+}
+
+.msg-link-view.music163 > header {
+	display: flex;
+}
+
+.msg-link-view.music163 > header > img {
+	border-radius: 7px;
+	margin-right: 20px;
+	height: 3lh;
+}
+
+.msg-link-view.music163 > header > .info {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	max-width: 100%;
+}
+
+.msg-link-view.music163 > header > .info > * {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.msg-link-view.music163 > header > .info > span {
+	color: var(--color-font-2);
+}
+
+.special .msg-link-view.music163 > header > .info > span {
+	color: var(--color-font-r);
+	opacity: 0.6;
+}
+
+.msg-link-view.music163 > hr {
+	width: calc(100% - 6px);
+}
+
+.msg-link-view.music163 > .audio {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.msg-link-view.music163 > .audio > * {
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.msg-link-view.music163 > .audio > input {
+	max-width: unset;
+	width: 100%;
+	flex-shrink: 1;
+	margin: 0 10px;
+	background-color: transparent;
+	--progress-color: var(--color-main);
+	--no-progress-color: var(--color-font-r);
+	appearance: none;
+	-webkit-appearance: none;
+}
+
+.special .msg-link-view.music163 > .audio > input {
+	--progress-color: var(--color-font-r);
+	--no-progress-color: var(--color-font-2);
+}
+
+.msg-link-view.music163 > .audio > input::-moz-range-thumb {
+	background-color: var(--progress-color);
+	border-radius: 10px;
+	width: 7px;
+	height: 7px;
+	border: none;
+	transition: all 0.3s;
+}
+.msg-link-view.music163 > .audio > input::-moz-range-track{
+	background-color: var(--no-progress-color);
+	height: 5px;
+	border-radius: 10px;
+	transition: height 0.3s;
+}
+.msg-link-view.music163 > .audio > input::-moz-range-progress{
+	background-color: var(--progress-color);
+	height: 5px;
+	border-radius: 10px;
+	transition: height 0.3s;
+}
+
+.msg-link-view.music163 > .audio > input:hover::-moz-range-thumb{
+	width: 15px;
+	height: 15px;
+}
+.msg-link-view.music163 > .audio > input:hover::-moz-range-track{
+	height: 7px;
+}
+.msg-link-view.music163 > .audio > input:hover::-moz-range-progress{
+	height: 7px;
+}
+
+/*
+	Chrome 没有 ::-moz-range-progress，
+	因此用线性渐变模拟“已播放”进度，进度值由 --progress-value（百分比）提供
+*/
+.msg-link-view.music163 > .audio > input::-webkit-slider-runnable-track {
+	background: linear-gradient(
+		to right,
+		var(--progress-color) 0,
+		var(--progress-color) var(--progress-value, 0%),
+		var(--no-progress-color) var(--progress-value, 0%),
+		var(--no-progress-color) 100%
+	);
+	height: 5px;
+	border-radius: 10px;
+	transition: height 0.3s;
+}
+
+.msg-link-view.music163 > .audio > input::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: var(--progress-color);
+	border-radius: 10px;
+	width: 7px;
+	height: 7px;
+	margin-top: -1px;
+	border: none;
+	transition: all 0.3s;
+}
+
+.msg-link-view.music163 > .audio > input:hover::-webkit-slider-thumb {
+	width: 15px;
+	height: 15px;
+	margin-top: -4px;
+}
+
+.msg-link-view.music163 > .audio > input:hover::-webkit-slider-runnable-track {
+	height: 7px;
 }
 
 .msg-json {
