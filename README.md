@@ -60,7 +60,6 @@ Stapxs QQ Lite X 是一个基于 Vue 的单页应用，这意味着如果你想�
 pnpm build
 ```
 
-
 ### > 命令列表
 
 这儿是本项目的完整命令列表，你可以使用这些命令来快速构建和调试 Stapxs QQ Lite。

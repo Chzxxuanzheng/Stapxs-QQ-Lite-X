@@ -5,9 +5,8 @@ import { ForwardSeg } from '@renderer/function/model/seg'
 import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue'
 import { popInfo } from '@renderer/function/base.js'
 import app from '@renderer/main.js'
-import { inject, TemplateRef } from 'vue'
-import MergePan from '../MergePan.vue'
 import { vTooltip } from '@renderer/function/utils/vcmd'
+import { useMergePan } from '@renderer/function/utils/vuse.js'
 
 const { seg } = defineProps<{
 	seg: ForwardSeg
@@ -15,7 +14,7 @@ const { seg } = defineProps<{
 
 const $t = app.config.globalProperties.$t
 
-const mergePan = inject<TemplateRef<InstanceType<typeof MergePan>>>('mergePan')
+const mergePan = useMergePan()
 
 function msgPrevTooltip(
 	msgs: Msg[] | string,

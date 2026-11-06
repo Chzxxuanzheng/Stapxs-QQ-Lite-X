@@ -258,13 +258,10 @@ import {
 	useTemplateRef,
 	shallowRef,
 	nextTick,
-	inject,
-	TemplateRef,
 	computed,
 	watchEffect,
 	onMounted,
 } from 'vue'
-import Viewer from '../Viewer.vue'
 import { Role } from '@renderer/function/adapter/enmu'
 import { vUserRole } from '@renderer/function/utils/vcmd'
 import { fitScroll } from '@renderer/function/utils/appUtil'
@@ -275,12 +272,12 @@ import {
 	useFrame,
 	useResizeObserver,
 	useUpdate,
+	useViewer,
 } from '@renderer/function/utils/vuse'
 import { calcTextareaHeight } from '@renderer/function/utils/calcTextareaHiehgt'
 import useRuntimeData from '@renderer/state/runtimeData'
 
-const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
-	inject('viewer')!
+const viewer = useViewer()
 
 const { session, focusHide = false } = defineProps<{
 	session: Session
@@ -663,7 +660,7 @@ async function editImg(key: string) {
 	const img = inputMsg.value.imgCache.get(key)
 	if (!img) return
 	if (img.state !== 'done') return
-	if (!viewer.value) return
+	if (!viewer?.value) return
 	const dataurl = await viewer.value.edit(img.dataurl!)
 	img.dataurl = dataurl
 }
