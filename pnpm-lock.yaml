@@ -138,9 +138,6 @@ importers:
       vue-tsc:
         specifier: ^3.2.3
         version: 3.2.3(typescript@5.9.3)
-      vue3-bcui:
-        specifier: ^0.2.6
-        version: 0.2.6(typescript@5.9.3)
       vue3-danmaku:
         specifier: ^1.6.7
         version: 1.6.7(vue@3.5.27(typescript@5.9.3))
@@ -957,32 +954,16 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fortawesome/fontawesome-common-types@6.7.2':
-    resolution: {integrity: sha512-Zs+YeHUC5fkt7Mg1l6XTniei3k4bwG/yo3iFUtZWd/pMx9g3fdvkSK9E0FOC+++phXOka78uJcYb8JaFkW52Xg==}
-    engines: {node: '>=6'}
-
   '@fortawesome/fontawesome-common-types@7.1.0':
     resolution: {integrity: sha512-l/BQM7fYntsCI//du+6sEnHOP6a74UixFyOYUyz2DLMXKx+6DEhfR3F2NYGE45XH1JJuIamacb4IZs9S0ZOWLA==}
-    engines: {node: '>=6'}
-
-  '@fortawesome/fontawesome-svg-core@6.7.2':
-    resolution: {integrity: sha512-yxtOBWDrdi5DD5o1pmVdq3WMCvnobT0LU6R8RyyVXPvFRd2o79/0NCuQoCjNTeZz9EzA9xS3JxNWfv54RIHFEA==}
     engines: {node: '>=6'}
 
   '@fortawesome/fontawesome-svg-core@7.1.0':
     resolution: {integrity: sha512-fNxRUk1KhjSbnbuBxlWSnBLKLBNun52ZBTcs22H/xEEzM6Ap81ZFTQ4bZBxVQGQgVY0xugKGoRcCbaKjLQ3XZA==}
     engines: {node: '>=6'}
 
-  '@fortawesome/free-regular-svg-icons@6.7.2':
-    resolution: {integrity: sha512-7Z/ur0gvCMW8G93dXIQOkQqHo2M5HLhYrRVC0//fakJXxcF1VmMPsxnG6Ee8qEylA8b8Q3peQXWMNZ62lYF28g==}
-    engines: {node: '>=6'}
-
   '@fortawesome/free-regular-svg-icons@7.1.0':
     resolution: {integrity: sha512-0e2fdEyB4AR+e6kU4yxwA/MonnYcw/CsMEP9lH82ORFi9svA6/RhDyhxIv5mlJaldmaHLLYVTb+3iEr+PDSZuQ==}
-    engines: {node: '>=6'}
-
-  '@fortawesome/free-solid-svg-icons@6.7.2':
-    resolution: {integrity: sha512-GsBrnOzU8uj0LECDfD5zomZJIjrPhIlWU82AHwa2s40FKH+kcxQaBvBo3Z4TxyZHIyX8XTDxsyA33/Vx9eFuQA==}
     engines: {node: '>=6'}
 
   '@fortawesome/free-solid-svg-icons@7.1.0':
@@ -1911,9 +1892,6 @@ packages:
   core-js-compat@3.51.0:
     resolution: {integrity: sha512-52r6fkXgxv4GLMjmFcMWRx7X9bw071xTTdrDcdyPGRqU2oE+9pCG0bAOMifSBdLw0JRBZKEF0q3B55qPlLuE8g==}
     engines: {node: '>=6.4.0'}
-
-  core-js@3.48.0:
-    resolution: {integrity: sha512-zpEHTy1fjTMZCKLHUZoVeylt9XrzaIN2rbPXEt0k+q7JE5CkCZdo6bNq55bn24a69CH7ErAVLKijxJja4fw+UQ==}
 
   core-util-is@1.0.2:
     resolution: {integrity: sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ==}
@@ -3483,9 +3461,6 @@ packages:
     peerDependencies:
       vue: ^3.2.0
 
-  vue3-bcui@0.2.6:
-    resolution: {integrity: sha512-xeKjGMY57kHXKDYK4L6BJMuWREDq3BSTrOXRW23F46owW8f+DgIFCEU5vY7vegRPoABVC0eAwYzTqYnW4TPfuw==}
-
   vue3-danmaku@1.6.7:
     resolution: {integrity: sha512-1tHJXVkC4T642qejIYfe4aOyAfTiv3OtYbE0HE6UbP4Q/+uUJxPvgx6J/vLe1aCHLrYbxfoEhFCuiw54ijw/hw==}
     engines: {node: '>=12.0.0'}
@@ -4559,38 +4534,19 @@ snapshots:
   '@esbuild/win32-x64@0.27.2':
     optional: true
 
-  '@fortawesome/fontawesome-common-types@6.7.2': {}
-
   '@fortawesome/fontawesome-common-types@7.1.0': {}
-
-  '@fortawesome/fontawesome-svg-core@6.7.2':
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
 
   '@fortawesome/fontawesome-svg-core@7.1.0':
     dependencies:
       '@fortawesome/fontawesome-common-types': 7.1.0
 
-  '@fortawesome/free-regular-svg-icons@6.7.2':
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
-
   '@fortawesome/free-regular-svg-icons@7.1.0':
     dependencies:
       '@fortawesome/fontawesome-common-types': 7.1.0
 
-  '@fortawesome/free-solid-svg-icons@6.7.2':
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
-
   '@fortawesome/free-solid-svg-icons@7.1.0':
     dependencies:
       '@fortawesome/fontawesome-common-types': 7.1.0
-
-  '@fortawesome/vue-fontawesome@3.1.3(@fortawesome/fontawesome-svg-core@6.7.2)(vue@3.5.27(typescript@5.9.3))':
-    dependencies:
-      '@fortawesome/fontawesome-svg-core': 6.7.2
-      vue: 3.5.27(typescript@5.9.3)
 
   '@fortawesome/vue-fontawesome@3.1.3(@fortawesome/fontawesome-svg-core@7.1.0)(vue@3.5.27(typescript@5.9.3))':
     dependencies:
@@ -5419,8 +5375,6 @@ snapshots:
   core-js-compat@3.51.0:
     dependencies:
       browserslist: 4.29.5
-
-  core-js@3.48.0: {}
 
   core-util-is@1.0.2: {}
 
@@ -7120,17 +7074,6 @@ snapshots:
       vue: 3.5.27(typescript@5.9.3)
       vue-observe-visibility: 2.0.0-alpha.1(vue@3.5.27(typescript@5.9.3))
       vue-resize: 2.0.0-alpha.1(vue@3.5.27(typescript@5.9.3))
-
-  vue3-bcui@0.2.6(typescript@5.9.3):
-    dependencies:
-      '@fortawesome/fontawesome-svg-core': 6.7.2
-      '@fortawesome/free-regular-svg-icons': 6.7.2
-      '@fortawesome/free-solid-svg-icons': 6.7.2
-      '@fortawesome/vue-fontawesome': 3.1.3(@fortawesome/fontawesome-svg-core@6.7.2)(vue@3.5.27(typescript@5.9.3))
-      core-js: 3.48.0
-      vue: 3.5.27(typescript@5.9.3)
-    transitivePeerDependencies:
-      - typescript
 
   vue3-danmaku@1.6.7(vue@3.5.27(typescript@5.9.3)):
     dependencies:

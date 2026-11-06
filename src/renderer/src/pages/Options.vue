@@ -8,7 +8,7 @@
 <template>
 	<div class="opt-main">
 		<div>
-			<BcTab class="opt-tab">
+			<Tab class="opt-tab">
 				<div :name="$t('账号')">
 					<OptAccount
 						:config="config"
@@ -27,7 +27,7 @@
 				<div :name="$t('关于')">
 					<AboutPan class="opt-about" show-u-i />
 				</div>
-			</BcTab>
+			</Tab>
 			<div class="ss-card end-card">
 				<div>
 					<div>
@@ -156,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import BcTab from 'vue3-bcui/packages/bc-tab'
+import Tab from '@renderer/components/Tab.vue'
 import OptAccount from './options/OptAccount.vue'
 import OptDev from './options/OptDev.vue'
 import OptFunction from './options/OptFunction.vue'

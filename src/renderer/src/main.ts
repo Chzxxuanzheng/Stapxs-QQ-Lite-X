@@ -12,6 +12,7 @@ import { faSquare } from '@fortawesome/free-regular-svg-icons'
 import VueAMap, { initAMapApiLoader } from '@vuemap/vue-amap'
 import '@vuemap/vue-amap/dist/style.css'
 
+import './assets/css/style.css'
 import './assets/css/chat.css'
 import './assets/css/doc.css'
 import './assets/css/msg.css'
