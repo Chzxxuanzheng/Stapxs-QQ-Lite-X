@@ -281,8 +281,14 @@
 	</div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import {
+	getCurrentInstance,
+	onMounted,
+	shallowReactive,
+	shallowRef,
+	watch,
+} from 'vue'
 
 import { use } from 'echarts/core'
 import { PieChart, BarChart, SunburstChart } from 'echarts/charts'
@@ -297,6 +303,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 
 import VChart from 'vue-echarts'
 import win from '@renderer/runtime/win'
+
 use([
 	TooltipComponent,
 	LegendComponent,
@@ -311,1134 +318,1128 @@ use([
 	SunburstChart,
 ])
 
+defineOptions({ name: 'UmamiInfoPan' })
+
 const API_URL = import.meta.env.VITE_APP_MU_DATA_API
 
-export default defineComponent({
-	name: 'UmamiInfoPan',
-	components: {
-		VChart,
-	},
-	data() {
-		return {
-			metricTypes: {
-				path: '页面',
-				browser: '浏览器',
-				os: '操作系统',
-				device: '设备',
-				language: '语言',
-				screen: '屏幕',
-				event: '事件',
-			},
-			eventTypes: {
-				send_msg: '发送消息',
-				sendMsg: '发送消息（弃用）',
-				connect: '连接',
-				use_theme_color: '切换主题色',
-				use_language: '切换语言',
-				click_statistics: '触发按钮',
-				use_chatview: '切换聊天面板样式',
-				cilent: '上报版本（弃用）',
-				show_qed: '触发彩蛋',
-				use_transparent: '切换窗口透明',
-				link_view: '链接预览',
+const instance = getCurrentInstance()
+/**
+ * 国际化翻译函数，等价于选项式 API 中的 `this.$t`
+ */
+const t = (key: string, ...args: any[]): string =>
+	(instance?.proxy as any)?.$t(key, ...args)
 
-				app_version: '应用版本',
-				os_version: '系统版本',
-				bot_version: '机器人版本',
-				os_arch: '系统架构',
-			},
-			buttonTypes: {
-				touch_randomly: '彩蛋按钮',
-				visit_fish: '赞助按钮',
-				visit_github: 'GitHub 按钮',
-				visit_blog: '博客按钮',
-			},
-			minPiePercentage: 0.0084, // 饼图中最小显示百分比
-			showName: 'website',
-			timeType: 1,
-			loading: false,
-			mainListSelected: '',
-			mainList: [] as {
-				label: string
-				subLabel?: string
-				value: string
-				count?: number
-				data?: any
-			}[],
-			visitData: {
-				pageviews: null as any,
-				pageviewChart: null as any,
-				status: {} as any,
-				metrics: null as any,
-				online: 0,
-			},
-			eventData: null as any,
-			onlyValidData: false,
-		}
-	},
-	mounted() {
-		this.$watch(
-			() => this.mainList,
-			(newValue) => {
-				if (newValue.length > 0) this.loading = false
-			},
-		)
-		this.$watch(
-			() => this.visitData.pageviewChart,
-			(newValue) => {
-				if (newValue != null) this.loading = false
-			},
-		)
-		this.updateData()
-		this.$watch(this.showName, () => {
-			this.updateData()
+interface MainListItem {
+	label: string
+	subLabel?: string
+	value: string
+	count?: number
+	data?: any
+}
+
+interface PieDataItem {
+	name: string
+	value: number
+}
+
+/** 指标名称映射 */
+const metricTypes: Record<string, string> = {
+	path: '页面',
+	browser: '浏览器',
+	os: '操作系统',
+	device: '设备',
+	language: '语言',
+	screen: '屏幕',
+	event: '事件',
+}
+
+/** 事件名称映射 */
+const eventTypes: Record<string, string> = {
+	send_msg: '发送消息',
+	sendMsg: '发送消息（弃用）',
+	connect: '连接',
+	use_theme_color: '切换主题色',
+	use_language: '切换语言',
+	click_statistics: '触发按钮',
+	use_chatview: '切换聊天面板样式',
+	cilent: '上报版本（弃用）',
+	show_qed: '触发彩蛋',
+	use_transparent: '切换窗口透明',
+	link_view: '链接预览',
+
+	app_version: '应用版本',
+	os_version: '系统版本',
+	bot_version: '机器人版本',
+	os_arch: '系统架构',
+}
+
+/** 按钮名称映射 */
+const buttonTypes: Record<string, string> = {
+	touch_randomly: '彩蛋按钮',
+	visit_fish: '赞助按钮',
+	visit_github: 'GitHub 按钮',
+	visit_blog: '博客按钮',
+}
+
+/** 饼图中最小显示百分比 */
+const minPiePercentage = 0.0084
+
+const showName = shallowRef('website')
+const timeType = shallowRef<number | string>(1)
+const loading = shallowRef(false)
+const mainListSelected = shallowRef('')
+const mainList = shallowRef<MainListItem[]>([])
+const visitData = shallowReactive({
+	pageviews: null as any,
+	pageviewChart: null as any,
+	status: {} as any,
+	metrics: null as any,
+	online: 0,
+})
+const eventData = shallowRef<any>(null)
+const onlyValidData = shallowRef(false)
+
+function changeView(view: string) {
+	if (loading.value) return
+
+	showName.value = view
+	mainListSelected.value = ''
+	visitData.metrics = null
+	eventData.value = null
+	updateData()
+}
+
+function changeTime() {
+	if (loading.value) return
+
+	mainListSelected.value = ''
+	updateData()
+}
+
+function updateData() {
+	loading.value = true
+	getStatus()
+	getOnlineCount()
+	getList()
+	if (mainListSelected.value != '' || showName.value === 'overview') {
+		getData(mainListSelected.value)
+	}
+}
+
+function getData(value: string) {
+	// 获取 css 中的 var(--color-main)
+	const colorMainRaw = getComputedStyle(document.body).getPropertyValue(
+		'--color-main',
+	)
+	const colorFont = getComputedStyle(document.body).getPropertyValue(
+		'--color-font-1',
+	)
+	const colorCard = getComputedStyle(document.body).getPropertyValue(
+		'--color-card-1',
+	)
+
+	mainListSelected.value = value
+	if (showName.value === 'overview') {
+		getPageViews().then(() => {
+			if (!visitData.pageviews) return
+			const xAxisData: string[] = []
+			const data1: number[] = []
+			const data2: number[] = []
+			for (let i = 0; i < visitData.pageviews.pageviews.length; i++) {
+				const pageviews = visitData.pageviews.pageviews[i]
+				const sessions = visitData.pageviews.sessions[i]
+				// 2025-09-19 01:00:00
+				const format = getRealTimeRange().format
+				const formattedDate = formatDate(pageviews.x, format)
+				xAxisData.push(formattedDate)
+				data1.push(pageviews.y)
+				data2.push(sessions.y)
+			}
+			const colorMain = hexToRgb(colorMainRaw)
+			// 给 colorMain 加透明的
+			const colorMainWithAlpha = colorMain
+				.replace(')', ', 0.5)')
+				.replace('rgb', 'rgba')
+			visitData.pageviewChart = {
+				textStyle: {
+					color: colorFont,
+				},
+				legend: {
+					data: [t('浏览量'), t('访客')],
+					left: '10%',
+					textStyle: {
+						color: colorFont,
+					},
+				},
+				tooltip: {},
+				xAxis: {
+					data: xAxisData,
+					name: getRealTimeRange().formatName,
+					axisLine: { onZero: true },
+					axisLabel: {
+						color: colorFont,
+					},
+					splitLine: { show: false },
+					splitArea: { show: false },
+				},
+				yAxis: {
+					axisLabel: {
+						color: colorFont,
+					},
+				},
+				grid: {
+					bottom: 100,
+					left: 50,
+				},
+				series: [
+					{
+						name: t('浏览量'),
+						type: 'bar',
+						data: data1,
+						barGap: '-100%',
+						itemStyle: {
+							color: colorMainWithAlpha,
+							borderRadius: [7, 7, 0, 0],
+						},
+					},
+					{
+						name: t('访客'),
+						type: 'bar',
+						data: data2,
+						itemStyle: {
+							color: colorMain,
+							borderRadius: [7, 7, 0, 0],
+						},
+					},
+				],
+			}
 		})
-		this.$watch(
-			() => win.darkMode,
-			() => {
-				this.updateData()
-			},
-		)
-	},
-	methods: {
-		changeView(view: string) {
-			if (this.loading) return
-
-			this.showName = view
-			this.mainListSelected = ''
-			this.visitData.metrics = null
-			this.eventData = null
-			this.updateData()
-		},
-
-		changeTime() {
-			if (this.loading) return
-
-			this.mainListSelected = ''
-			this.updateData()
-		},
-
-		updateData() {
-			this.loading = true
-			this.getStatus()
-			this.getOnlineCount()
-			this.getList()
-			if (this.mainListSelected != '' || this.showName === 'overview') {
-				this.getData(this.mainListSelected)
-			}
-		},
-
-		getData(value: string) {
-			// 获取 css 中的 var(--color-main)
-			const colorMainRaw = getComputedStyle(
-				document.body,
-			).getPropertyValue('--color-main')
-			const colorFont = getComputedStyle(document.body).getPropertyValue(
-				'--color-font-1',
-			)
-			const colorCard = getComputedStyle(document.body).getPropertyValue(
-				'--color-card-1',
-			)
-
-			this.mainListSelected = value
-			if (this.showName === 'overview') {
-				this.getPageViews().then(() => {
-					if (!this.visitData.pageviews) return
-					const xAxisData: string[] = []
-					const data1: number[] = []
-					const data2: number[] = []
-					for (
-						let i = 0;
-						i < this.visitData.pageviews.pageviews.length;
-						i++
-					) {
-						const pageviews = this.visitData.pageviews.pageviews[i]
-						const sessions = this.visitData.pageviews.sessions[i]
-						// 2025-09-19 01:00:00
-						const format = this.getRealTimeRange().format
-						const formattedDate = this.formatDate(
-							pageviews.x,
-							format,
-						)
-						xAxisData.push(formattedDate)
-						data1.push(pageviews.y)
-						data2.push(sessions.y)
-					}
-					const colorMain = this.hexToRgb(colorMainRaw)
-					// 给 colorMain 加透明的
-					const colorMainWithAlpha = colorMain
-						.replace(')', ', 0.5)')
-						.replace('rgb', 'rgba')
-					this.visitData.pageviewChart = {
-						textStyle: {
-							color: colorFont,
-						},
-						legend: {
-							data: [this.$t('浏览量'), this.$t('访客')],
-							left: '10%',
-							textStyle: {
-								color: colorFont,
-							},
-						},
-						tooltip: {},
-						xAxis: {
-							data: xAxisData,
-							name: this.getRealTimeRange().formatName,
-							axisLine: { onZero: true },
-							axisLabel: {
-								color: colorFont,
-							},
-							splitLine: { show: false },
-							splitArea: { show: false },
-						},
-						yAxis: {
-							axisLabel: {
-								color: colorFont,
-							},
-						},
-						grid: {
-							bottom: 100,
-							left: 50,
-						},
-						series: [
-							{
-								name: this.$t('浏览量'),
-								type: 'bar',
-								data: data1,
-								barGap: '-100%',
-								itemStyle: {
-									color: colorMainWithAlpha,
-									borderRadius: [7, 7, 0, 0],
-								},
-							},
-							{
-								name: this.$t('访客'),
-								type: 'bar',
-								data: data2,
-								itemStyle: {
-									color: colorMain,
-									borderRadius: [7, 7, 0, 0],
-								},
-							},
-						],
-					}
-				})
-			} else if (this.showName === 'website') {
-				this.getMetric(value)
-			} else if (
-				this.showName === 'event' ||
-				this.showName === 'session'
-			) {
-				const eventData = this.mainList.find(
-					(item) => item.value === value,
-				)?.data
-				if (eventData) {
-					// eventData 格式：[{value: 'xxx', total: 123}, ...]
-					// 转换为饼图需要的格式
-					let pieData = eventData.map((item: any) => ({
-						value: item.total,
-						name:
-							item.value != '' && item.value != null
-								? item.value
-								: this.$t('（未知）'),
-					}))
-					// 只取前 9 项，其他归为“其他”，如果恰巧有 10 项也不处理防止第 10 项变成“其他”
-					// if (pieData.length > 10) {
-					//     const topData = pieData.slice(0, 9)
-					//     const otherTotal = pieData.slice(9).reduce((sum: number, item: any) => sum + item.value, 0)
-					//     topData.push({ value: otherTotal, name: this.$t('其他') })
-					//     pieData = topData
-					// }
-					// 按 value 降序排列
-					pieData.sort((a: any, b: any) => b.value - a.value)
-
-					const isSunburstMetric =
-						value.indexOf('app_version') == 0 ||
-						value.indexOf('os_version') == 0 ||
-						value.indexOf('bot_version') == 0
-
-					// ======= 特殊处理 =======
-					// 应用版本、系统版本、机器人版本改为旭日图逐层展示
-					if (isSunburstMetric) {
-						this.eventData = this.buildSunburstOption(
-							value,
-							pieData,
-							colorCard,
-							colorFont,
-						)
-						return
-					}
-					// 系统架构将 x86_64 统一为 x64、arm64 统一为 aarch64
-					if (value.indexOf('os_arch') == 0) {
-						pieData = this.processOsArch(pieData)
-					}
-					// 触发按钮进行名称映射
-					else if (value.indexOf('click_statistics') == 0) {
-						pieData = this.processClickStatistics(pieData)
-					}
-					// 触发彩蛋的数值实际上是尝试次数，把它们划到一个合适的指数区间内
-					else if (value.indexOf('show_qed') == 0) {
-						pieData = this.processShowQed(pieData)
-					}
-					// 这边的颜色用 colorMainRaw 创建 10 级不同透明度的颜色，不需要转为 rgba，使用十六进制颜色
-					const colors = [] as string[]
-					for (let i = 10; i >= 1; i--) {
-						const alpha = Math.floor((i / 10) * 255)
-							.toString(16)
-							.padStart(2, '0')
-						colors.push(colorMainRaw + alpha)
-					}
-					// 去除占比小于等于 0.84% 的
-					const total = pieData.reduce(
-						(sum: number, it: any) => sum + it.value,
-						0,
-					)
-					pieData = pieData.filter(
-						(item: any) =>
-							item.value / total > this.minPiePercentage,
-					)
-					this.eventData = {
-						// colors: colors,
-						color: [
-							'#d87c7c',
-							'#919e8b',
-							'#d7ab82',
-							'#6e7074',
-							'#61a0a8',
-							'#efa18d',
-							'#787464',
-							'#cc7e63',
-							'#724e58',
-							'#4b565b',
-						],
-						tooltip: {
-							formatter: (params: any) => {
-								return `${params.marker} ${params.name}: ${params.value} (${params.percent}%)`
-							},
-							trigger: 'item',
-							backgroundColor: colorCard,
-							textStyle: {
-								color: colorFont,
-							},
-						},
-						legend: {
-							top: 'bottom',
-							left: 'center',
-							type: 'scroll',
-							textStyle: {
-								color: colorFont,
-							},
-						},
-						series: [
-							{
-								type: 'pie',
-								radius: ['40%', '70%'],
-								center: ['50%', '55%'],
-								avoidLabelOverlap: false,
-								padAngle: 3,
-								itemStyle: {
-									borderRadius: 7,
-								},
-								label: {
-									show: false,
-								},
-								emphasis: {
-									label: {
-										show: false,
-									},
-								},
-								labelLine: {
-									show: false,
-								},
-								data: pieData,
-							},
-						],
-					}
-				}
-			}
-		},
-
-		async getPageViews() {
-			const url =
-				API_URL +
-				'/pageviews/' +
-				this.getRealTimeRange().precision +
-				'/' +
-				this.getRealTimeRange().time
-			const res = await fetch(url)
-			const data = await res.json()
-			if (!data.error) {
-				this.visitData.pageviews = data
-			}
-		},
-
-		/**
-		 * 获取当前在线人数
-		 */
-		async getOnlineCount() {
-			// 获取当前在线人数
-			const url = API_URL + '/active'
-			const res = await fetch(url)
-			const data = await res.json()
-			if (!data.error) {
-				this.visitData.online = data.visitors
-			}
-		},
-
-		/**
-		 * 获取统计指标列表
-		 */
-		async getList() {
-			this.mainList = []
-			if (this.showName == 'website') {
-				const list = [] as {
-					label: string
-					subLabel?: string
-					value: string
-					count?: number
-					data?: any
-				}[]
-				for (const type of Object.keys(this.metricTypes)) {
-					list.push({
-						label: this.$t(this.metricTypes[type]),
-						value: type,
-					})
-				}
-				if (this.showName == 'website') this.mainList = list
-			} else if (this.showName == 'event' || this.showName == 'session') {
-				let url = API_URL + '/events/' + this.getRealTimeRange().time
-				if (this.showName == 'session') {
-					url = API_URL + '/sessions/' + this.getRealTimeRange().time
-				}
-				let res
-				if (this.showName == 'session' && this.onlyValidData) {
-					url =
-						API_URL +
-						'/sessions/' +
-						this.getRealTimeRange().time +
-						'/filter'
-					res = await fetch(url, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							event: 'eq.send_msg',
-						}),
-					})
-				} else {
-					res = await fetch(url)
-				}
-				const data = await res.json()
-				if (!data.error) {
-					const list = [] as {
-						label: string
-						subLabel?: string
-						value: string
-						count?: number
-						data?: any
-					}[]
-					for (const item of data) {
-						if (!item.eventName) {
-							item.eventName = item.propertyName
-							delete item.propertyName
-						}
-						list.push({
-							label: this.eventTypes[item.eventName]
-								? this.$t(this.eventTypes[item.eventName])
-								: item.eventName,
-							subLabel: item.propertyName,
-							value: item.eventName + '/' + item.propertyName,
-							count: item.total,
-							data: item.details,
-						})
-					}
-					// 根据 count 降序排列
-					list.sort((a, b) => (b.count || 0) - (a.count || 0))
-					if (this.showName == 'event' || this.showName == 'session')
-						this.mainList = list
-				}
-			}
-		},
-
-		/**
-		 * 获取访客数据总览
-		 */
-		async getStatus() {
-			const url = API_URL + '/status/' + this.getRealTimeRange().time
-			const res = await fetch(url)
-			const data = await res.json()
-			if (!data.error) {
-				const calculateComparison = (
-					current: number,
-					baseline: number,
-				): number => {
-					const currentVal = current || 0
-					const baselineVal = baseline || 0
-					// 如果基准值为 0，则无法计算百分比变化
-					if (baselineVal === 0) {
-						return currentVal === 0 ? 0 : 100
-					}
-					const result =
-						((currentVal - baselineVal) / baselineVal) * 100
-					return isNaN(result) ? 0 : result
-				}
-				this.visitData.status = {
-					pageviews: {
-						value: data.pageviews || 0,
-						comparison: calculateComparison(
-							data.pageviews,
-							data.comparison?.pageviews,
-						),
-					},
-					visitors: {
-						value: data.visitors || 0,
-						comparison: calculateComparison(
-							data.visitors,
-							data.comparison?.visitors,
-						),
-					},
-					visits: {
-						value: data.visits || 0,
-						comparison: calculateComparison(
-							data.visits,
-							data.comparison?.visits,
-						),
-					},
-				}
-			}
-		},
-
-		/**
-		 * 获取指定指标的详细数据
-		 * @param name 指标名称
-		 */
-		async getMetric(name: string) {
-			// 获取指定指标的详细数据
-			this.visitData.metrics = []
-			const url =
-				API_URL +
-				'/metrics/' +
-				name +
-				'/' +
-				this.getRealTimeRange().time
-			const res = await fetch(url)
-			const data = await res.json()
-			if (!data.error) {
-				// 计算 data[*].y 的总和
-				let total = 0
-				for (const item of data) {
-					total += item.y
-				}
-				// 计算每一项的占比
-				for (const item of data) {
-					item.percentage = ((item.y / total) * 100).toFixed(0)
-				}
-				this.visitData.metrics = data
-			}
-		},
-
-		// ========== 工具函数 ===========
-
-		/**
-		 * 合并同名项并降序排序
-		 */
-		mergeAndSort(pieData: Array<{ name: string; value: number }>) {
-			const mergedData: Record<string, number> = {}
-			for (const item of pieData) {
-				if (mergedData[item.name]) {
-					mergedData[item.name] += item.value
-				} else {
-					mergedData[item.name] = item.value
-				}
-			}
-			const result = Object.keys(mergedData).map((name) => ({
-				name,
-				value: mergedData[name],
+	} else if (showName.value === 'website') {
+		getMetric(value)
+	} else if (showName.value === 'event' || showName.value === 'session') {
+		const listItemData = mainList.value.find(
+			(item) => item.value === value,
+		)?.data
+		if (listItemData) {
+			// listItemData 格式：[{value: 'xxx', total: 123}, ...]
+			// 转换为饼图需要的格式
+			let pieData = listItemData.map((item: any) => ({
+				value: item.total,
+				name:
+					item.value != '' && item.value != null
+						? item.value
+						: t('（未知）'),
 			}))
-			result.sort((a, b) => b.value - a.value)
-			return result
-		},
+			// 只取前 9 项，其他归为“其他”，如果恰巧有 10 项也不处理防止第 10 项变成“其他”
+			// if (pieData.length > 10) {
+			//     const topData = pieData.slice(0, 9)
+			//     const otherTotal = pieData.slice(9).reduce((sum: number, item: any) => sum + item.value, 0)
+			//     topData.push({ value: otherTotal, name: t('其他') })
+			//     pieData = topData
+			// }
+			// 按 value 降序排列
+			pieData.sort((a: any, b: any) => b.value - a.value)
 
-		/**
-		 * 处理应用版本数据
-		 */
-		processAppVersion(pieData: Array<{ name: string; value: number }>) {
-			return this.mergeAndSort(
-				pieData.map((item) => {
-					let name = item.name
-					if (name.includes('beta-')) {
-						name = name.split('beta-')[0] + 'beta'
-					}
-					if (name.includes('pre.')) {
-						name = name.split('pre.')[0] + 'pre'
-					}
-					return { value: item.value, name }
-				}),
-			)
-		},
+			const isSunburstMetric =
+				value.indexOf('app_version') == 0 ||
+				value.indexOf('os_version') == 0 ||
+				value.indexOf('bot_version') == 0
 
-		/**
-		 * 处理系统版本数据
-		 */
-		processOsVersion(pieData: Array<{ name: string; value: number }>) {
-			return this.mergeAndSort(
-				pieData.map((item) => {
-					if (item.name.includes('(Web)')) {
-						return { value: item.value, name: 'Web' }
-					} else {
-						const parts = item.name.split(' ')
-						return {
-							value: item.value,
-							name: parts.slice(0, 2).join(' '),
-						}
-					}
-				}),
-			)
-		},
-
-		/**
-		 * 处理机器人版本数据
-		 */
-		processBotVersion(pieData: Array<{ name: string; value: number }>) {
-			return this.mergeAndSort(
-				pieData.map((item) => {
-					const name = item.name.split(',')[0]
-					let version = item.name.split(',')[1]
-
-					if (!item.name || !name || !version) {
-						return { value: item.value, name: item.name }
-					}
-
-					if (version.startsWith('v')) {
-						version = version.slice(1)
-					}
-					const parts = version.split('.')
-					if (parts.length >= 2 && Number(parts[1]) != 0) {
-						version = parts[0] + '.' + parts[1]
-					}
-					return { value: item.value, name: name + ',' + version }
-				}),
-			)
-		},
-
-		buildSunburstOption(
-			metric: string,
-			pieData: Array<{ name: string; value: number }>,
-			colorCard: string,
-			colorFont: string,
-		) {
-			const sunburstData = this.getSunburstData(metric, pieData)
-			if (!sunburstData || sunburstData.length === 0) {
-				return null
+			// ======= 特殊处理 =======
+			// 应用版本、系统版本、机器人版本改为旭日图逐层展示
+			if (isSunburstMetric) {
+				eventData.value = buildSunburstOption(
+					value,
+					pieData,
+					colorCard,
+					colorFont,
+				)
+				return
 			}
-
-			return {
+			// 系统架构将 x86_64 统一为 x64、arm64 统一为 aarch64
+			if (value.indexOf('os_arch') == 0) {
+				pieData = processOsArch(pieData)
+			}
+			// 触发按钮进行名称映射
+			else if (value.indexOf('click_statistics') == 0) {
+				pieData = processClickStatistics(pieData)
+			}
+			// 触发彩蛋的数值实际上是尝试次数，把它们划到一个合适的指数区间内
+			else if (value.indexOf('show_qed') == 0) {
+				pieData = processShowQed(pieData)
+			}
+			// 这边的颜色用 colorMainRaw 创建 10 级不同透明度的颜色，不需要转为 rgba，使用十六进制颜色
+			const colors = [] as string[]
+			for (let i = 10; i >= 1; i--) {
+				const alpha = Math.floor((i / 10) * 255)
+					.toString(16)
+					.padStart(2, '0')
+				colors.push(colorMainRaw + alpha)
+			}
+			// 去除占比小于等于 0.84% 的
+			const total = pieData.reduce(
+				(sum: number, it: any) => sum + it.value,
+				0,
+			)
+			pieData = pieData.filter(
+				(item: any) => item.value / total > minPiePercentage,
+			)
+			eventData.value = {
+				// colors: colors,
+				color: [
+					'#d87c7c',
+					'#919e8b',
+					'#d7ab82',
+					'#6e7074',
+					'#61a0a8',
+					'#efa18d',
+					'#787464',
+					'#cc7e63',
+					'#724e58',
+					'#4b565b',
+				],
 				tooltip: {
+					formatter: (params: any) => {
+						return `${params.marker} ${params.name}: ${params.value} (${params.percent}%)`
+					},
 					trigger: 'item',
 					backgroundColor: colorCard,
 					textStyle: {
 						color: colorFont,
 					},
-					formatter: (params: any) => {
-						const treePath = params.treePathInfo || []
-						const visiblePath = treePath.slice(1)
-						const path = visiblePath
-							.map((item: any) => item.name)
-							.join(' ')
-
-						const toPercent = (part: number, whole: number) => {
-							if (!whole || whole <= 0) return '0.00%'
-							return `${((part / whole) * 100).toFixed(2)}%`
-						}
-
-						const rootValue = Number(
-							treePath[0]?.value || params.value || 0,
-						)
-						const levelLines = visiblePath.map(
-							(node: any, index: number) => {
-								const currentValue = Number(node.value || 0)
-								const parentValue = Number(
-									treePath[index]?.value || rootValue,
-								)
-								const parentPercent = toPercent(
-									currentValue,
-									parentValue,
-								)
-								const totalPercent = toPercent(
-									currentValue,
-									rootValue,
-								)
-								return `${node.name}: ${parentPercent} (${this.$t('全局')} ${totalPercent})`
-							},
-						)
-
-						return `${params.marker} ${path}<br/>${this.$t('数值')}: ${params.value}<br/>${levelLines.join('<br/>')}`
+				},
+				legend: {
+					top: 'bottom',
+					left: 'center',
+					type: 'scroll',
+					textStyle: {
+						color: colorFont,
 					},
 				},
 				series: [
 					{
-						type: 'sunburst',
-						radius: ['20%', '90%'],
+						type: 'pie',
+						radius: ['40%', '70%'],
+						center: ['50%', '55%'],
+						avoidLabelOverlap: false,
+						padAngle: 3,
 						itemStyle: {
-							borderWidth: 3,
 							borderRadius: 7,
-							borderColor: colorCard,
 						},
 						label: {
 							show: false,
 						},
 						emphasis: {
-							focus: 'series',
+							label: {
+								show: false,
+							},
 						},
-						data: sunburstData,
+						labelLine: {
+							show: false,
+						},
+						data: pieData,
 					},
 				],
 			}
-		},
+		}
+	}
+}
 
-		getSunburstData(
-			metric: string,
-			pieData: Array<{ name: string; value: number }>,
-		) {
-			if (metric.indexOf('os_version') == 0) {
-				return this.buildOsVersionSunburstData(pieData)
-			}
-			if (metric.indexOf('app_version') == 0) {
-				return this.buildVersionSunburstData(pieData, 'app')
-			}
-			if (metric.indexOf('bot_version') == 0) {
-				return this.buildVersionSunburstData(pieData, 'bot')
-			}
-			return []
-		},
+async function getPageViews() {
+	const url =
+		API_URL +
+		'/pageviews/' +
+		getRealTimeRange().precision +
+		'/' +
+		getRealTimeRange().time
+	const res = await fetch(url)
+	const data = await res.json()
+	if (!data.error) {
+		visitData.pageviews = data
+	}
+}
 
-		buildOsVersionSunburstData(
-			pieData: Array<{ name: string; value: number }>,
-		) {
-			const tree: Record<string, Record<string, number>> = {}
-			const appleSystems = new Set(['macOS', 'iPadOS', 'iOS'])
+/**
+ * 获取当前在线人数
+ */
+async function getOnlineCount() {
+	// 获取当前在线人数
+	const url = API_URL + '/active'
+	const res = await fetch(url)
+	const data = await res.json()
+	if (!data.error) {
+		visitData.online = data.visitors
+	}
+}
 
-			for (const item of pieData) {
-				const parsed = this.parseOsVersionNode(item.name)
-				const rawSystemName = parsed.systemName
-				const systemName = appleSystems.has(rawSystemName)
-					? `apple/${rawSystemName}`
-					: rawSystemName
-				const version = parsed.version
-
-				if (!tree[systemName]) {
-					tree[systemName] = {}
-				}
-				tree[systemName][version] =
-					(tree[systemName][version] || 0) + item.value
-			}
-
-			const result: Array<{ name: string; children: any[] }> = []
-			const appleChildren: Array<{ name: string; children: any[] }> = []
-
-			for (const systemName of Object.keys(tree)) {
-				const children = Object.keys(tree[systemName]).map(
-					(version) => ({
-						name: version,
-						value: tree[systemName][version],
-					}),
-				)
-				children.sort((a, b) => b.value - a.value)
-
-				if (systemName.startsWith('apple/')) {
-					appleChildren.push({
-						name: systemName.replace('apple/', ''),
-						children,
-					})
-				} else {
-					result.push({
-						name: systemName,
-						children,
-					})
-				}
-			}
-
-			if (appleChildren.length > 0) {
-				appleChildren.sort((a, b) => {
-					const aValue = a.children.reduce(
-						(sum, child) => sum + child.value,
-						0,
-					)
-					const bValue = b.children.reduce(
-						(sum, child) => sum + child.value,
-						0,
-					)
-					return bValue - aValue
-				})
-				result.push({
-					name: 'apple',
-					children: appleChildren,
-				})
-			}
-
-			result.sort((a, b) => {
-				const aValue = a.children.reduce(
-					(sum, child) => sum + child.value,
-					0,
-				)
-				const bValue = b.children.reduce(
-					(sum, child) => sum + child.value,
-					0,
-				)
-				return bValue - aValue
+/**
+ * 获取统计指标列表
+ */
+async function getList() {
+	mainList.value = []
+	if (showName.value == 'website') {
+		const list = [] as MainListItem[]
+		for (const type of Object.keys(metricTypes)) {
+			list.push({
+				label: t(metricTypes[type]),
+				value: type,
 			})
-			return result
-		},
-
-		buildVersionSunburstData(
-			pieData: Array<{ name: string; value: number }>,
-			type: 'app' | 'bot',
-		) {
-			const tree: Record<
-				string,
-				Record<string, Record<string, number>>
-			> = {}
-
-			for (const item of pieData) {
-				let parsed
-				if (type === 'app') {
-					parsed = this.parseAppVersionNode(item.name)
-				} else {
-					parsed = this.parseBotVersionNode(item.name)
-				}
-
-				const branch = parsed.branch
-				const majorMinor = parsed.majorMinor
-				const detail = parsed.detail
-
-				if (!tree[branch]) {
-					tree[branch] = {}
-				}
-				if (!tree[branch][majorMinor]) {
-					tree[branch][majorMinor] = {}
-				}
-				tree[branch][majorMinor][detail] =
-					(tree[branch][majorMinor][detail] || 0) + item.value
-			}
-
-			const result = Object.keys(tree).map((branch) => ({
-				name: branch,
-				children: Object.keys(tree[branch]).map((majorMinor) => ({
-					name: majorMinor,
-					children: Object.keys(tree[branch][majorMinor])
-						.map((detail) => ({
-							name: detail,
-							value: tree[branch][majorMinor][detail],
-						}))
-						.sort((a, b) => b.value - a.value),
-				})),
-			}))
-
-			result.sort((a, b) => {
-				const sumNode = (node: any): number => {
-					if (node.value) return node.value
-					if (!node.children) return 0
-					return node.children.reduce(
-						(sum: number, child: any) => sum + sumNode(child),
-						0,
-					)
-				}
-				return sumNode(b) - sumNode(a)
-			})
-
-			return result
-		},
-
-		parseOsVersionNode(rawName: string) {
-			const raw = (rawName || '').trim()
-			if (!raw) {
-				return {
-					systemName: this.$t('未知'),
-					version: this.$t('未知'),
-				}
-			}
-
-			if (raw.includes('(Web)')) {
-				return {
-					systemName: 'Web',
-					version: 'Web',
-				}
-			}
-
-			const parts = raw.split(/\s+/)
-			if (parts.length >= 2) {
-				return {
-					systemName: parts[0],
-					version: parts[1],
-				}
-			}
-
-			return {
-				systemName: raw,
-				version: this.$t('未知'),
-			}
-		},
-
-		parseAppVersionNode(rawName: string) {
-			const raw = (rawName || '').trim()
-			const segs = raw
-				.split(',')
-				.map((seg) => seg.trim())
-				.filter(Boolean)
-			const versionRaw = segs[1] || ''
-			const versionLower = versionRaw.toLowerCase()
-			const branchRaw = segs[0] || this.$t('未知')
-			const branch = versionLower.includes('pre') ? 'pre' : branchRaw
-			const versionInfo = this.extractVersionGroups(versionRaw)
-			return {
-				branch,
-				majorMinor: versionInfo.majorMinor,
-				detail: versionInfo.detail,
-			}
-		},
-
-		parseBotVersionNode(rawName: string) {
-			const raw = (rawName || '').trim()
-			const segs = raw
-				.split(',')
-				.map((seg) => seg.trim())
-				.filter(Boolean)
-			const branch = segs[0] || this.$t('未知')
-			const versionRaw = segs[1] || segs[0] || ''
-			const versionInfo = this.extractVersionGroups(versionRaw)
-			return {
-				branch,
-				majorMinor: versionInfo.majorMinor,
-				detail: versionInfo.detail,
-			}
-		},
-
-		extractVersionGroups(rawVersion: string) {
-			const cleaned = (rawVersion || '').replace(/^v/i, '')
-			const matched =
-				cleaned.match(/(\d+)(?:\.(\d+))?(?:\.(\d+))?(.*)?/) || []
-
-			if (!matched[1]) {
-				const unknown = this.$t('未知')
-				return {
-					majorMinor: unknown,
-					detail: unknown,
-				}
-			}
-
-			const major = matched[1]
-			const minorNum = matched[2] || '0'
-			const patchNum = matched[3] || '0'
-			const suffix = (matched[4] || '').trim()
-			const detail = `${patchNum}${suffix}`
-
-			return {
-				majorMinor: `${major}.${minorNum}`,
-				detail,
-			}
-		},
-
-		/**
-		 * 处理系统架构数据
-		 */
-		processOsArch(pieData: Array<{ name: string; value: number }>) {
-			return this.mergeAndSort(
-				pieData.map((item) => {
-					let name = item.name
-					if (name === 'x86_64') {
-						name = 'x64'
-					} else if (name === 'arm64') {
-						name = 'aarch64'
-					}
-					return { value: item.value, name }
+		}
+		if (showName.value == 'website') mainList.value = list
+	} else if (showName.value == 'event' || showName.value == 'session') {
+		let url = API_URL + '/events/' + getRealTimeRange().time
+		if (showName.value == 'session') {
+			url = API_URL + '/sessions/' + getRealTimeRange().time
+		}
+		let res
+		if (showName.value == 'session' && onlyValidData.value) {
+			url = API_URL + '/sessions/' + getRealTimeRange().time + '/filter'
+			res = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					event: 'eq.send_msg',
 				}),
-			)
-		},
-
-		/**
-		 * 处理触发按钮数据
-		 */
-		processClickStatistics(
-			pieData: Array<{ name: string; value: number }>,
-		) {
-			return this.mergeAndSort(
-				pieData.map((item) => {
-					let name = item.name
-					if (this.buttonTypes[name]) {
-						name = this.$t(this.buttonTypes[name])
-					}
-					return { value: item.value, name }
-				}),
-			)
-		},
-
-		/**
-		 * 处理彩蛋数据
-		 */
-		processShowQed(pieData: Array<{ name: string; value: number }>) {
-			const mapped = pieData.map((item) => {
-				let name = item.name
-				const num = Number(name)
-				if (isNaN(num)) {
-					name = this.$t('未知')
-				} else if (num >= 1000) {
-					name = '1000+'
-				} else if (num >= 500) {
-					name = '500-999'
-				} else if (num >= 200) {
-					name = '200-499'
-				} else if (num >= 100) {
-					name = '100-199'
-				} else if (num >= 50) {
-					name = '50-99'
-				} else if (num >= 20) {
-					name = '20-49'
-				} else if (num >= 10) {
-					name = '10-19'
-				} else if (num >= 5) {
-					name = '5-9'
-				} else if (num >= 1) {
-					name = '1-4'
-				} else {
-					name = this.$t('未知')
-				}
-				return { value: item.value, name }
 			})
-
-			// 合并同名项
-			const mergedData: Record<string, number> = {}
-			for (const item of mapped) {
-				if (mergedData[item.name]) {
-					mergedData[item.name] += item.value
-				} else {
-					mergedData[item.name] = item.value
+		} else {
+			res = await fetch(url)
+		}
+		const data = await res.json()
+		if (!data.error) {
+			const list = [] as MainListItem[]
+			for (const item of data) {
+				if (!item.eventName) {
+					item.eventName = item.propertyName
+					delete item.propertyName
 				}
+				list.push({
+					label: eventTypes[item.eventName]
+						? t(eventTypes[item.eventName])
+						: item.eventName,
+					subLabel: item.propertyName,
+					value: item.eventName + '/' + item.propertyName,
+					count: item.total,
+					data: item.details,
+				})
 			}
-			const result = Object.keys(mergedData).map((name) => ({
-				name,
-				value: mergedData[name],
-			}))
+			// 根据 count 降序排列
+			list.sort((a, b) => (b.count || 0) - (a.count || 0))
+			if (showName.value == 'event' || showName.value == 'session')
+				mainList.value = list
+		}
+	}
+}
 
-			// 按区间顺序排列
-			const order = [
-				'1-4',
-				'5-9',
-				'10-19',
-				'20-49',
-				'50-99',
-				'100-199',
-				'200-499',
-				'500-999',
-				'1000+',
-				this.$t('未知'),
-			]
-			result.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name))
-			return result
-		},
-
-		getRealTimeRange() {
-			const now = new Date()
-			switch (Number(this.timeType)) {
-				case 1: // 最近 24 小时
-					return {
-						time: Date.now() - 86400000 + '-' + Date.now(),
-						precision: 'hour',
-						format: 'HH',
-						formatName: this.$t('小时'),
-					}
-				case 2: {
-					// 本周
-					const day = now.getDay() || 7 // 周日为7
-					const startOfWeek = new Date(now)
-					startOfWeek.setHours(0, 0, 0, 0)
-					startOfWeek.setDate(now.getDate() - day + 1) // 周一
-					return {
-						time: startOfWeek.getTime() + '-' + now.getTime(),
-						precision: 'day',
-						format: 'MM-DD',
-						formatName: this.$t('天'),
-					}
-				}
-				case 3: {
-					// 本月
-					const startOfMonth = new Date(
-						now.getFullYear(),
-						now.getMonth(),
-						1,
-					)
-					return {
-						time: startOfMonth.getTime() + '-' + now.getTime(),
-						precision: 'day',
-						format: 'MM-DD',
-						formatName: this.$t('天'),
-					}
-				}
-				case 4: {
-					// 本年
-					const startOfYear = new Date(now.getFullYear(), 0, 1)
-					return {
-						time: startOfYear.getTime() + '-' + now.getTime(),
-						precision: 'month',
-						format: 'YYYY-MM',
-						formatName: this.$t('月'),
-					}
-				}
-				case 5: {
-					// 所有时间段
-					return {
-						time: '0000000000000-' + now.getTime(),
-						precision: 'month',
-						format: 'YYYY-MM',
-						formatName: this.$t('月'),
-					}
-				}
-				default: // 默认最近 24 小时
-					return {
-						time: Date.now() - 86400000 + '-' + Date.now(),
-						precision: 'hour',
-						format: 'HH',
-					}
+/**
+ * 获取访客数据总览
+ */
+async function getStatus() {
+	const url = API_URL + '/status/' + getRealTimeRange().time
+	const res = await fetch(url)
+	const data = await res.json()
+	if (!data.error) {
+		const calculateComparison = (
+			current: number,
+			baseline: number,
+		): number => {
+			const currentVal = current || 0
+			const baselineVal = baseline || 0
+			// 如果基准值为 0，则无法计算百分比变化
+			if (baselineVal === 0) {
+				return currentVal === 0 ? 0 : 100
 			}
-		},
+			const result = ((currentVal - baselineVal) / baselineVal) * 100
+			return isNaN(result) ? 0 : result
+		}
+		visitData.status = {
+			pageviews: {
+				value: data.pageviews || 0,
+				comparison: calculateComparison(
+					data.pageviews,
+					data.comparison?.pageviews,
+				),
+			},
+			visitors: {
+				value: data.visitors || 0,
+				comparison: calculateComparison(
+					data.visitors,
+					data.comparison?.visitors,
+				),
+			},
+			visits: {
+				value: data.visits || 0,
+				comparison: calculateComparison(
+					data.visits,
+					data.comparison?.visits,
+				),
+			},
+		}
+	}
+}
 
-		formatNumber(num: number) {
-			// 将大于 1000 的数字格式化为 1.2k 形式
-			if (num >= 1000000) {
-				return (num / 1000000).toFixed(1) + 'M'
-			} else if (num >= 1000) {
-				return (num / 1000).toFixed(1) + 'k'
+/**
+ * 获取指定指标的详细数据
+ * @param name 指标名称
+ */
+async function getMetric(name: string) {
+	// 获取指定指标的详细数据
+	visitData.metrics = []
+	const url = API_URL + '/metrics/' + name + '/' + getRealTimeRange().time
+	const res = await fetch(url)
+	const data = await res.json()
+	if (!data.error) {
+		// 计算 data[*].y 的总和
+		let total = 0
+		for (const item of data) {
+			total += item.y
+		}
+		// 计算每一项的占比
+		for (const item of data) {
+			item.percentage = ((item.y / total) * 100).toFixed(0)
+		}
+		visitData.metrics = data
+	}
+}
+
+// ========== 工具函数 ===========
+
+/**
+ * 合并同名项并降序排序
+ */
+function mergeAndSort(pieData: PieDataItem[]) {
+	const mergedData: Record<string, number> = {}
+	for (const item of pieData) {
+		if (mergedData[item.name]) {
+			mergedData[item.name] += item.value
+		} else {
+			mergedData[item.name] = item.value
+		}
+	}
+	const result = Object.keys(mergedData).map((name) => ({
+		name,
+		value: mergedData[name],
+	}))
+	result.sort((a, b) => b.value - a.value)
+	return result
+}
+
+/**
+ * 处理应用版本数据
+ */
+function processAppVersion(pieData: PieDataItem[]) {
+	return mergeAndSort(
+		pieData.map((item) => {
+			let name = item.name
+			if (name.includes('beta-')) {
+				name = name.split('beta-')[0] + 'beta'
+			}
+			if (name.includes('pre.')) {
+				name = name.split('pre.')[0] + 'pre'
+			}
+			return { value: item.value, name }
+		}),
+	)
+}
+
+/**
+ * 处理系统版本数据
+ */
+function processOsVersion(pieData: PieDataItem[]) {
+	return mergeAndSort(
+		pieData.map((item) => {
+			if (item.name.includes('(Web)')) {
+				return { value: item.value, name: 'Web' }
 			} else {
-				return num.toString()
+				const parts = item.name.split(' ')
+				return {
+					value: item.value,
+					name: parts.slice(0, 2).join(' '),
+				}
 			}
+		}),
+	)
+}
+
+/**
+ * 处理机器人版本数据
+ */
+function processBotVersion(pieData: PieDataItem[]) {
+	return mergeAndSort(
+		pieData.map((item) => {
+			const name = item.name.split(',')[0]
+			let version = item.name.split(',')[1]
+
+			if (!item.name || !name || !version) {
+				return { value: item.value, name: item.name }
+			}
+
+			if (version.startsWith('v')) {
+				version = version.slice(1)
+			}
+			const parts = version.split('.')
+			if (parts.length >= 2 && Number(parts[1]) != 0) {
+				version = parts[0] + '.' + parts[1]
+			}
+			return { value: item.value, name: name + ',' + version }
+		}),
+	)
+}
+
+function buildSunburstOption(
+	metric: string,
+	pieData: PieDataItem[],
+	colorCard: string,
+	colorFont: string,
+) {
+	const sunburstData = getSunburstData(metric, pieData)
+	if (!sunburstData || sunburstData.length === 0) {
+		return null
+	}
+
+	return {
+		tooltip: {
+			trigger: 'item',
+			backgroundColor: colorCard,
+			textStyle: {
+				color: colorFont,
+			},
+			formatter: (params: any) => {
+				const treePath = params.treePathInfo || []
+				const visiblePath = treePath.slice(1)
+				const path = visiblePath.map((item: any) => item.name).join(' ')
+
+				const toPercent = (part: number, whole: number) => {
+					if (!whole || whole <= 0) return '0.00%'
+					return `${((part / whole) * 100).toFixed(2)}%`
+				}
+
+				const rootValue = Number(
+					treePath[0]?.value || params.value || 0,
+				)
+				const levelLines = visiblePath.map(
+					(node: any, index: number) => {
+						const currentValue = Number(node.value || 0)
+						const parentValue = Number(
+							treePath[index]?.value || rootValue,
+						)
+						const parentPercent = toPercent(
+							currentValue,
+							parentValue,
+						)
+						const totalPercent = toPercent(currentValue, rootValue)
+						return `${node.name}: ${parentPercent} (${t('全局')} ${totalPercent})`
+					},
+				)
+
+				return `${params.marker} ${path}<br/>${t('数值')}: ${params.value}<br/>${levelLines.join('<br/>')}`
+			},
 		},
+		series: [
+			{
+				type: 'sunburst',
+				radius: ['20%', '90%'],
+				itemStyle: {
+					borderWidth: 3,
+					borderRadius: 7,
+					borderColor: colorCard,
+				},
+				label: {
+					show: false,
+				},
+				emphasis: {
+					focus: 'series',
+				},
+				data: sunburstData,
+			},
+		],
+	}
+}
 
-		formatDate(dateStr: string, format: string): string {
-			const date = new Date(dateStr)
-			if (isNaN(date.getTime())) return ''
+function getSunburstData(metric: string, pieData: PieDataItem[]) {
+	if (metric.indexOf('os_version') == 0) {
+		return buildOsVersionSunburstData(pieData)
+	}
+	if (metric.indexOf('app_version') == 0) {
+		return buildVersionSunburstData(pieData, 'app')
+	}
+	if (metric.indexOf('bot_version') == 0) {
+		return buildVersionSunburstData(pieData, 'bot')
+	}
+	return []
+}
 
-			const map: Record<string, string> = {
-				YYYY: date.getFullYear().toString(),
-				MM: (date.getMonth() + 1).toString().padStart(2, '0'),
-				DD: date.getDate().toString().padStart(2, '0'),
-				HH: date.getHours().toString().padStart(2, '0'),
-				mm: date.getMinutes().toString().padStart(2, '0'),
-				ss: date.getSeconds().toString().padStart(2, '0'),
-			}
+function buildOsVersionSunburstData(pieData: PieDataItem[]) {
+	const tree: Record<string, Record<string, number>> = {}
+	const appleSystems = new Set(['macOS', 'iPadOS', 'iOS'])
 
-			return format.replace(
-				/YYYY|MM|DD|HH|mm|ss/g,
-				(matched) => map[matched],
+	for (const item of pieData) {
+		const parsed = parseOsVersionNode(item.name)
+		const rawSystemName = parsed.systemName
+		const systemName = appleSystems.has(rawSystemName)
+			? `apple/${rawSystemName}`
+			: rawSystemName
+		const version = parsed.version
+
+		if (!tree[systemName]) {
+			tree[systemName] = {}
+		}
+		tree[systemName][version] =
+			(tree[systemName][version] || 0) + item.value
+	}
+
+	const result: Array<{ name: string; children: any[] }> = []
+	const appleChildren: Array<{ name: string; children: any[] }> = []
+
+	for (const systemName of Object.keys(tree)) {
+		const children = Object.keys(tree[systemName]).map((version) => ({
+			name: version,
+			value: tree[systemName][version],
+		}))
+		children.sort((a, b) => b.value - a.value)
+
+		if (systemName.startsWith('apple/')) {
+			appleChildren.push({
+				name: systemName.replace('apple/', ''),
+				children,
+			})
+		} else {
+			result.push({
+				name: systemName,
+				children,
+			})
+		}
+	}
+
+	if (appleChildren.length > 0) {
+		appleChildren.sort((a, b) => {
+			const aValue = a.children.reduce(
+				(sum, child) => sum + child.value,
+				0,
 			)
-		},
+			const bValue = b.children.reduce(
+				(sum, child) => sum + child.value,
+				0,
+			)
+			return bValue - aValue
+		})
+		result.push({
+			name: 'apple',
+			children: appleChildren,
+		})
+	}
 
-		hexToRgb(hex: string): string {
-			const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-			return result
-				? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})`
-				: ''
+	result.sort((a, b) => {
+		const aValue = a.children.reduce((sum, child) => sum + child.value, 0)
+		const bValue = b.children.reduce((sum, child) => sum + child.value, 0)
+		return bValue - aValue
+	})
+	return result
+}
+
+function buildVersionSunburstData(pieData: PieDataItem[], type: 'app' | 'bot') {
+	const tree: Record<string, Record<string, Record<string, number>>> = {}
+
+	for (const item of pieData) {
+		let parsed
+		if (type === 'app') {
+			parsed = parseAppVersionNode(item.name)
+		} else {
+			parsed = parseBotVersionNode(item.name)
+		}
+
+		const branch = parsed.branch
+		const majorMinor = parsed.majorMinor
+		const detail = parsed.detail
+
+		if (!tree[branch]) {
+			tree[branch] = {}
+		}
+		if (!tree[branch][majorMinor]) {
+			tree[branch][majorMinor] = {}
+		}
+		tree[branch][majorMinor][detail] =
+			(tree[branch][majorMinor][detail] || 0) + item.value
+	}
+
+	const result = Object.keys(tree).map((branch) => ({
+		name: branch,
+		children: Object.keys(tree[branch]).map((majorMinor) => ({
+			name: majorMinor,
+			children: Object.keys(tree[branch][majorMinor])
+				.map((detail) => ({
+					name: detail,
+					value: tree[branch][majorMinor][detail],
+				}))
+				.sort((a, b) => b.value - a.value),
+		})),
+	}))
+
+	result.sort((a, b) => {
+		const sumNode = (node: any): number => {
+			if (node.value) return node.value
+			if (!node.children) return 0
+			return node.children.reduce(
+				(sum: number, child: any) => sum + sumNode(child),
+				0,
+			)
+		}
+		return sumNode(b) - sumNode(a)
+	})
+
+	return result
+}
+
+function parseOsVersionNode(rawName: string) {
+	const raw = (rawName || '').trim()
+	if (!raw) {
+		return {
+			systemName: t('未知'),
+			version: t('未知'),
+		}
+	}
+
+	if (raw.includes('(Web)')) {
+		return {
+			systemName: 'Web',
+			version: 'Web',
+		}
+	}
+
+	const parts = raw.split(/\s+/)
+	if (parts.length >= 2) {
+		return {
+			systemName: parts[0],
+			version: parts[1],
+		}
+	}
+
+	return {
+		systemName: raw,
+		version: t('未知'),
+	}
+}
+
+function parseAppVersionNode(rawName: string) {
+	const raw = (rawName || '').trim()
+	const segs = raw
+		.split(',')
+		.map((seg) => seg.trim())
+		.filter(Boolean)
+	const versionRaw = segs[1] || ''
+	const versionLower = versionRaw.toLowerCase()
+	const branchRaw = segs[0] || t('未知')
+	const branch = versionLower.includes('pre') ? 'pre' : branchRaw
+	const versionInfo = extractVersionGroups(versionRaw)
+	return {
+		branch,
+		majorMinor: versionInfo.majorMinor,
+		detail: versionInfo.detail,
+	}
+}
+
+function parseBotVersionNode(rawName: string) {
+	const raw = (rawName || '').trim()
+	const segs = raw
+		.split(',')
+		.map((seg) => seg.trim())
+		.filter(Boolean)
+	const branch = segs[0] || t('未知')
+	const versionRaw = segs[1] || segs[0] || ''
+	const versionInfo = extractVersionGroups(versionRaw)
+	return {
+		branch,
+		majorMinor: versionInfo.majorMinor,
+		detail: versionInfo.detail,
+	}
+}
+
+function extractVersionGroups(rawVersion: string) {
+	const cleaned = (rawVersion || '').replace(/^v/i, '')
+	const matched = cleaned.match(/(\d+)(?:\.(\d+))?(?:\.(\d+))?(.*)?/) || []
+
+	if (!matched[1]) {
+		const unknown = t('未知')
+		return {
+			majorMinor: unknown,
+			detail: unknown,
+		}
+	}
+
+	const major = matched[1]
+	const minorNum = matched[2] || '0'
+	const patchNum = matched[3] || '0'
+	const suffix = (matched[4] || '').trim()
+	const detail = `${patchNum}${suffix}`
+
+	return {
+		majorMinor: `${major}.${minorNum}`,
+		detail,
+	}
+}
+
+/**
+ * 处理系统架构数据
+ */
+function processOsArch(pieData: PieDataItem[]) {
+	return mergeAndSort(
+		pieData.map((item) => {
+			let name = item.name
+			if (name === 'x86_64') {
+				name = 'x64'
+			} else if (name === 'arm64') {
+				name = 'aarch64'
+			}
+			return { value: item.value, name }
+		}),
+	)
+}
+
+/**
+ * 处理触发按钮数据
+ */
+function processClickStatistics(pieData: PieDataItem[]) {
+	return mergeAndSort(
+		pieData.map((item) => {
+			let name = item.name
+			if (buttonTypes[name]) {
+				name = t(buttonTypes[name])
+			}
+			return { value: item.value, name }
+		}),
+	)
+}
+
+/**
+ * 处理彩蛋数据
+ */
+function processShowQed(pieData: PieDataItem[]) {
+	const mapped = pieData.map((item) => {
+		let name = item.name
+		const num = Number(name)
+		if (isNaN(num)) {
+			name = t('未知')
+		} else if (num >= 1000) {
+			name = '1000+'
+		} else if (num >= 500) {
+			name = '500-999'
+		} else if (num >= 200) {
+			name = '200-499'
+		} else if (num >= 100) {
+			name = '100-199'
+		} else if (num >= 50) {
+			name = '50-99'
+		} else if (num >= 20) {
+			name = '20-49'
+		} else if (num >= 10) {
+			name = '10-19'
+		} else if (num >= 5) {
+			name = '5-9'
+		} else if (num >= 1) {
+			name = '1-4'
+		} else {
+			name = t('未知')
+		}
+		return { value: item.value, name }
+	})
+
+	// 合并同名项
+	const mergedData: Record<string, number> = {}
+	for (const item of mapped) {
+		if (mergedData[item.name]) {
+			mergedData[item.name] += item.value
+		} else {
+			mergedData[item.name] = item.value
+		}
+	}
+	const result = Object.keys(mergedData).map((name) => ({
+		name,
+		value: mergedData[name],
+	}))
+
+	// 按区间顺序排列
+	const order = [
+		'1-4',
+		'5-9',
+		'10-19',
+		'20-49',
+		'50-99',
+		'100-199',
+		'200-499',
+		'500-999',
+		'1000+',
+		t('未知'),
+	]
+	result.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name))
+	return result
+}
+
+function getRealTimeRange(): {
+	time: string
+	precision: string
+	format: string
+	formatName?: string
+} {
+	const now = new Date()
+	switch (Number(timeType.value)) {
+		case 1: // 最近 24 小时
+			return {
+				time: Date.now() - 86400000 + '-' + Date.now(),
+				precision: 'hour',
+				format: 'HH',
+				formatName: t('小时'),
+			}
+		case 2: {
+			// 本周
+			const day = now.getDay() || 7 // 周日为7
+			const startOfWeek = new Date(now)
+			startOfWeek.setHours(0, 0, 0, 0)
+			startOfWeek.setDate(now.getDate() - day + 1) // 周一
+			return {
+				time: startOfWeek.getTime() + '-' + now.getTime(),
+				precision: 'day',
+				format: 'MM-DD',
+				formatName: t('天'),
+			}
+		}
+		case 3: {
+			// 本月
+			const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+			return {
+				time: startOfMonth.getTime() + '-' + now.getTime(),
+				precision: 'day',
+				format: 'MM-DD',
+				formatName: t('天'),
+			}
+		}
+		case 4: {
+			// 本年
+			const startOfYear = new Date(now.getFullYear(), 0, 1)
+			return {
+				time: startOfYear.getTime() + '-' + now.getTime(),
+				precision: 'month',
+				format: 'YYYY-MM',
+				formatName: t('月'),
+			}
+		}
+		case 5: {
+			// 所有时间段
+			return {
+				time: '0000000000000-' + now.getTime(),
+				precision: 'month',
+				format: 'YYYY-MM',
+				formatName: t('月'),
+			}
+		}
+		default: // 默认最近 24 小时
+			return {
+				time: Date.now() - 86400000 + '-' + Date.now(),
+				precision: 'hour',
+				format: 'HH',
+			}
+	}
+}
+
+function formatNumber(num: number) {
+	// 将大于 1000 的数字格式化为 1.2k 形式
+	if (num >= 1000000) {
+		return (num / 1000000).toFixed(1) + 'M'
+	} else if (num >= 1000) {
+		return (num / 1000).toFixed(1) + 'k'
+	} else {
+		return num.toString()
+	}
+}
+
+function formatDate(dateStr: string, format: string): string {
+	const date = new Date(dateStr)
+	if (isNaN(date.getTime())) return ''
+
+	const map: Record<string, string> = {
+		YYYY: date.getFullYear().toString(),
+		MM: (date.getMonth() + 1).toString().padStart(2, '0'),
+		DD: date.getDate().toString().padStart(2, '0'),
+		HH: date.getHours().toString().padStart(2, '0'),
+		mm: date.getMinutes().toString().padStart(2, '0'),
+		ss: date.getSeconds().toString().padStart(2, '0'),
+	}
+
+	return format.replace(/YYYY|MM|DD|HH|mm|ss/g, (matched) => map[matched])
+}
+
+function hexToRgb(hex: string): string {
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+	return result
+		? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})`
+		: ''
+}
+
+// ========== 监听与生命周期 ==========
+
+onMounted(() => {
+	watch(mainList, (newValue) => {
+		if (newValue.length > 0) loading.value = false
+	})
+	watch(
+		() => visitData.pageviewChart,
+		(newValue) => {
+			if (newValue != null) loading.value = false
 		},
-	},
+	)
+	updateData()
+	// 原选项式实现为 `this.$watch(this.showName, ...)`，传入的是属性值（字符串）而不是 getter，
+	// 该监听器实际不会触发；视图切换由 changeView 主动调用 updateData 完成，此处保持等价行为。
+	watch(
+		() => win.darkMode,
+		() => {
+			updateData()
+		},
+	)
+})
+
+// 保持原组件实例对外暴露的数据与方法可用（父组件通过 ref 访问时行为不变）
+defineExpose({
+	metricTypes,
+	eventTypes,
+	buttonTypes,
+	minPiePercentage,
+	showName,
+	timeType,
+	loading,
+	mainListSelected,
+	mainList,
+	visitData,
+	eventData,
+	onlyValidData,
+	changeView,
+	changeTime,
+	updateData,
+	getData,
+	getPageViews,
+	getOnlineCount,
+	getList,
+	getStatus,
+	getMetric,
+	mergeAndSort,
+	processAppVersion,
+	processOsVersion,
+	processBotVersion,
+	buildSunburstOption,
+	getSunburstData,
+	buildOsVersionSunburstData,
+	buildVersionSunburstData,
+	parseOsVersionNode,
+	parseAppVersionNode,
+	parseBotVersionNode,
+	extractVersionGroups,
+	processOsArch,
+	processClickStatistics,
+	processShowQed,
+	getRealTimeRange,
+	formatNumber,
+	formatDate,
+	hexToRgb,
 })
 </script>
 
