@@ -7,6 +7,7 @@ import { popInfo } from '@renderer/function/base.js';
 import app from '@renderer/main.js';
 import { inject, TemplateRef } from 'vue';
 import MergePan from '../MergePan.vue';
+import { vTooltip } from '@renderer/function/utils/vcmd'
 
 const { seg } = defineProps<{
 	seg: ForwardSeg
@@ -39,7 +40,8 @@ function openMerge(seg: ForwardSeg) {
 </script>
 
 <template>
-	<section v-tooltip="msgPrevTooltip(seg.content ?? $t('加载消息中...'))" class="msg-forward" @click="openMerge(seg)">
+	<section v-tooltip="msgPrevTooltip(seg.content ?? $t('加载消息中...'))" class="msg-forward" @click="openMerge(seg)"
+		:class="{ 'msg-inline': seg.inline }">
 		<header>{{ $t('合并转发消息') }}</header>
 		<div v-if="!seg.content" class="content loading">
 			<font-awesome-icon :icon="['fas', 'spinner']" />
