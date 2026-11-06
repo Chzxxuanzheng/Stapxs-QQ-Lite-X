@@ -1896,9 +1896,6 @@ msgstr ""
 msgid "呜呜呜——图标都被遮挡的看不到了！"
 msgstr ""
 
-msgid "小黄脸长大了，变成了大黄脸！"
-msgstr ""
-
 msgid "如何连接？"
 msgstr ""
 

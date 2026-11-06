@@ -452,7 +452,7 @@
     padding: 10px;
 }
 
-.msg-reply a {
+.msg-reply span {
     line-height: calc(0.9rem + 10px);
     margin-left: calc(1rem + 10px);
     word-break: break-all;
