@@ -1,0 +1,77 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["eslint", "typescript", "unicorn", "oxc", "vue"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "warn"
+	},
+	"env": {
+		"browser": true,
+		"es2024": true,
+		"node": true
+	},
+	"ignorePatterns": [
+		"node_modules/**",
+		"dist/**",
+		"src/renderer/public/**",
+		"src/renderer/src/assets/**",
+		"plugin/**",
+		"ssqq.npx-web-quick-start/**",
+		"proxy.js",
+		"**/*.config.*"
+	],
+	"rules": {
+		"no-unused-vars": [
+			"error",
+			{
+				"argsIgnorePattern": "^_",
+				"varsIgnorePattern": "^_",
+				"caughtErrorsIgnorePattern": "^_",
+				"destructuredArrayIgnorePattern": "^_",
+				"ignoreRestSiblings": true
+			}
+		],
+		"no-restricted-imports": [
+			"error",
+			{
+				"paths": [
+					{
+						"name": "vue",
+						"importNames": ["ref", "reactive"],
+						"message": "禁止使用 ref 和 reactive"
+					}
+				]
+			}
+		],
+		"no-restricted-globals": [
+			"error",
+			{
+				"name": "localStorage",
+				"message": "禁止使用 localStorage。请使用 useLocalStorage 替代。"
+			}
+		],
+		"no-restricted-properties": [
+			"error",
+			{
+				"object": "window",
+				"property": "localStorage",
+				"message": "禁止使用 localStorage。请使用 useLocalStorage 替代。"
+			}
+		],
+		"no-constant-condition": ["error", { "checkLoops": "none" }],
+		"no-console": "warn",
+		"no-debugger": "warn",
+		"prefer-arrow-callback": "warn",
+		"typescript/no-explicit-any": "off",
+		"vue/no-reserved-component-names": "off",
+		"vue/require-prop-types": "off",
+		"no-underscore-dangle": "off",
+
+		"unicorn/prefer-add-event-listener": "off",
+		"unicorn/consistent-function-scoping": "off",
+		"unicorn/no-array-sort": "off",
+		"unicorn/no-array-reverse": "off",
+		"eslint/no-new": "off",
+		"typescript/no-extraneous-class": "off"
+	}
+}

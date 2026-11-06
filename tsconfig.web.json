@@ -1,36 +1,36 @@
 {
-    "include": [
-        "src/renderer/src/env.d.ts",
-        "src/renderer/src/**/*",
-        "src/renderer/src/**/*.vue"
-    ],
-    "exclude": [
-        "src/renderer/src/assets/img/qq-face/**/*",
-        "src/renderer/src/pages/chat-view/Chat弹幕.vue",
-        "src/renderer/src/pages/chat-view/SystemNotice.vue"
-    ],
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "lib": ["ESNext", "DOM", "DOM.Iterable"],
-        "sourceMap": false,
-        "strict": true,
-        "jsx": "preserve",
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitAny": false,
-        "noImplicitReturns": true,
-        "composite": true,
-        "paths": {
-            "@renderer/*": ["./src/renderer/src/*"]
-        },
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true
-    }
+	"include": [
+		"src/renderer/src/env.d.ts",
+		"src/renderer/src/**/*",
+		"src/renderer/src/**/*.vue"
+	],
+	"exclude": [
+		"src/renderer/src/assets/img/qq-face/**/*",
+		"src/renderer/src/pages/chat-view/Chat弹幕.vue",
+		"src/renderer/src/pages/chat-view/SystemNotice.vue"
+	],
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"sourceMap": false,
+		"strict": true,
+		"jsx": "preserve",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitAny": false,
+		"noImplicitReturns": true,
+		"composite": true,
+		"paths": {
+			"@renderer/*": ["./src/renderer/src/*"]
+		},
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true
+	}
 }

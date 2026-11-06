@@ -2,7 +2,7 @@
 import { MdSeg } from '@renderer/function/model/seg'
 import { openLink } from '@renderer/function/utils/appUtil'
 import markdownit from 'markdown-it'
-import { onMounted, useTemplateRef } from 'vue';
+import { onMounted, useTemplateRef } from 'vue'
 
 const { seg } = defineProps<{
 	seg: MdSeg
@@ -48,5 +48,10 @@ onMounted(() => {
 </script>
 
 <template>
-	<div class="msg-md" v-once ref="root" :class="{ 'msg-inline': seg.inline }" />
+	<div
+		class="msg-md"
+		v-once
+		ref="root"
+		:class="{ 'msg-inline': seg.inline }"
+	/>
 </template>

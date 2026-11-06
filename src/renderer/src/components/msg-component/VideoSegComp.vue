@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VideoSeg } from '@renderer/function/model/seg';
+import { VideoSeg } from '@renderer/function/model/seg'
 
 const { seg } = defineProps<{
 	seg: VideoSeg
@@ -25,10 +25,7 @@ async function canLoaded(): Promise<boolean> {
 			v.load() // 中止请求、释放解码器
 			fn()
 		}
-		const timer = setTimeout(
-			() => finish(() => resolve(false)),
-			timeoutMs,
-		)
+		const timer = setTimeout(() => finish(() => resolve(false)), timeoutMs)
 
 		v.onloadeddata = () => {
 			finish(() => resolve(true))
@@ -41,7 +38,6 @@ async function canLoaded(): Promise<boolean> {
 		v.src = seg.url
 		v.load()
 	})
-
 }
 
 let refreshLock = false

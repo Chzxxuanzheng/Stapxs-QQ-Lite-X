@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { VueCompData } from '@renderer/function/elements/vueComp';
-import { Msg } from '@renderer/function/model/msg';
-import { ForwardSeg } from '@renderer/function/model/seg';
-import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue';
-import { popInfo } from '@renderer/function/base.js';
-import app from '@renderer/main.js';
-import { inject, TemplateRef } from 'vue';
-import MergePan from '../MergePan.vue';
+import { VueCompData } from '@renderer/function/elements/vueComp'
+import { Msg } from '@renderer/function/model/msg'
+import { ForwardSeg } from '@renderer/function/model/seg'
+import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue'
+import { popInfo } from '@renderer/function/base.js'
+import app from '@renderer/main.js'
+import { inject, TemplateRef } from 'vue'
+import MergePan from '../MergePan.vue'
 import { vTooltip } from '@renderer/function/utils/vcmd'
 
 const { seg } = defineProps<{
@@ -28,8 +28,7 @@ function msgPrevTooltip(
 	}
 }
 
-
-function openMerge(seg: ForwardSeg) {
+function openMerge() {
 	if (!seg.id) {
 		popInfo.error($t('请先等发送完成...'))
 		return
@@ -40,8 +39,12 @@ function openMerge(seg: ForwardSeg) {
 </script>
 
 <template>
-	<section v-tooltip="msgPrevTooltip(seg.content ?? $t('加载消息中...'))" class="msg-forward" @click="openMerge(seg)"
-		:class="{ 'msg-inline': seg.inline }">
+	<section
+		v-tooltip="msgPrevTooltip(seg.content ?? $t('加载消息中...'))"
+		class="msg-forward"
+		@click="openMerge"
+		:class="{ 'msg-inline': seg.inline }"
+	>
 		<header>{{ $t('合并转发消息') }}</header>
 		<div v-if="!seg.content" class="content loading">
 			<font-awesome-icon :icon="['fas', 'spinner']" />
@@ -60,7 +63,7 @@ function openMerge(seg: ForwardSeg) {
 			{{ $t('加载失败') }}
 		</div>
 		<footer v-if="seg.content !== undefined">
-			{{ $t('查看 {count} 条转发消息', { count: seg.content.length, }) }}
+			{{ $t('查看 {count} 条转发消息', { count: seg.content.length }) }}
 		</footer>
 		<footer v-else>
 			{{ $t('聊天记录') }}

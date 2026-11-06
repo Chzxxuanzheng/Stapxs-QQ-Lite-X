@@ -55,15 +55,11 @@ Stapxs QQ Lite X 是一个基于 Vue 的单页应用，这意味着如果你想�
 下面是构建该项目的命令，构建结果将最终输出在 `dist` 目录下：
 
 ```bash
-# 运行本地调试
-pnpm dev
-
-# 代码检查和自动格式化
-pnpm lint
 
 # 构建应用
 pnpm build
 ```
+
 
 ### > 命令列表
 
@@ -71,14 +67,19 @@ pnpm build
 
 **命令格式为 `pnpm <命令>`，其中 `<命令>`为列表中的一个：**
 
-| 命令    | 描述                   |
-| ------- | ---------------------- |
-| install | 安装依赖               |
-| lint    | 代码检查和自动格式化   |
-| dev     | 网页调试               |
-| build   | 网页构建               |
-| preview | 预览网页构建产物       |
-| proxy   | 一个临时跨域代理服务器 |
+| 命令         | 描述                          |
+| ------------ | ----------------------------- |
+| install      | 安装依赖                      |
+| lint         | 代码检查（oxlint + 类型检查） |
+| lint:fix     | 自动修复 oxlint 问题          |
+| lint:oxlint  | 仅执行 oxlint 检查            |
+| lint:types   | 仅执行 vue-tsc 类型检查       |
+| format       | 格式化代码（oxfmt）           |
+| format:check | 检查代码格式（不写入文件）    |
+| dev          | 网页调试                      |
+| build        | 网页构建                      |
+| preview      | 预览网页构建产物              |
+| proxy        | 一个临时跨域代理服务器        |
 
 ## 🎉 鸣谢
 

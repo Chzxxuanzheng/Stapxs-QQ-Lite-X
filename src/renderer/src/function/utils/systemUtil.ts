@@ -14,7 +14,7 @@ import LoginPan from '@renderer/components/popBox/LoginPan.vue'
  * @returns Promise<void>
  */
 export function delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+	return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 /**
@@ -22,13 +22,13 @@ export function delay(ms: number): Promise<void> {
  * @returns 符合规范的地区代码
  */
 export function getTrueLang(): string {
-    let back = 'zh-CN'
-    l10nConfig.forEach((item) => {
-        if (item.value === app.config.globalProperties.$i18n.locale) {
-            back = item.lang
-        }
-    })
-    return back
+	let back = 'zh-CN'
+	l10nConfig.forEach((item) => {
+		if (item.value === app.config.globalProperties.$i18n.locale) {
+			back = item.lang
+		}
+	})
+	return back
 }
 
 /**
@@ -36,22 +36,22 @@ export function getTrueLang(): string {
  * @param name 文件名
  */
 export function getPortableFileLang(name: string) {
-    const files = import.meta.glob('@renderer/assets/l10n/*.po', {
-        eager: true,
-        query: '?raw',
-        import: 'default',
-    })
-    const filePath = Object.keys(files).find((item) => item.includes(name))
-    const final = {} as { [key: string]: string }
-    if (filePath) {
-        const file = files[filePath] as string
-        const items = PO.parse(file).items
-        for (const item of items) {
-            final[item.msgid] =
-                item.msgstr[0] == '' ? item.msgid : item.msgstr[0]
-        }
-    }
-    return final
+	const files = import.meta.glob('@renderer/assets/l10n/*.po', {
+		eager: true,
+		query: '?raw',
+		import: 'default',
+	})
+	const filePath = Object.keys(files).find((item) => item.includes(name))
+	const final = {} as { [key: string]: string }
+	if (filePath) {
+		const file = files[filePath] as string
+		const items = PO.parse(file).items
+		for (const item of items) {
+			final[item.msgid] =
+				item.msgstr[0] == '' ? item.msgid : item.msgstr[0]
+		}
+	}
+	return final
 }
 
 /**
@@ -60,81 +60,81 @@ export function getPortableFileLang(name: string) {
  * @returns emoji 符号
  */
 export function gitmojiToEmoji(name: string) {
-    return {
-        ':art:': '🎨',
-        ':zap:': '⚡️',
-        ':fire:': '🔥',
-        ':bug:': '🐛',
-        ':ambulance:': '🚑️',
-        ':sparkles:': '✨',
-        ':memo:': '📝',
-        ':rocket:': '🚀',
-        ':lipstick:': '💄',
-        ':tada:': '🎉',
-        ':white_check_mark:': '✅',
-        ':lock:': '🔒️',
-        ':closed_lock_with_key:': '🔐',
-        ':bookmark:': '🔖',
-        ':rotating_light:': '🚨',
-        ':construction:': '🚧',
-        ':green_heart:': '💚',
-        ':arrow_down:': '⬇️',
-        ':arrow_up:': '⬆️',
-        ':pushpin:': '📌',
-        ':construction_worker:': '👷',
-        ':chart_with_upwards_trend:': '📈',
-        ':recycle:': '♻️',
-        ':heavy_plus_sign:': '➕',
-        ':heavy_minus_sign:': '➖',
-        ':wrench:': '🔧',
-        ':hammer:': '🔨',
-        ':globe_with_meridians:': '🌐',
-        ':pencil2:': '✏️',
-        ':poop:': '💩',
-        ':rewind:': '⏪️',
-        ':twisted_rightwards_arrows:': '🔀',
-        ':package:': '📦️',
-        ':alien:': '👽️',
-        ':truck:': '🚚',
-        ':page_facing_up:': '📄',
-        ':boom:': '💥',
-        ':bento:': '🍱',
-        ':wheelchair:': '♿️',
-        ':bulb:': '💡',
-        ':beers:': '🍻',
-        ':speech_balloon:': '💬',
-        ':card_file_box:': '🗃️',
-        ':loud_sound:': '🔊',
-        ':mute:': '🔇',
-        ':busts_in_silhouette:': '👥',
-        ':children_crossing:': '🚸',
-        ':building_construction:': '🏗️',
-        ':iphone:': '📱',
-        ':clown_face:': '🤡',
-        ':egg:': '🥚',
-        ':see_no_evil:': '🙈',
-        ':camera_flash:': '📸',
-        ':alembic:': '⚗️',
-        ':mag:': '🔍️',
-        ':label:': '🏷️',
-        ':seedling:': '🌱',
-        ':triangular_flag_on_post:': '🚩',
-        ':goal_net:': '🥅',
-        ':dizzy:': '💫',
-        ':wastebasket:': '🗑️',
-        ':passport_control:': '🛂',
-        ':adhesive_bandage:': '🩹',
-        ':monocle_face:': '🧐',
-        ':coffin:': '⚰️',
-        ':test_tube:': '🧪',
-        ':necktie:': '👔',
-        ':stethoscope:': '🩺',
-        ':bricks:': '🧱',
-        ':technologist:': '🧑‍💻',
-        ':money_with_wings:': '💸',
-        ':thread:': '🧵',
-        ':safety_vest:': '🦺',
-    }[name]
+	return {
+		':art:': '🎨',
+		':zap:': '⚡️',
+		':fire:': '🔥',
+		':bug:': '🐛',
+		':ambulance:': '🚑️',
+		':sparkles:': '✨',
+		':memo:': '📝',
+		':rocket:': '🚀',
+		':lipstick:': '💄',
+		':tada:': '🎉',
+		':white_check_mark:': '✅',
+		':lock:': '🔒️',
+		':closed_lock_with_key:': '🔐',
+		':bookmark:': '🔖',
+		':rotating_light:': '🚨',
+		':construction:': '🚧',
+		':green_heart:': '💚',
+		':arrow_down:': '⬇️',
+		':arrow_up:': '⬆️',
+		':pushpin:': '📌',
+		':construction_worker:': '👷',
+		':chart_with_upwards_trend:': '📈',
+		':recycle:': '♻️',
+		':heavy_plus_sign:': '➕',
+		':heavy_minus_sign:': '➖',
+		':wrench:': '🔧',
+		':hammer:': '🔨',
+		':globe_with_meridians:': '🌐',
+		':pencil2:': '✏️',
+		':poop:': '💩',
+		':rewind:': '⏪️',
+		':twisted_rightwards_arrows:': '🔀',
+		':package:': '📦️',
+		':alien:': '👽️',
+		':truck:': '🚚',
+		':page_facing_up:': '📄',
+		':boom:': '💥',
+		':bento:': '🍱',
+		':wheelchair:': '♿️',
+		':bulb:': '💡',
+		':beers:': '🍻',
+		':speech_balloon:': '💬',
+		':card_file_box:': '🗃️',
+		':loud_sound:': '🔊',
+		':mute:': '🔇',
+		':busts_in_silhouette:': '👥',
+		':children_crossing:': '🚸',
+		':building_construction:': '🏗️',
+		':iphone:': '📱',
+		':clown_face:': '🤡',
+		':egg:': '🥚',
+		':see_no_evil:': '🙈',
+		':camera_flash:': '📸',
+		':alembic:': '⚗️',
+		':mag:': '🔍️',
+		':label:': '🏷️',
+		':seedling:': '🌱',
+		':triangular_flag_on_post:': '🚩',
+		':goal_net:': '🥅',
+		':dizzy:': '💫',
+		':wastebasket:': '🗑️',
+		':passport_control:': '🛂',
+		':adhesive_bandage:': '🩹',
+		':monocle_face:': '🧐',
+		':coffin:': '⚰️',
+		':test_tube:': '🧪',
+		':necktie:': '👔',
+		':stethoscope:': '🩺',
+		':bricks:': '🧱',
+		':technologist:': '🧑‍💻',
+		':money_with_wings:': '💸',
+		':thread:': '🧵',
+		':safety_vest:': '🦺',
+	}[name]
 }
 
 /**
@@ -149,33 +149,33 @@ export function gitmojiToEmoji(name: string) {
  * @return HSL各值数组
  */
 export function rgbToHsl(r: number, g: number, b: number) {
-    r /= 255
-    g /= 255
-    b /= 255
-    const max = Math.max(r, g, b),
-        min = Math.min(r, g, b)
-    let h = 0
-    let s = 0
-    const l = (max + min) / 2
+	r /= 255
+	g /= 255
+	b /= 255
+	const max = Math.max(r, g, b),
+		min = Math.min(r, g, b)
+	let h = 0
+	let s = 0
+	const l = (max + min) / 2
 
-    if (max !== min) {
-        const d = max - min
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-        switch (max) {
-            case r:
-                h = (g - b) / d + (g < b ? 6 : 0)
-                break
-            case g:
-                h = (b - r) / d + 2
-                break
-            case b:
-                h = (r - g) / d + 4
-                break
-        }
-        h /= 6
-    }
+	if (max !== min) {
+		const d = max - min
+		s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+		switch (max) {
+			case r:
+				h = (g - b) / d + (g < b ? 6 : 0)
+				break
+			case g:
+				h = (b - r) / d + 2
+				break
+			case b:
+				h = (r - g) / d + 4
+				break
+		}
+		h /= 6
+	}
 
-    return [h, s, l]
+	return [h, s, l]
 }
 
 /**
@@ -190,28 +190,28 @@ export function rgbToHsl(r: number, g: number, b: number) {
  * @return RGB色值数值
  */
 export function hslToRgb(h: number, s: number, l: number) {
-    let r: number, g: number, b: number
+	let r: number, g: number, b: number
 
-    if (s === 0) {
-        r = g = b = l
-    } else {
-        const hue2rgb = function hue2rgb(p: number, q: number, t: number) {
-            if (t < 0) t += 1
-            if (t > 1) t -= 1
-            if (t < 1 / 6) return p + (q - p) * 6 * t
-            if (t < 1 / 2) return q
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6
-            return p
-        }
+	if (s === 0) {
+		r = g = b = l
+	} else {
+		const hue2rgb = function hue2rgb(p: number, q: number, t: number) {
+			if (t < 0) t += 1
+			if (t > 1) t -= 1
+			if (t < 1 / 6) return p + (q - p) * 6 * t
+			if (t < 1 / 2) return q
+			if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6
+			return p
+		}
 
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s
-        const p = 2 * l - q
-        r = hue2rgb(p, q, h + 1 / 3)
-        g = hue2rgb(p, q, h)
-        b = hue2rgb(p, q, h - 1 / 3)
-    }
+		const q = l < 0.5 ? l * (1 + s) : l + s - l * s
+		const p = 2 * l - q
+		r = hue2rgb(p, q, h + 1 / 3)
+		g = hue2rgb(p, q, h)
+		b = hue2rgb(p, q, h - 1 / 3)
+	}
 
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]
+	return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]
 }
 
 /**
@@ -220,25 +220,25 @@ export function hslToRgb(h: number, s: number, l: number) {
  * @returns
  */
 export function getSizeFromBytes(size: number): string {
-    if (!size) {
-        return ''
-    }
+	if (!size) {
+		return ''
+	}
 
-    const num = 1024
+	const num = 1024
 
-    if (size < num) {
-        return size + 'B'
-    }
-    if (size < Math.pow(num, 2)) {
-        return (size / num).toFixed(2) + 'K'
-    }
-    if (size < Math.pow(num, 3)) {
-        return (size / Math.pow(num, 2)).toFixed(2) + 'M'
-    }
-    if (size < Math.pow(num, 4)) {
-        return (size / Math.pow(num, 3)).toFixed(2) + 'G'
-    }
-    return (size / Math.pow(num, 4)).toFixed(2) + 'T'
+	if (size < num) {
+		return size + 'B'
+	}
+	if (size < Math.pow(num, 2)) {
+		return (size / num).toFixed(2) + 'K'
+	}
+	if (size < Math.pow(num, 3)) {
+		return (size / Math.pow(num, 2)).toFixed(2) + 'M'
+	}
+	if (size < Math.pow(num, 4)) {
+		return (size / Math.pow(num, 3)).toFixed(2) + 'G'
+	}
+	return (size / Math.pow(num, 4)).toFixed(2) + 'T'
 }
 
 /**
@@ -250,51 +250,51 @@ export function getSizeFromBytes(size: number): string {
  * @returns 生成的随机数字符串
  */
 export function getRandom(
-    num: boolean,
-    maxA: boolean,
-    minlA: boolean,
-    fqy: number,
+	num: boolean,
+	maxA: boolean,
+	minlA: boolean,
+	fqy: number,
 ): string {
-    const arr = [] as number[]
-    const arr1 = [] as number[]
-    const arr2 = [] as number[]
-    if (num) {
-        for (let m = 0; m <= 9; m++) {
-            arr.push(m)
-        }
-    }
-    if (maxA) {
-        for (let m = 65; m <= 90; m++) {
-            arr1.push(m)
-        }
-    }
-    if (minlA) {
-        for (let m = 97; m <= 122; m++) {
-            arr2.push(m)
-        }
-    }
-    const mergeArr = arr.concat(arr1)
-    const mergeArr1 = mergeArr.concat(arr2)
-    const _length = mergeArr1.length
-    let text = ''
-    for (let m = 0; m < fqy; m++) {
-        let text1 = ''
-        let max = 0
-        let min = _length
-        if (_length > 0) {
-            max = _length
-            min = 0
-        }
-        const random =
-            Number.parseInt((Math.random() * (max - min)).toString()) + min
-        if (mergeArr1[random] <= 9) {
-            text1 = mergeArr1[random].toString()
-        } else if (mergeArr1[random] > 9) {
-            text1 = String.fromCodePoint(mergeArr1[random])
-        }
-        text += text1
-    }
-    return text
+	const arr = [] as number[]
+	const arr1 = [] as number[]
+	const arr2 = [] as number[]
+	if (num) {
+		for (let m = 0; m <= 9; m++) {
+			arr.push(m)
+		}
+	}
+	if (maxA) {
+		for (let m = 65; m <= 90; m++) {
+			arr1.push(m)
+		}
+	}
+	if (minlA) {
+		for (let m = 97; m <= 122; m++) {
+			arr2.push(m)
+		}
+	}
+	const mergeArr = arr.concat(arr1)
+	const mergeArr1 = mergeArr.concat(arr2)
+	const _length = mergeArr1.length
+	let text = ''
+	for (let m = 0; m < fqy; m++) {
+		let text1 = ''
+		let max = 0
+		let min = _length
+		if (_length > 0) {
+			max = _length
+			min = 0
+		}
+		const random =
+			Number.parseInt((Math.random() * (max - min)).toString()) + min
+		if (mergeArr1[random] <= 9) {
+			text1 = mergeArr1[random].toString()
+		} else if (mergeArr1[random] > 9) {
+			text1 = String.fromCodePoint(mergeArr1[random])
+		}
+		text += text1
+	}
+	return text
 }
 
 /**
@@ -304,17 +304,17 @@ export function getRandom(
  * @returns 随机数
  */
 export function randomNum(minNum: number, maxNum: number) {
-    switch (arguments.length) {
-        case 1:
-            return Number.parseInt((Math.random() * minNum + 1).toString(), 10)
-        case 2:
-            return Number.parseInt(
-                (Math.random() * (maxNum - minNum + 1) + minNum).toString(),
-                10,
-            )
-        default:
-            return 0
-    }
+	switch (arguments.length) {
+		case 1:
+			return Number.parseInt((Math.random() * minNum + 1).toString(), 10)
+		case 2:
+			return Number.parseInt(
+				(Math.random() * (maxNum - minNum + 1) + minNum).toString(),
+				10,
+			)
+		default:
+			return 0
+	}
 }
 
 /**
@@ -323,8 +323,8 @@ export function randomNum(minNum: number, maxNum: number) {
  * @returns 随机选择的元素
  */
 export function randomChoice<T>(...args: T[]): T {
-    const id = randomNum(0, args.length - 1)
-    return args[id]
+	const id = randomNum(0, args.length - 1)
+	return args[id]
 }
 
 /**
@@ -333,11 +333,11 @@ export function randomChoice<T>(...args: T[]): T {
  * @param i0n
  */
 export function getViewTime(time: number) {
-    if (time.toString().length === 10) {
-        return time * 1000
-    } else {
-        return time
-    }
+	if (time.toString().length === 10) {
+		return time * 1000
+	} else {
+		return time
+	}
 }
 
 const second = 1000
@@ -353,55 +353,55 @@ const year = day * 365
  * @returns
  */
 export function getTimeConfig(date: Date) {
-    // 倒计时型
-    if (date.getTime() < 50 * year) {
-        const base = {} as Intl.DateTimeFormatOptions
-        const time = date.getTime()
-        if (time < hour) base.second = 'numeric'
-        if (minute < time && time < day) base.minute = 'numeric'
-        if (hour < time && time < month) base.hour = 'numeric'
-        if (day < time && time < year) base.day = 'numeric'
-        if (month < time) base.month = 'short'
-        if (year < time) base.year = 'numeric'
-        return base
-    }
-    // 日期型
-    const base = {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-    } as Intl.DateTimeFormatOptions
-    const nowDate = new Date()
-    const todayDate = new Date().setHours(0, 0, 0, 0)
-    const paramsDate = date.setHours(0, 0, 0, 0)
-    if (todayDate != paramsDate) {
-        if (
-            nowDate.getFullYear() == date.getFullYear() &&
-            nowDate.getMonth() == date.getMonth()
-        ) {
-            base.weekday = 'short'
-        } else if (nowDate.getFullYear() == date.getFullYear()) {
-            base.day = 'numeric'
-            base.month = 'short'
-        } else {
-            base.day = 'numeric'
-            base.month = 'short'
-            base.year = 'numeric'
-        }
-    }
-    return base
+	// 倒计时型
+	if (date.getTime() < 50 * year) {
+		const base = {} as Intl.DateTimeFormatOptions
+		const time = date.getTime()
+		if (time < hour) base.second = 'numeric'
+		if (minute < time && time < day) base.minute = 'numeric'
+		if (hour < time && time < month) base.hour = 'numeric'
+		if (day < time && time < year) base.day = 'numeric'
+		if (month < time) base.month = 'short'
+		if (year < time) base.year = 'numeric'
+		return base
+	}
+	// 日期型
+	const base = {
+		hour: 'numeric',
+		minute: 'numeric',
+		second: 'numeric',
+	} as Intl.DateTimeFormatOptions
+	const nowDate = new Date()
+	const todayDate = new Date().setHours(0, 0, 0, 0)
+	const paramsDate = date.setHours(0, 0, 0, 0)
+	if (todayDate != paramsDate) {
+		if (
+			nowDate.getFullYear() == date.getFullYear() &&
+			nowDate.getMonth() == date.getMonth()
+		) {
+			base.weekday = 'short'
+		} else if (nowDate.getFullYear() == date.getFullYear()) {
+			base.day = 'numeric'
+			base.month = 'short'
+		} else {
+			base.day = 'numeric'
+			base.month = 'short'
+			base.year = 'numeric'
+		}
+	}
+	return base
 }
 
 export function pastTimeFormat(time: number): string {
-    const pastTime = Date.now() - time
-    if (pastTime <= 30 * second) return i18n.global.t('刚刚')
-    else if (pastTime <= minute) return i18n.global.t('1分钟前')
-    else if (pastTime <= 10 * minute)
-        return Math.floor(pastTime / minute) + i18n.global.t('分钟前')
+	const pastTime = Date.now() - time
+	if (pastTime <= 30 * second) return i18n.global.t('刚刚')
+	else if (pastTime <= minute) return i18n.global.t('1分钟前')
+	else if (pastTime <= 10 * minute)
+		return Math.floor(pastTime / minute) + i18n.global.t('分钟前')
 
-    const config = getTimeConfig(new Date(time))
-    const lang = getTrueLang()
-    return Intl.DateTimeFormat(lang, config).format(time)
+	const config = getTimeConfig(new Date(time))
+	const lang = getTrueLang()
+	return Intl.DateTimeFormat(lang, config).format(time)
 }
 
 /**
@@ -409,17 +409,17 @@ export function pastTimeFormat(time: number): string {
  * @param url 请求的地址
  */
 export async function getApi(url: string) {
-    // 先尝试在前端请求
-    try {
-        const response = await fetch(url)
-        if (response.ok) {
-            const data = await response.json()
-            return data
-        }
-    } catch (error) {
-        logger.error(error as Error, '前端请求 API 失败')
-        return null
-    }
+	// 先尝试在前端请求
+	try {
+		const response = await fetch(url)
+		if (response.ok) {
+			const data = await response.json()
+			return data
+		}
+	} catch (error) {
+		logger.error(error as Error, '前端请求 API 失败')
+		return null
+	}
 }
 
 /**
@@ -433,22 +433,22 @@ export async function copyToClipboard(text: string)
  */
 export async function copyToClipboard(content: ClipboardItem[])
 export async function copyToClipboard(content: ClipboardItem[] | string) {
-    if (window.navigator.clipboard === undefined) {
-        popInfo.error(i18n.global.t('当前环境不支持剪贴板操作'))
-        throw new Error('当前环境不支持剪贴板操作')
-    }
-    if (typeof content === 'string')
-        await window.navigator.clipboard.writeText(content)
-    else await window.navigator.clipboard.write(content)
+	if (window.navigator.clipboard === undefined) {
+		popInfo.error(i18n.global.t('当前环境不支持剪贴板操作'))
+		throw new Error('当前环境不支持剪贴板操作')
+	}
+	if (typeof content === 'string')
+		await window.navigator.clipboard.writeText(content)
+	else await window.navigator.clipboard.write(content)
 }
 
 /**
  * 获取当前版本
  */
 export function getVersion(): string {
-    if (import.meta.env.VITE_HASH)
-        return `${packageInfo.version}-${import.meta.env.VITE_HASH}`
-    else return packageInfo.version
+	if (import.meta.env.VITE_HASH)
+		return `${packageInfo.version}-${import.meta.env.VITE_HASH}`
+	else return packageInfo.version
 }
 
 /**
@@ -457,43 +457,43 @@ export function getVersion(): string {
  * @returns DNS解析结果
  */
 export async function dns(host: string): Promise<DnsElem[]> {
-    const data = await fetch(
-        `https://dns.alidns.com/resolve?name=${host}.`,
-    ).then((res) => res.json())
-    if (!data['Answer']) return []
-    return data['Answer'].map((item: any) => {
-        return {
-            value: item.data,
-            type: getDnsType(item.type),
-        }
-    })
+	const data = await fetch(
+		`https://dns.alidns.com/resolve?name=${host}.`,
+	).then((res) => res.json())
+	if (!data['Answer']) return []
+	return data['Answer'].map((item: any) => {
+		return {
+			value: item.data,
+			type: getDnsType(item.type),
+		}
+	})
 }
 
 function getDnsType(
-    type: number,
+	type: number,
 ): 'A' | 'AAAA' | 'CNAME' | 'SRV' | 'TXT' | 'OTHER' {
-    switch (type) {
-        case 1:
-            return 'A'
-        case 5:
-            return 'CNAME'
-        case 16:
-            return 'TXT'
-        case 28:
-            return 'AAAA'
-        case 33:
-            return 'SRV'
-        default:
-            return 'OTHER'
-    }
+	switch (type) {
+		case 1:
+			return 'A'
+		case 5:
+			return 'CNAME'
+		case 16:
+			return 'TXT'
+		case 28:
+			return 'AAAA'
+		case 33:
+			return 'SRV'
+		default:
+			return 'OTHER'
+	}
 }
 
 /**
  * 打开登陆框
  */
 export function openLoginPan() {
-    popBox({
-        comp: LoginPan,
-        allowAutoClose: false,
-    })
+	popBox({
+		comp: LoginPan,
+		allowAutoClose: false,
+	})
 }

@@ -13,29 +13,30 @@ import { GroupSession } from './session'
 import { BaseUser, IUser } from './user'
 
 export class Ann {
-    content: string
-    img?: string
-    time: Time
-    sender: IUser
-    session: GroupSession
-    read?: boolean
-    readNum?: number
-    imgData?: Img
+	content: string
+	img?: string
+	time: Time
+	sender: IUser
+	session: GroupSession
+	read?: boolean
+	readNum?: number
+	imgData?: Img
 
-    constructor(data: GroupAnnouncementData, session: GroupSession) {
-        this.content = data.content
-        this.img = data.img
-        this.time = new Time(data.time)
-        this.read = data.is_read
-        this.readNum = data.read_num
-        this.session = session
-        this.sender = this.session.getUserById(data.sender) ?? new BaseUser(data.sender)
-        if (this.img) this.imgData = new Img(this.img)
-    }
+	constructor(data: GroupAnnouncementData, session: GroupSession) {
+		this.content = data.content
+		this.img = data.img
+		this.time = new Time(data.time)
+		this.read = data.is_read
+		this.readNum = data.read_num
+		this.session = session
+		this.sender =
+			this.session.getUserById(data.sender) ?? new BaseUser(data.sender)
+		if (this.img) this.imgData = new Img(this.img)
+	}
 
-    match(search: string): boolean {
-        if (this.sender.match(search)) return true
-        if (this.content.includes(search)) return true
-        return false
-    }
+	match(search: string): boolean {
+		if (this.sender.match(search)) return true
+		if (this.content.includes(search)) return true
+		return false
+	}
 }

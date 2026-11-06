@@ -833,10 +833,10 @@ export default class NapCapOneBot extends OneBotAdapter {
 	private rkeyCache: {
 		[key in RkeyType]: { value: string; time: number } | null
 	} = {
-			PRIVATE: null,
-			GROUP: null,
-			UNKNOWN: null,
-		}
+		PRIVATE: null,
+		GROUP: null,
+		UNKNOWN: null,
+	}
 	@api
 	/**
 	 * 获取图片rkey

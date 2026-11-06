@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { AtSeg } from '@renderer/function/model/seg';
-import { IUser } from '@renderer/function/model/user';
+import { AtSeg } from '@renderer/function/model/seg'
+import { IUser } from '@renderer/function/model/user'
 import { vUserTooltip } from '@renderer/function/tooltip'
-import { useCurrentMsg } from '@renderer/function/utils/vuse';
-import useRuntimeData from '@renderer/state/runtimeData';
+import { useCurrentMsg } from '@renderer/function/utils/vuse'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 const { seg, showToMe = true } = defineProps<{
-	seg: AtSeg,
+	seg: AtSeg
 	showToMe?: boolean
 }>()
 
@@ -23,8 +23,14 @@ function getAtMember(): IUser | number {
 </script>
 
 <template>
-	<span v-user-tooltip="() => getAtMember()" class="msg-at"
-		:class="{ atme: seg.user_id === runtimeData.loginInfo?.uin && showToMe, 'msg-inline': seg.inline }">
+	<span
+		v-user-tooltip="() => getAtMember()"
+		class="msg-at"
+		:class="{
+			atme: seg.user_id === runtimeData.loginInfo?.uin && showToMe,
+			'msg-inline': seg.inline,
+		}"
+	>
 		{{ seg.plaintext(msg) }}
 	</span>
 </template>

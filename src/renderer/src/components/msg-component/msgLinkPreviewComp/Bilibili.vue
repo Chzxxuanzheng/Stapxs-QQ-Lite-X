@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LinkInfo } from '@renderer/function/utils/linkViewUtil';
-import { getTrueLang } from '@renderer/function/utils/systemUtil';
+import { LinkInfo } from '@renderer/function/utils/linkViewUtil'
+import { getTrueLang } from '@renderer/function/utils/systemUtil'
 
 const { info } = defineProps<{
 	info: LinkInfo & { type: 'bilibili' }
@@ -27,7 +27,7 @@ const formatNum = (num: number) => {
 					day: 'numeric',
 					hour: 'numeric',
 					minute: 'numeric',
-				}).format(info.publicDate,)
+				}).format(info.publicDate)
 			}}</span>
 		</div>
 		<img :src="info.pic.url" :alt="'[' + $t('封面') + ']'" />

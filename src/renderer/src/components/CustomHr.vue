@@ -5,24 +5,24 @@
 -->
 
 <template>
-    <div class="custom-hr">
-        <span />
-        <slot />
-        <span />
-    </div>
+	<div class="custom-hr">
+		<span />
+		<slot />
+		<span />
+	</div>
 </template>
 
 <style scoped>
 .custom-hr {
-    display: flex;
-    align-items: center;
-    width: auto;
-    --hr-color: var(--color-main);
-    opacity: 0.8;
+	display: flex;
+	align-items: center;
+	width: auto;
+	--hr-color: var(--color-main);
+	opacity: 0.8;
 }
 .custom-hr > :first-child,
 .custom-hr > :last-child {
-    flex: 1;
-    border-bottom: var(--hr-color) 1px solid;
+	flex: 1;
+	border-bottom: var(--hr-color) 1px solid;
 }
 </style>

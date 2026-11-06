@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Viewer from '@renderer/components/Viewer.vue';
-import { Img } from '@renderer/function/model/img';
-import { LinkInfo } from '@renderer/function/utils/linkViewUtil';
-import { inject } from 'vue';
+import Viewer from '@renderer/components/Viewer.vue'
+import { Img } from '@renderer/function/model/img'
+import { LinkInfo } from '@renderer/function/utils/linkViewUtil'
+import { inject } from 'vue'
 
 const { info } = defineProps<{
 	info: LinkInfo & { type: 'og' }
@@ -24,8 +24,13 @@ function imgClick(img: string) {
 	<div class="msg-link-view og" :class="{ large: info.large }">
 		<hr class="bar" />
 		<div>
-			<img v-if="info.img !== undefined" alt="预览图片" title="查看图片" :src="info.img.url"
-				@click="imgClick(info.img.raw)" />
+			<img
+				v-if="info.img !== undefined"
+				alt="预览图片"
+				title="查看图片"
+				:src="info.img.url"
+				@click="imgClick(info.img.raw)"
+			/>
 			<div class="body">
 				<p v-if="info.site">
 					{{ info.site }}

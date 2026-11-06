@@ -32,7 +32,7 @@ import { autoMarkRaw } from './utils'
 import { parseUrlFromMsg } from '../utils/baseUtil'
 
 export const segType = {}
-type SegCon<T extends Seg> = { new(...args: any[]): T; type: string }
+type SegCon<T extends Seg> = { new (...args: any[]): T; type: string }
 function registerSegType<T extends Seg>(segClass: SegCon<T>): void {
 	segType[segClass.type] = segClass
 }
@@ -77,7 +77,7 @@ export class TxtSeg extends Seg {
 	static readonly type = 'text'
 	static readonly inline = true
 	text: string
-	praseMsg: { type: 'txt' | 'link', content: string }[]
+	praseMsg: { type: 'txt' | 'link'; content: string }[]
 	links: string[]
 
 	constructor(text: string)
@@ -95,10 +95,9 @@ export class TxtSeg extends Seg {
 	 * 解析文本中的链接，切分为文本与链接片段
 	 * @param text 原始文本
 	 */
-	parseTextMsg(text: string): [
-		{ type: 'txt' | 'link', content: string }[],
-		string[]
-	] {
+	parseTextMsg(
+		text: string,
+	): [{ type: 'txt' | 'link'; content: string }[], string[]] {
 		const parsedMsg = parseUrlFromMsg(text)
 		const links: string[] = []
 		for (const data of parsedMsg) {

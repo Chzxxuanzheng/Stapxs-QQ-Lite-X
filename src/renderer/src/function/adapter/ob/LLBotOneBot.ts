@@ -767,7 +767,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 				},
 			}
 		}
-		; (data as any).message_seq = event.message_seq
+		;(data as any).message_seq = event.message_seq
 		return await this.messageEvent(data)
 	}
 	//#endregion
@@ -824,10 +824,10 @@ export default class LLBTOneBot extends OneBotAdapter {
 	private rkeyCache: {
 		[key in RkeyType]: { value: string; time: number } | null
 	} = {
-			PRIVATE: null,
-			GROUP: null,
-			UNKNOWN: null,
-		}
+		PRIVATE: null,
+		GROUP: null,
+		UNKNOWN: null,
+	}
 	@api
 	/**
 	 * 获取图片rkey

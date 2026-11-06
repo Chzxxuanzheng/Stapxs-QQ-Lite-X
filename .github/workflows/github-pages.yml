@@ -1,61 +1,61 @@
 name: 部署到 GitHub Pages
 
 on:
-  repository_dispatch:
-    types: ['deploy-github-pages']
+    repository_dispatch:
+        types: ['deploy-github-pages']
 
-  # 这个选项可以使你手动在 Action tab 页面触发工作流
-  workflow_dispatch:
+    # 这个选项可以使你手动在 Action tab 页面触发工作流
+    workflow_dispatch:
 
 # 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+    contents: read
+    pages: write
+    id-token: write
 
 # 允许一个并发部署
 concurrency:
-  group: 'pages'
-  cancel-in-progress: true
+    group: 'pages'
+    cancel-in-progress: true
 
 jobs:
-  # 单次部署的工作描述
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: 拉取 test 分支
-        uses: actions/checkout@v4
-        with:
-            submodules: recursive
-            ref: test-pages
+    # 单次部署的工作描述
+    deploy:
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: 拉取 test 分支
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+                  ref: test-pages
 
-      - name: 备份 test 分支
-        run: |
-            mkdir -p /tmp/test-backup
-            mv ./* /tmp/test-backup/
+            - name: 备份 test 分支
+              run: |
+                  mkdir -p /tmp/test-backup
+                  mv ./* /tmp/test-backup/
 
-      - name: 拉取 web 分支
-        uses: actions/checkout@v4
-        with:
-            submodules: recursive
-            ref: web-pages
+            - name: 拉取 web 分支
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+                  ref: web-pages
 
-      - name: 安装 test 分支
-        run: |
-            mkdir -p test
-            mv /tmp/test-backup/* test
+            - name: 安装 test 分支
+              run: |
+                  mkdir -p test
+                  mv /tmp/test-backup/* test
 
-      - name: 配置 Pages 环境
-        uses: actions/configure-pages@v5
+            - name: 配置 Pages 环境
+              uses: actions/configure-pages@v5
 
-      - name: 上传构建产物
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './'
+            - name: 上传构建产物
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: './'
 
-      - name: 部署到 GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+            - name: 部署到 GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
