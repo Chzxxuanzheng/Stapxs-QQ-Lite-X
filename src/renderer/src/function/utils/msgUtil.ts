@@ -3,7 +3,11 @@
 import useRuntimeData from '@renderer/state/runtimeData'
 import { Msg, SelfMsg } from '@renderer/function/model/msg'
 import { Seg } from '@renderer/function/model/seg'
-import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import {
+	GroupSession,
+	Session,
+	UserSession,
+} from '@renderer/function/model/session'
 import { IUser } from '@renderer/function/model/user'
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
 import { popBox } from '@renderer/function/utils/popBox'

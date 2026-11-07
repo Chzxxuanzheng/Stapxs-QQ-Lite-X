@@ -9,7 +9,11 @@ import { type Component } from 'vue'
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
 import { Msg } from '@renderer/function/model/msg'
 import { Resource } from '@renderer/function/model/resource'
-import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import {
+	GroupSession,
+	Session,
+	UserSession,
+} from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
 import { Gender, Role } from '@renderer/function/adapter/enmu'
 

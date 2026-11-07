@@ -3,7 +3,11 @@ import { markRaw } from 'vue'
 import { AdapterInterface } from '@renderer/function/adapter/interface'
 import { logger, popInfo } from '@renderer/function/base'
 import { User } from '@renderer/function/model/user'
-import { reloadUsers, sendIdentifyData, sendStatEvent } from '@renderer/function/utils/appUtil'
+import {
+	reloadUsers,
+	sendIdentifyData,
+	sendStatEvent,
+} from '@renderer/function/utils/appUtil'
 
 const SSL_WHITE_LIST = new Set<string>(['localhost', '127.0.0.1'])
 

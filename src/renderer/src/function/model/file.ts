@@ -8,7 +8,10 @@
 
 import app from '@renderer/main'
 import { shallowRef, ShallowRef } from 'vue'
-import { GroupFileData, GroupFolderData } from '@renderer/function/adapter/interface'
+import {
+	GroupFileData,
+	GroupFolderData,
+} from '@renderer/function/adapter/interface'
 import { popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { downloadFile } from '@renderer/function/utils/appUtil'

@@ -68,7 +68,12 @@ import type {
 	ObSendMsg,
 	RkeyType,
 } from '@renderer/function/adapter/ob/type'
-import { createSender, fileToBase64, getGender, ObConnector } from '@renderer/function/adapter/ob/utils'
+import {
+	createSender,
+	fileToBase64,
+	getGender,
+	ObConnector,
+} from '@renderer/function/adapter/ob/utils'
 import semver from 'semver'
 
 export default class NapCapOneBot extends OneBotAdapter {

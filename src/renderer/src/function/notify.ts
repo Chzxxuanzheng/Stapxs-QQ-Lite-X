@@ -1,5 +1,8 @@
 import app from '@renderer/main'
-import { NotifyInfo, NotificationElem } from '@renderer/function/elements/system'
+import {
+	NotifyInfo,
+	NotificationElem,
+} from '@renderer/function/elements/system'
 import { jumpToSession } from '@renderer/function/utils/appUtil'
 import { Session } from '@renderer/function/model/session'
 

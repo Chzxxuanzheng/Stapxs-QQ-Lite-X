@@ -21,7 +21,10 @@ import '@renderer/assets/css/sys_notice.css'
 import '@renderer/assets/css/view.css'
 import '@renderer/assets/css/color.css'
 
-import { getPortableFileLang, getVersion } from '@renderer/function/utils/systemUtil'
+import {
+	getPortableFileLang,
+	getVersion,
+} from '@renderer/function/utils/systemUtil'
 import win from '@renderer/runtime/win'
 import useOptionStore from '@renderer/state/option'
 
