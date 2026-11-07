@@ -1,4 +1,7 @@
-import type { OutgoingSegment, OutgoingSegmentV1 } from '@renderer/function/adapter/mk/types'
+import type {
+	OutgoingSegment,
+	OutgoingSegmentV1,
+} from '@renderer/function/adapter/mk/types'
 
 // 具体的发送消息段类型
 export type TextSeg = Extract<OutgoingSegment, { type: 'text' }>

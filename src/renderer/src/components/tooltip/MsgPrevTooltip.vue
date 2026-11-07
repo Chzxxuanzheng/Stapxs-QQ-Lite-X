@@ -11,23 +11,23 @@
 		<template v-if="typeof msgs === 'string'">
 			{{ msgs }}
 		</template>
-		<MsgBar
-			v-else
-			show-avatar
-			:msgs="msgs"
-			:can-interaction="false"
-			:ex-info="[]"
-		/>
+		<MsgBar v-else show-avatar :msgs="msgs" :config="msgsConfig" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { Msg } from '@renderer/function/model/msg'
 import MsgBar from '@renderer/components/MsgBar.vue'
+import useMsgsConfigState from '@renderer/function/composable/scopedState/msgsConfig'
 
 const { msgs } = defineProps<{
 	msgs: Msg[] | string
 }>()
+
+const msgsConfig = useMsgsConfigState({
+	allowInteraction: false,
+	exInfo: [],
+})
 </script>
 
 <style scoped>

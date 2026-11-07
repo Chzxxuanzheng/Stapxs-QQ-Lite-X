@@ -60,7 +60,11 @@ import type {
 	ObGroupSender,
 	ObTextSeg,
 } from '@renderer/function/adapter/ob/type'
-import { ObConnector, getGender, createSender } from '@renderer/function/adapter/ob/utils'
+import {
+	ObConnector,
+	getGender,
+	createSender,
+} from '@renderer/function/adapter/ob/utils'
 
 export default class LagrangeOneBot
 	extends OneBotAdapter

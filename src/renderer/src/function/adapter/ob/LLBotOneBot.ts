@@ -33,7 +33,12 @@ import {
 	UserData,
 } from '@renderer/function/adapter/interface'
 import { api, OneBotAdapter } from '@renderer/function/adapter/ob/adapter'
-import { createSender, fileToBase64, getGender, ObConnector } from '@renderer/function/adapter/ob/utils'
+import {
+	createSender,
+	fileToBase64,
+	getGender,
+	ObConnector,
+} from '@renderer/function/adapter/ob/utils'
 import type {
 	LltbObCreateGroupFileFolder,
 	LltbObFetchCustomFace,

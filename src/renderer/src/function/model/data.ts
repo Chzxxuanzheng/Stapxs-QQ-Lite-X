@@ -6,8 +6,16 @@
  * @Description: 定义数据结构
  */
 
-import { getPinyin, matchPinyin, PinYinData } from '@renderer/function/utils/pinyin'
-import { getTimeConfig, getTrueLang, getViewTime } from '@renderer/function/utils/systemUtil'
+import {
+	getPinyin,
+	matchPinyin,
+	PinYinData,
+} from '@renderer/function/utils/pinyin'
+import {
+	getTimeConfig,
+	getTrueLang,
+	getViewTime,
+} from '@renderer/function/utils/systemUtil'
 
 /**
  * 包含拼音的名称类

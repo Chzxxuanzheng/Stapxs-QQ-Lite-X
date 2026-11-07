@@ -52,13 +52,9 @@
 								<MsgBar
 									ref="msgBar"
 									:key="'merge-' + nowData.id"
-									:msgs="nowData.content as Message[]"
-									:show-msg-menu="showMsgMenu"
-									:special-self="false"
-									:direction="
-										vw * 100 > 450 ? 'right' : 'left'
-									"
-									:ex-info="[]"
+									:msgs="nowData.content"
+									:config="msgConfig"
+									:multiselect-state="multiselect"
 									class="merge-node"
 								/>
 							</KeepAlive>
@@ -66,15 +62,13 @@
 					</div>
 					<!-- 多选指示器 -->
 					<Transition name="select-tag">
-						<div v-if="isMultiselectMode" class="select-tag">
-							<div v-if="msgBarEl!.multiCanForward()">
+						<div v-if="multiselect.active" class="select-tag">
+							<div v-if="multiselect.hasCantSend">
 								<font-awesome-icon
 									style="color: var(--color-red)"
 									:icon="['fas', 'fa-xmark']"
 									@click="
-										popInfo.error(
-											msgBarEl!.multiCanForward(),
-										)
+										popInfo.error($t('包含不能发送的消息'))
 									"
 								/>
 								<span>{{ $t('合并转发') }}</span>
@@ -86,14 +80,12 @@
 								/>
 								<span>{{ $t('合并转发') }}</span>
 							</div>
-							<div v-if="msgBarEl!.multiCanForward()">
+							<div v-if="multiselect.hasCantSend">
 								<font-awesome-icon
 									style="color: var(--color-red)"
 									:icon="['fas', 'fa-xmark']"
 									@click="
-										popInfo.error(
-											msgBarEl!.multiCanForward(),
-										)
+										popInfo.error($t('包含不能发送的消息'))
 									"
 								/>
 								<span>{{ $t('逐条转发') }}</span>
@@ -119,9 +111,9 @@
 								<span>{{ $t('复制') }}</span>
 							</div>
 							<div>
-								<span @click="closeMultiselect()">{{
-									msgBarEl!.getMultiselectListLength()
-								}}</span>
+								<span @click="multiselect.end()">
+									{{ multiselect.length }}
+								</span>
 								<span>{{ $t('取消') }}</span>
 							</div>
 						</div>
@@ -137,7 +129,6 @@ import MsgBar from '@renderer/components/MsgBar.vue'
 
 import { popInfo } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
-import { Message } from '@renderer/function/model/message'
 import { Msg } from '@renderer/function/model/msg'
 import { ForwardSeg } from '@renderer/function/model/seg'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
@@ -155,17 +146,19 @@ import {
 	shallowRef,
 	useTemplateRef,
 	watch,
+	watchEffect,
 } from 'vue'
 import ChatMsgMenu from '@renderer/components/menu/ChatMsgMenu.vue'
 import { getCm } from '@renderer/function/utils/baseUtil'
 import { useViewportUnits } from '@renderer/function/composable/useViewportUnits.js'
+import useMsgsConfigState from '@renderer/function/composable/scopedState/msgsConfig'
+import useMultiselectState from '@renderer/function/composable/scopedState/multiselect'
 
 const { vw } = useViewportUnits()
 const stack = shallowReactive<ForwardSeg[]>([])
 const nowData = shallowRef<undefined | ForwardSeg>()
 const addMode = shallowRef(true)
 const positionCache: number[] = []
-const isMultiselectMode = shallowRef(false)
 
 const msgBarEl = useTemplateRef('msgBar')
 const mergePanEl = useTemplateRef('mergePan')
@@ -207,6 +200,18 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
 		},
 	},
 }
+
+const msgConfig = useMsgsConfigState({
+	msgMenu: showMsgMenu,
+	specialSelf: false,
+	exInfo: [],
+})
+
+const multiselect = useMultiselectState()
+
+watchEffect(() => {
+	msgConfig.direction = vw.value * 100 > 450 ? 'right' : 'left'
+})
 
 watch(
 	() => stack.length,
@@ -258,11 +263,10 @@ function isMergeOpen() {
  * @param msg 消息对象
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
-function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
+function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> {
 	const intoMultiselect = (selectedMsg: Msg) => {
-		msgBarEl.value?.startMultiselect()
-		isMultiselectMode.value = true
-		msgBarEl.value?.forceAddToMultiselectList(selectedMsg)
+		multiselect.start()
+		multiselect.select(selectedMsg)
 	}
 	const menu = openContextMenu(
 		{ x: data.x, y: data.y },
@@ -284,33 +288,26 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
  * 合并转发
  */
 function sendMergeForward() {
-	if (!msgBarEl.value) return
-	const msgList = msgBarEl.value.getMultiselectList()
+	const msgList = multiselect.createSelectedList(nowData.value!.content)
+	multiselect.end()
 	if (msgList.length === 0) return
-
 	mergeForward(msgList)
-
-	closeMultiselect()
 }
 /**
  * 逐条转发
  */
 function sendSingleForward() {
-	if (!msgBarEl.value) return
-	const msgList = msgBarEl.value.getMultiselectList()
+	const msgList = multiselect.createSelectedList(nowData.value!.content)
+	multiselect.end()
 	if (msgList.length === 0) return
-
 	singleForward(msgList)
-
-	closeMultiselect()
 }
 
 /**
  * 复制消息
  */
 function copyMsgs() {
-	if (!msgBarEl.value) return
-	const msgList = msgBarEl.value.getMultiselectList()
+	const msgList = multiselect.createSelectedList(nowData.value!.content)
 	let msg = ''
 	let lastDate = ''
 	msgList.forEach((item: Msg) => {
@@ -347,11 +344,6 @@ function copyMsgs() {
 	copyToClipboard(msg)
 		.then(() => popInfo.info($t('复制成功')))
 		.catch(() => popInfo.error($t('复制失败')))
-}
-function closeMultiselect() {
-	if (!msgBarEl.value) return
-	msgBarEl.value.cancelMultiselect()
-	isMultiselectMode.value = false
 }
 //#endregion
 

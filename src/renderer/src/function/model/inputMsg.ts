@@ -8,7 +8,13 @@
 // oxlint-disable-next-line no-restricted-imports
 import { shallowRef, shallowReactive, computed, nextTick, reactive } from 'vue'
 import { Msg } from '@renderer/function/model/msg'
-import { AtSeg, ImgSeg, ReplySeg, Seg, TxtSeg } from '@renderer/function/model/seg'
+import {
+	AtSeg,
+	ImgSeg,
+	ReplySeg,
+	Seg,
+	TxtSeg,
+} from '@renderer/function/model/seg'
 import { autoMarkRaw } from '@renderer/function/model/utils'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { Session } from '@renderer/function/model/session'

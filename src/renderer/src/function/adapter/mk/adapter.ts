@@ -96,7 +96,11 @@ import type {
 	SendGroupMessageOutput,
 	SendPrivateMessageOutput,
 } from '@renderer/function/adapter/mk/types'
-import { parseApiInput, parseApiOutput, safeParseEvent } from '@renderer/function/adapter/mk/types'
+import {
+	parseApiInput,
+	parseApiOutput,
+	safeParseEvent,
+} from '@renderer/function/adapter/mk/types'
 import { Component } from 'vue'
 import * as ISeg from '@renderer/function/adapter/mk/incomeSeg'
 import MkInfo from '@renderer/function/adapter/mk/MkInfo.vue'

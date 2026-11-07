@@ -52,12 +52,8 @@
 				ref="msgBar"
 				:key="chat.id"
 				:msgs="chat.messageList"
-				:show-msg-menu="showMsgMenu"
-				:show-user-menu="showUserMenu"
-				:show-self-avatar="
-					runtimeData.sysConfig.hide_self_avatar === false
-				"
-				:self-direction="runtimeData.sysConfig.self_msg_direction"
+				:config="msgsConfig"
+				:multiselect-state="multiselect"
 				@image-loaded="imgLoadedScroll"
 				@left-move="replyMsg"
 				@sender-double-click="(user) => sendPoke(user)"
@@ -79,12 +75,12 @@
 
 		<!-- 多选指示器 -->
 		<Transition name="select-tag">
-			<div v-if="tags.isMultiselectMode" class="select-tag ss-card">
-				<div v-if="msgBar!.multiCanForward()">
+			<div v-if="multiselect.active" class="select-tag ss-card">
+				<div v-if="multiselect.hasCantSend">
 					<font-awesome-icon
 						style="color: var(--color-red)"
 						:icon="['fas', 'fa-xmark']"
-						@click="popInfo.error(msgBar!.multiCanForward())"
+						@click="popInfo.error($t('包含不能发送的消息'))"
 					/>
 					<span>{{ $t('合并转发') }}</span>
 				</div>
@@ -95,11 +91,11 @@
 					/>
 					<span>{{ $t('合并转发') }}</span>
 				</div>
-				<div v-if="msgBar!.multiCanForward()">
+				<div v-if="multiselect.hasCantSend">
 					<font-awesome-icon
 						style="color: var(--color-red)"
 						:icon="['fas', 'fa-xmark']"
-						@click="popInfo.error(msgBar!.multiCanForward())"
+						@click="popInfo.error($t('包含不能发送的消息'))"
 					/>
 					<span>{{ $t('逐条转发') }}</span>
 				</div>
@@ -136,9 +132,9 @@
 					<span>{{ $t('撤回') }}</span>
 				</div>
 				<div>
-					<span @click="closeMultiselect()">{{
-						msgBar!.getMultiselectListLength()
-					}}</span>
+					<span @click="multiselect.end()">
+						{{ multiselect.length }}
+					</span>
 					<span>{{ $t('取消') }}</span>
 				</div>
 			</div>
@@ -149,7 +145,7 @@
 			ref="bottom"
 			v-model="inputMsg"
 			:session="chat"
-			:focus-hide="tags.isMultiselectMode"
+			:focus-hide="multiselect.active"
 			@send-poke="sendPoke"
 			@scroll-bottom="scrollBottom"
 		/>
@@ -203,12 +199,15 @@ import {
 	shallowRef,
 	markRaw,
 	provide,
+	watchEffect,
 } from 'vue'
 import { getCm } from '@renderer/function/utils/baseUtil'
 import { useViewportUnits } from '@renderer/function/composable/useViewportUnits'
 import { useFrame } from '@renderer/function/composable/useFrame'
 import { useKeyboard } from '@renderer/function/composable/useKeyboard'
 import { useBackHoldup } from '@renderer/function/composable/useBackHoldup'
+import useMsgsConfigState from '@renderer/function/composable/scopedState/msgsConfig'
+import useMultiselectState from '@renderer/function/composable/scopedState/multiselect'
 //#region == 常量声明 ====================================================================
 const { chat } = defineProps<{ chat: Session }>()
 const inputMsg = defineModel<InputMsg>({ required: true })
@@ -219,8 +218,19 @@ const $t = app.config.globalProperties.$t
 const runtimeData = useRuntimeData()
 const { vh } = useViewportUnits()
 
+const msgsConfig = useMsgsConfigState({
+	msgMenu: showMsgMenu,
+	userMenu: showUserMenu,
+})
+
+const multiselect = useMultiselectState()
+
+watchEffect(() => {
+	msgsConfig.showSelfAvatar = !runtimeData.sysConfig.hide_self_avatar
+	msgsConfig.specialDirection = runtimeData.sysConfig.self_msg_direction
+})
+
 //#region  == 模板引用 ======================================
-const msgBar = useTemplateRef('msgBar')
 const mergePan = useTemplateRef('mergePan')
 const msgPan = useTemplateRef('msgPan')
 const chatPan = useTemplateRef('chat-pan')
@@ -230,7 +240,6 @@ provide('mergePan', mergePan)
 
 const tagsDefault = {
 	showBottomButton: false,
-	isMultiselectMode: false,
 }
 const tags = shallowReactive({ ...tagsDefault })
 //#endregion
@@ -273,7 +282,7 @@ useFrame(() => {
 	if (!bottomTop) return
 	const bottomRect = bottomTop.getBoundingClientRect()
 	let height = 100 * vh.value - bottomRect.top
-	if (tags.isMultiselectMode) height = Math.max(height, 140)
+	if (multiselect.active) height = Math.max(height, 140)
 	if (bottomHeight.value === height) return
 	bottomHeight.value = height
 })
@@ -340,11 +349,10 @@ function chatScroll(event: Event) {
  * @param msg 消息对象
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
-function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
+function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> {
 	const intoMultiselect = (selectedMsg: Msg) => {
-		msgBar.value?.startMultiselect()
-		tags.isMultiselectMode = true
-		msgBar.value?.forceAddToMultiselectList(selectedMsg)
+		multiselect.start()
+		multiselect.select(selectedMsg)
 	}
 	const menu = openContextMenu(
 		{ x: data.x, y: data.y },
@@ -472,35 +480,26 @@ async function sendPrivatePoke() {
  * 合并转发
  */
 function sendMergeForward() {
-	if (!msgBar.value) return
-	const msgList = msgBar.value.getMultiselectList()
+	const msgList = multiselect.createSelectedList(chat.messageList)
+	multiselect.end()
 	if (msgList.length === 0) return
-
 	mergeForward(msgList)
-
-	closeMultiselect()
 }
 /**
  * 逐条转发
  */
 function sendSingleForward() {
-	if (!msgBar.value) return
-	const msgList = msgBar.value.getMultiselectList()
+	const msgList = multiselect.createSelectedList(chat.messageList)
+	multiselect.end()
 	if (msgList.length === 0) return
-
 	singleForward(msgList)
-
-	closeMultiselect()
 }
 /**
  * 删除消息
  */
 async function delMsgs() {
-	if (!msgBar.value) return
-	const msgList = [...msgBar.value.getMultiselectList()]
-
-	closeMultiselect()
-
+	const msgList = multiselect.createSelectedList(chat.messageList)
+	multiselect.end()
 	for (const msg of msgList) {
 		await chat.removeMsg(msg)
 	}
@@ -509,8 +508,7 @@ async function delMsgs() {
  * 复制消息
  */
 function copyMsgs() {
-	if (!msgBar.value) return
-	const msgList = msgBar.value.getMultiselectList()
+	const msgList = multiselect.createSelectedList(chat.messageList)
 	let msg = ''
 	let lastDate = ''
 	msgList.forEach((item: Msg) => {
@@ -552,24 +550,18 @@ function copyMsgs() {
  * 批量撤回消息
  */
 async function recallMsgs() {
-	if (!msgBar.value) return
 	if (!runtimeData.nowAdapter?.recallMsg) {
 		popInfo.error($t('当前适配器不支持撤回消息'))
 		return
 	}
 	if (!(await ensurePopBox($t('要撤回选中的消息吗？')))) return
-	const msgList = msgBar.value.getMultiselectList()
+	const msgList = multiselect.createSelectedList(chat.messageList)
+	multiselect.end()
 	const tasks: Promise<true | undefined>[] = []
 	for (const msg of msgList) {
 		tasks.push(runtimeData.nowAdapter.recallMsg(msg))
 	}
-	closeMultiselect()
 	await Promise.all(tasks)
-}
-function closeMultiselect() {
-	if (!msgBar.value) return
-	msgBar.value.cancelMultiselect()
-	tags.isMultiselectMode = false
 }
 //#endregion
 

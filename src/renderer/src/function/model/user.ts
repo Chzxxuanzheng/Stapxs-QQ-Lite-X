@@ -20,7 +20,12 @@ import { Gender, Role } from '@renderer/function/adapter/enmu'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { Name, Time } from '@renderer/function/model/data'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
-import { GroupSession, Session, TempSession, UserSession } from '@renderer/function/model/session'
+import {
+	GroupSession,
+	Session,
+	TempSession,
+	UserSession,
+} from '@renderer/function/model/session'
 
 export interface IUser {
 	user_id: number

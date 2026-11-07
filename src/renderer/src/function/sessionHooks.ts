@@ -10,7 +10,11 @@
 import app from '@renderer/main'
 import { Message } from '@renderer/function/model/message'
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { Notice, ReceivedNotice, SystemNotice } from '@renderer/function/model/notice'
+import {
+	Notice,
+	ReceivedNotice,
+	SystemNotice,
+} from '@renderer/function/model/notice'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { Msg } from '@renderer/function/model/msg'
 import { NotifyInfo } from '@renderer/function/elements/system'

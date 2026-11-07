@@ -11,47 +11,49 @@
 
 <template>
 	<div
-		:id="'chat-' + data.uuid"
+		:id="'chat-' + msg.uuid"
 		ref="msgMain"
 		:class="{
 			message: true,
 			left: direction === 'left',
 			right: direction === 'right',
 			selected: selected,
-			'without-avatar': withoutAvatar,
+			'without-avatar': config.withoutAvatar,
 		}"
 	>
 		<img
 			v-if="direction === 'left'"
-			v-hide="!showAvatar"
-			v-user-tooltip="() => data.sender"
-			v-menu.prevent="(event) => emit('showUserMenu', event, data.sender)"
+			v-hide="!config.showAvatar"
+			v-user-tooltip="() => msg.sender"
+			v-menu.prevent="(event) => config.userMenu(event, msg.sender)"
 			class="avatar"
-			:src="data.sender.face"
-			:alt="data.sender.name"
-			@dblclick="emit('senderDoubleClick', data.sender)"
+			:src="msg.sender.face"
+			:alt="msg.sender.name"
+			@dblclick="emit('senderDoubleClick', msg.sender)"
 		/>
 		<div v-if="direction === 'right'" class="message-space" />
 		<div
 			:class="{
 				'message-body': true,
 				special: special,
-				'hide-face': !showAvatar,
+				'hide-face': !config.showAvatar,
 			}"
 		>
 			<div class="message-info">
 				<!-- 一帮头衔之类的 -->
-				<template v-if="data.sender instanceof Member && showAvatar">
-					<span v-user-role="data.sender.role">
-						<template v-if="data.sender.role === Role.Bot">
+				<template
+					v-if="msg.sender instanceof Member && config.showAvatar"
+				>
+					<span v-user-role="msg.sender.role">
+						<template v-if="msg.sender.role === Role.Bot">
 							<font-awesome-icon :icon="['fas', 'robot']" />
 						</template>
-						<template v-if="data.sender.level">
-							{{ 'Lv.' + data.sender.level }}
+						<template v-if="msg.sender.level">
+							{{ 'Lv.' + msg.sender.level }}
 						</template>
-						<template v-if="data.sender.title">
+						<template v-if="msg.sender.title">
 							{{
-								data.sender.title.replace(
+								msg.sender.title.replace(
 									/[\u202A-\u202E\u2066-\u2069]/g,
 									'',
 								)
@@ -59,41 +61,41 @@
 						</template>
 					</span>
 				</template>
-				<a v-if="showAvatar" class="sender-name">
-					{{ data.sender.name }}
+				<a v-if="config.showAvatar" class="sender-name">
+					{{ msg.sender.name }}
 				</a>
 			</div>
 			<div class="message-content">
 				<div
-					v-if="data.icon && showIcon && direction === 'right'"
+					v-if="msg.icon && config.showIcon && direction === 'right'"
 					:class="{
-						rotate: data.icon.rotate,
+						rotate: msg.icon.rotate,
 						icon: true,
 						left: true,
 					}"
 				>
-					<div @click="data.iconClick">
+					<div @click="msg.iconClick">
 						<font-awesome-icon
-							:style="{ color: data.icon.color }"
-							:title="data.icon.desc"
-							:aria-label="data.icon.desc"
-							:icon="['fas', data.icon.icon]"
+							:style="{ color: msg.icon.color }"
+							:title="msg.icon.desc"
+							:aria-label="msg.icon.desc"
+							:icon="['fas', msg.icon.icon]"
 						/>
 					</div>
 				</div>
 				<div
-					v-menu.prevent="(event) => emit('showMsgMenu', event, data)"
+					v-menu.prevent="(event) => openMsgMenu(event)"
 					v-move="moveOptions"
 					:class="{
 						main: true,
-						'not-exist': !data.exist && dimNonExistentMsg,
+						'not-exist': !msg.exist && config.dimNonExistentMsg,
 					}"
-					@v-move-left.prevent="emit('leftMove', data)"
-					@v-move-right.prevent="emit('rightMove', data)"
+					@v-move-left.prevent="emit('leftMove', msg)"
+					@v-move-right.prevent="emit('rightMove', msg)"
 				>
 					<!-- 空消息 -->
 					<span
-						v-if="data.message.length === 0"
+						v-if="msg.message.length === 0"
 						class="msg-space"
 						style="opacity: 0.5"
 					>
@@ -101,29 +103,29 @@
 					</span>
 					<!-- 常规消息 -->
 					<Segs
-						:segs="data.message"
-						:show-to-me="showToMe"
+						:segs="msg.message"
+						:show-to-me="config.showToMe"
 						@imageLoaded="(height) => emit('imageLoaded', height)"
 					/>
 					<!-- 链接预览框 -->
 					<MsgLinkPreview
-						v-if="data.linkPreview"
-						:info="data.linkPreview"
+						v-if="msg.linkPreview"
+						:info="msg.linkPreview"
 					/>
 				</div>
 				<div
-					v-if="data.icon && showIcon && direction === 'left'"
+					v-if="msg.icon && config.showIcon && direction === 'left'"
 					:class="{
-						rotate: data.icon.rotate,
+						rotate: msg.icon.rotate,
 						icon: true,
 					}"
 				>
-					<div @click="data.iconClick">
+					<div @click="msg.iconClick">
 						<font-awesome-icon
-							:style="{ color: data.icon.color }"
-							:title="data.icon.desc"
-							:aria-label="data.icon.desc"
-							:icon="['fas', data.icon.icon]"
+							:style="{ color: msg.icon.color }"
+							:title="msg.icon.desc"
+							:aria-label="msg.icon.desc"
+							:icon="['fas', msg.icon.icon]"
 						/>
 					</div>
 				</div>
@@ -131,27 +133,27 @@
 		</div>
 		<img
 			v-if="direction === 'right'"
-			v-hide="!showAvatar"
-			v-menu.prevent="(event) => emit('showUserMenu', event, data.sender)"
-			v-user-tooltip="() => data.sender"
+			v-hide="!config.showAvatar"
+			v-menu.prevent="(event) => config.userMenu(event, msg.sender)"
+			v-user-tooltip="() => msg.sender"
 			class="avatar"
-			:src="data.sender.face"
-			:alt="data.sender.name"
-			@dblclick="emit('senderDoubleClick', data.sender)"
+			:src="msg.sender.face"
+			:alt="msg.sender.name"
+			@dblclick="emit('senderDoubleClick', msg.sender)"
 		/>
 		<div
-			v-if="data.emojis && Object.keys(data.emojis).length > 0"
+			v-if="msg.emojis && Object.keys(msg.emojis).length > 0"
 			class="emoji-like"
 		>
 			<div class="emoji-space" />
 			<div class="emoji-like-body">
 				<TransitionGroup name="emoji-like">
 					<template
-						v-for="(info, id) in data.emojis as Record<
+						v-for="(info, id) in msg.emojis as Record<
 							string,
 							number[]
 						>"
-						:key="'respond-' + data.uuid + '-' + id"
+						:key="'respond-' + msg.uuid + '-' + id"
 					>
 						<div
 							:class="{
@@ -159,7 +161,7 @@
 									runtimeData.loginInfo &&
 									info.includes(runtimeData.loginInfo?.uin),
 							}"
-							@click="emit('emojiClick', id as string, data)"
+							@click="emit('emojiClick', id as string, msg)"
 						>
 							<EmojiFace :emoji="Emoji.get(Number(id))" />
 							<span>{{ info.length }}</span>
@@ -172,14 +174,12 @@
 			<div v-if="direction === 'right'" class="space" />
 			<div class="content">
 				<template
-					v-for="info in exInfo"
-					:key="data.uuid + '-exinfo-' + info"
+					v-for="info in config.exInfo"
+					:key="msg.uuid + '-exinfo-' + info"
 				>
-					<a v-if="info === 'msgId'">
-						msgId: {{ data.message_id }}
-					</a>
+					<a v-if="info === 'msgId'"> msgId: {{ msg.message_id }} </a>
 					<a v-if="info === 'time'">
-						time: {{ data.time?.format('year') }}
+						time: {{ msg.time?.format('year') }}
 					</a>
 				</template>
 			</div>
@@ -202,7 +202,7 @@ import {
 	VMoveOptions,
 	vUserRole,
 } from '@renderer/function/utils/vcmd'
-import { provide, useTemplateRef } from 'vue'
+import { computed, provide, shallowRef, useTemplateRef } from 'vue'
 import { vUserTooltip } from '@renderer/function/tooltip'
 
 import useRuntimeData from '@renderer/state/runtimeData'
@@ -210,73 +210,51 @@ import { getCm } from '@renderer/function/utils/baseUtil'
 import MsgLinkPreview from '@renderer/components/msg-component/MsgLinkPreview.vue'
 import app from '@renderer/main.js'
 import Segs from '@renderer/components/msg-component/Segs.vue'
+import useMsgsConfigState, {
+	MsgsConfig,
+} from '@renderer/function/composable/scopedState/msgsConfig'
+import { MultiselectState } from '@renderer/function/composable/scopedState/multiselect'
 
-//#region == 声明变量 ================================================================
 const {
-	data,
-	selected,
-	showIcon = true,
-	dimNonExistentMsg = true,
-	special = false,
-	showToMe = true,
-	direction = 'left',
-	showAvatar = true,
-	exInfo = ['time', 'msgId'],
-	withoutAvatar = false,
+	msg,
+	config = useMsgsConfigState({}),
+	multiselectState,
 } = defineProps<{
-	data: Msg | SelfMsg
-	selected?: boolean
-	/**
-	 * 显示消息icon（如发送中，发送失败）
-	 */
-	showIcon?: boolean
-	/**
-	 * 淡化不存在的消息（如正在发送中消息）
-	 */
-	dimNonExistentMsg?: boolean
-	/**
-	 * 特殊消息（如自己发的消息等）
-	 */
-	special?: boolean
-	/**
-	 * @我自己时高亮
-	 */
-	showToMe?: boolean
-	/**
-	 * 消息对齐方向（左侧/右侧）
-	 */
-	direction?: 'left' | 'right'
-	/**
-	 * 显示头像
-	 * 设置为 false 时隐藏头像。
-	 * 想移除头像占位请使用 withoutAvatar 选项
-	 * 如果设为 true 不显示头像，请检查 withoutAvatar 选项
-	 */
-	showAvatar?: boolean
-	/**
-	 * 移除头像占位
-	 * 设置为 true 时移除头像占位
-	 */
-	withoutAvatar?: boolean
-	/**
-	 * 显示时间
-	 */
-	exInfo?: ('time' | 'msgId')[]
+	msg: Msg | SelfMsg
+	config?: MsgsConfig
+	multiselectState?: MultiselectState
 }>()
 
 const emit = defineEmits<{
 	leftMove: [msg: Msg]
 	rightMove: [msg: Msg]
 	senderDoubleClick: [user: IUser]
-	showMsgMenu: [event: MenuEventData, msg: Msg]
-	showUserMenu: [event: MenuEventData, user: IUser]
 	emojiClick: [id: string, msg: Msg]
 	imageLoaded: [height: number]
 }>()
 
 const msgMain = useTemplateRef<HTMLDivElement>('msgMain')
+const menuTarget = shallowRef(false)
 
 const runtimeData = useRuntimeData()
+
+const special = computed(() => {
+	if (!config.specialSelf) return false
+	return msg.sender.user_id === runtimeData.loginInfo?.uin
+})
+const selected = computed(() => menuTarget.value || multiselectState?.has(msg))
+const direction = computed(() => {
+	if (special.value) return config.specialDirection
+	else return config.direction
+})
+
+function openMsgMenu(eventData: MenuEventData) {
+	menuTarget.value = true
+	// 打开菜单
+	config.msgMenu(eventData, msg).finally(() => {
+		menuTarget.value = false
+	})
+}
 
 const moveOptions: VMoveOptions<HTMLDivElement> = {
 	moveHook: (_, move: number) => {
@@ -305,12 +283,7 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
 	},
 }
 
-provide('message-content', data)
+provide('message-content', msg)
 
 const $t = app.config.globalProperties.$t
-//#endregion
-
-//#region == 工具函数 ================================================================
-
-//#endregion
 </script>
