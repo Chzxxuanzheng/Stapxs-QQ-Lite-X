@@ -23,11 +23,16 @@ const rootRef = useTemplateRef<HTMLDivElement>('rootRef')
 
 const viewer = useViewer()
 
-/**
- * 本组件是一次性的：seg / pos 挂载后不会再被替换，所以资源地址只在 setup
- * 阶段解析一次即可，不需要 computed 去追踪 props。
- */
-const src = getUrl(seg.imgData.src)
+const src = computed(() => {
+	const url = seg.url
+	if (!url) return ''
+	if (url.startsWith('http')) return url
+	if (url.startsWith('data:')) return url
+	if (url.startsWith('base64://')) {
+		return url.replace('base64://', 'data:image/png;base64,')
+	}
+	throw new Error('Unsupported image url format:' + url)
+})
 
 /** 图片的真实像素尺寸，用于在图片解码完成前就锁定占位盒子 */
 const naturalWidth = shallowRef(seg instanceof ImgSeg ? (seg.width ?? 0) : 0)
@@ -123,7 +128,7 @@ async function loadedImg(): Promise<boolean> {
 			resolve(false)
 		}
 
-		img.src = src
+		img.src = src.value
 	})
 }
 
@@ -134,16 +139,6 @@ void init()
  */
 function imgClick() {
 	viewer?.value?.open(seg.imgData)
-}
-
-function getUrl(url: string): string {
-	if (!url) return ''
-	if (url.startsWith('http')) return url
-	if (url.startsWith('data:')) return url
-	if (url.startsWith('base64://')) {
-		return url.replace('base64://', 'data:image/png;base64,')
-	}
-	throw new Error('Unsupported image url format:' + url)
 }
 </script>
 
