@@ -1,5 +1,5 @@
 import { nextTick } from 'vue'
-import { Session } from '../model/session'
+import { Session } from '@renderer/function/model/session'
 import useRuntimeData from '@renderer/state/runtimeData'
 
 let needRefreshFavicon = false

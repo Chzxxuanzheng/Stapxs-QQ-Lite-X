@@ -2,10 +2,10 @@ import app, { i18n } from '@renderer/main'
 
 import l10nConfig from '@renderer/assets/l10n/_l10nconfig.json'
 import PO from 'pofile'
-import packageInfo from '../../../../../package.json'
-import { logger, popInfo } from '../base'
-import { DnsElem } from '../elements/information'
-import { popBox } from './popBox'
+import packageInfo from '@root/package.json'
+import { logger, popInfo } from '@renderer/function/base'
+import { DnsElem } from '@renderer/function/elements/information'
+import { popBox } from '@renderer/function/utils/popBox'
 import LoginPan from '@renderer/components/popBox/LoginPan.vue'
 
 /**

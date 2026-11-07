@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import Umami from '@stapxs/umami-logger-typescript'
-import * as App from './function/utils/appUtil'
+import * as App from '@renderer/function/utils/appUtil'
 
 import { logger, popInfo, popList } from '@renderer/function/base'
 import { i18n, uptime } from '@renderer/main'
@@ -88,9 +88,9 @@ import SideBar from '@renderer/pages/SideBar.vue'
 import ContextMenus from '@renderer/components/menu/ContextMenus.vue'
 import Tooltips from '@renderer/components/tooltip/Tooltips.vue'
 import PopBoxes from '@renderer/components/popBox/PopBoxes.vue'
-import useRuntimeData from './state/runtimeData'
-import { useFrame } from './function/composable/useFrame'
-import { useBackHoldup } from './function/composable/useBackHoldup'
+import useRuntimeData from '@renderer/state/runtimeData'
+import { useFrame } from '@renderer/function/composable/useFrame'
+import { useBackHoldup } from '@renderer/function/composable/useBackHoldup'
 
 //#region == 定义变量 ===================================================
 const fps = shallowReactive({

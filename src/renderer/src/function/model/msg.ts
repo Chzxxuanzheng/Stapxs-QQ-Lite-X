@@ -14,21 +14,21 @@ import type {
 	MsgData,
 	SegData,
 	SenderData,
-} from '../adapter/interface'
-import { popInfo } from '../base'
+} from '@renderer/function/adapter/interface'
+import { popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { delay } from '../utils/systemUtil'
-import { Time } from './data'
-import { Img } from './img'
-import { Message } from './message'
-import { AtSeg, ForwardSeg, ReplySeg, Seg, TxtSeg } from './seg'
-import { GroupSession, Session, TempSession } from './session'
-import { BaseUser, ForwardSender, getSender, Member, type IUser } from './user'
-import { autoMarkRaw, autoReactive } from './utils'
-import { sendStatEvent } from '../utils/appUtil'
-import { Role } from '../adapter/enmu'
-import { TimeoutSet } from '../utils/baseUtil'
-import { LinkInfo, parseLinks } from '../utils/linkViewUtil'
+import { delay } from '@renderer/function/utils/systemUtil'
+import { Time } from '@renderer/function/model/data'
+import { Img } from '@renderer/function/model/img'
+import { Message } from '@renderer/function/model/message'
+import { AtSeg, ForwardSeg, ReplySeg, Seg, TxtSeg } from '@renderer/function/model/seg'
+import { GroupSession, Session, TempSession } from '@renderer/function/model/session'
+import { BaseUser, ForwardSender, getSender, Member, type IUser } from '@renderer/function/model/user'
+import { autoMarkRaw, autoReactive } from '@renderer/function/model/utils'
+import { sendStatEvent } from '@renderer/function/utils/appUtil'
+import { Role } from '@renderer/function/adapter/enmu'
+import { TimeoutSet } from '@renderer/function/utils/baseUtil'
+import { LinkInfo, parseLinks } from '@renderer/function/utils/linkViewUtil'
 
 type IconData = { icon: string; rotate: boolean; desc: string; color: string }
 

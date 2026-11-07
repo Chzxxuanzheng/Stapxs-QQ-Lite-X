@@ -11,7 +11,7 @@ import {
 	getPortableFileLang,
 	getTrueLang,
 } from '@renderer/function/utils/systemUtil'
-import type { OptionField } from './index'
+import type { OptionField } from '@renderer/state/option/index'
 
 /**
  * 配置文件声明

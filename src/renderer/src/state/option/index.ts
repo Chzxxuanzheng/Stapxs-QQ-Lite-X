@@ -1,10 +1,10 @@
-import { OptionInfos } from './cfgs'
-import { checkAndMigration, migration } from './migration'
+import { OptionInfos } from '@renderer/state/option/cfgs'
+import { checkAndMigration, migration } from '@renderer/state/option/migration'
 
 import { computed, shallowReactive } from 'vue'
-import { loadAllOptions, saveAllOptions } from './utils'
+import { loadAllOptions, saveAllOptions } from '@renderer/state/option/utils'
 import { defineStore } from 'pinia'
-import useRuntimeData from '../runtimeData'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { queueWait } from '@renderer/function/utils/baseUtil'
 
 type OptionGlobalTag = 'global'

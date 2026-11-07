@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import { FaceSeg, ImgSeg, TxtSeg } from '@renderer/function/model/seg'
 import { GroupSession } from '@renderer/function/model/session'
-import EmojiFace from './EmojiFace.vue'
+import EmojiFace from '@renderer/components/EmojiFace.vue'
 import { watchEffect } from 'vue'
 import { useViewer } from '@renderer/function/composable/inject/useViewer.js'
 

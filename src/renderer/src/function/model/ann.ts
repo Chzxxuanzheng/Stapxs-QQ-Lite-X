@@ -6,11 +6,11 @@
  * @Description: 群公告模型
  */
 
-import { GroupAnnouncementData } from '../adapter/interface'
-import { Time } from './data'
-import { Img } from './img'
-import { GroupSession } from './session'
-import { BaseUser, IUser } from './user'
+import { GroupAnnouncementData } from '@renderer/function/adapter/interface'
+import { Time } from '@renderer/function/model/data'
+import { Img } from '@renderer/function/model/img'
+import { GroupSession } from '@renderer/function/model/session'
+import { BaseUser, IUser } from '@renderer/function/model/user'
 
 export class Ann {
 	content: string

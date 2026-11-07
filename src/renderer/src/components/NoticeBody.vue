@@ -149,9 +149,9 @@ import {
 import { scrollToMsg } from '@renderer/function/utils/appUtil'
 import { vTooltip } from '@renderer/function/utils/vcmd'
 import { computed, ComputedRef } from 'vue'
-import EmojiFace from './EmojiFace.vue'
-import NoticeUser from './NoticeUser.vue'
-import MsgPrevTooltip from './tooltip/MsgPrevTooltip.vue'
+import EmojiFace from '@renderer/components/EmojiFace.vue'
+import NoticeUser from '@renderer/components/NoticeUser.vue'
+import MsgPrevTooltip from '@renderer/components/tooltip/MsgPrevTooltip.vue'
 import { useUpdateFlag } from '@renderer/function/composable/useUpdateFlag.js'
 import { pastTimeFormat } from '@renderer/function/utils/systemUtil.js'
 const { data, id } = defineProps<{

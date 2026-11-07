@@ -28,6 +28,7 @@
 		"noImplicitReturns": true,
 		"composite": true,
 		"paths": {
+			"@root/*": ["./*"],
 			"@renderer/*": ["./src/renderer/src/*"]
 		},
 		"emitDecoratorMetadata": true,

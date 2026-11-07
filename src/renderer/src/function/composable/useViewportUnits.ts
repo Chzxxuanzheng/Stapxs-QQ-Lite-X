@@ -1,5 +1,5 @@
 import { shallowRef, ShallowRef } from 'vue'
-import { useEventListener } from './useEventListener'
+import { useEventListener } from '@renderer/function/composable/useEventListener'
 
 let viewportUnitsCache:
 	| { vw: ShallowRef<number>; vh: ShallowRef<number> }

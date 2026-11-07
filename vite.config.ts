@@ -90,6 +90,7 @@ export function configFactory(outPath: string): UserConfigFnObject {
             resolve: {
                 alias: {
                     '@renderer': resolve(__dirname, 'src/renderer/src'),
+                    '@root': resolve(__dirname, './'),
                 },
             },
             build: {

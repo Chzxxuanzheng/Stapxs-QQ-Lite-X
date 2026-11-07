@@ -7,13 +7,13 @@
  */
 // oxlint-disable-next-line no-restricted-imports
 import { shallowRef, shallowReactive, computed, nextTick, reactive } from 'vue'
-import { Msg } from './msg'
-import { AtSeg, ImgSeg, ReplySeg, Seg, TxtSeg } from './seg'
-import { autoMarkRaw } from './utils'
+import { Msg } from '@renderer/function/model/msg'
+import { AtSeg, ImgSeg, ReplySeg, Seg, TxtSeg } from '@renderer/function/model/seg'
+import { autoMarkRaw } from '@renderer/function/model/utils'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { Session } from './session'
-import { queueWait } from '../utils/baseUtil'
-import { logger, popInfo } from '../base'
+import { Session } from '@renderer/function/model/session'
+import { queueWait } from '@renderer/function/utils/baseUtil'
+import { logger, popInfo } from '@renderer/function/base'
 import imageCompression from 'browser-image-compression'
 import app from '@renderer/main'
 

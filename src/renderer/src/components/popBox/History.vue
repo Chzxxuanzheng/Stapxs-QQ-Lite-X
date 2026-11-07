@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { changeSession } from '@renderer/function/utils/msgUtil'
 import { useSessionHistoryStore } from '@renderer/state/sessionHistory'
-import TinySessionBody from '../TinySessionBody.vue'
+import TinySessionBody from '@renderer/components/TinySessionBody.vue'
 
 const history = useSessionHistoryStore()
 </script>

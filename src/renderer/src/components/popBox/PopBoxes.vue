@@ -11,6 +11,6 @@
 </template>
 <script setup lang="ts">
 import { popBoxList } from '@renderer/function/utils/popBox'
-import PopBox from './PopBox.vue'
+import PopBox from '@renderer/components/popBox/PopBox.vue'
 import { vHide } from '@renderer/function/utils/vcmd'
 </script>

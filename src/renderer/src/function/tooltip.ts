@@ -5,10 +5,10 @@ import {
 	ObjectDirective,
 	shallowReactive,
 } from 'vue'
-import { VueCompData } from './elements/vueComp'
-import { vTooltip } from './utils/vcmd'
+import { VueCompData } from '@renderer/function/elements/vueComp'
+import { vTooltip } from '@renderer/function/utils/vcmd'
 import UserInfoTooltip from '@renderer/components/tooltip/UserInfoTooltip.vue'
-import { IUser } from './model/user'
+import { IUser } from '@renderer/function/model/user'
 
 export const tooltipList: TooltipInfo<Component>[] = shallowReactive([])
 

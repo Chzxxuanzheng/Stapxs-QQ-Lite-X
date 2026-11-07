@@ -48,7 +48,7 @@ import {
 	VideoSegData,
 	XmlSegData,
 	SuperFaceSegData,
-} from '../interface'
+} from '@renderer/function/adapter/interface'
 
 import { handleEvent } from '@renderer/function/event'
 import { Resource } from '@renderer/function/model/resource'
@@ -95,12 +95,12 @@ import type {
 	OutgoingSegment,
 	SendGroupMessageOutput,
 	SendPrivateMessageOutput,
-} from './types'
-import { parseApiInput, parseApiOutput, safeParseEvent } from './types'
+} from '@renderer/function/adapter/mk/types'
+import { parseApiInput, parseApiOutput, safeParseEvent } from '@renderer/function/adapter/mk/types'
 import { Component } from 'vue'
-import * as ISeg from './incomeSeg'
-import MkInfo from './MkInfo.vue'
-import * as OSeg from './outgoingSeg'
+import * as ISeg from '@renderer/function/adapter/mk/incomeSeg'
+import MkInfo from '@renderer/function/adapter/mk/MkInfo.vue'
+import * as OSeg from '@renderer/function/adapter/mk/outgoingSeg'
 import {
 	$t,
 	camelCaseToUnderline,
@@ -110,8 +110,8 @@ import {
 	getGender,
 	getRole,
 	versionCompare,
-} from './utils'
-import type { MilkyVersion } from './utils'
+} from '@renderer/function/adapter/mk/utils'
+import type { MilkyVersion } from '@renderer/function/adapter/mk/utils'
 import { logger, popInfo } from '@renderer/function/base'
 import Emoji from '@renderer/function/model/emoji'
 

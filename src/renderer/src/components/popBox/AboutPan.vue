@@ -263,11 +263,11 @@
 import { openLink, sendStatEvent } from '@renderer/function/utils/appUtil'
 import { popBox } from '@renderer/function/utils/popBox'
 import app from '@renderer/main'
-import DepPan from './DepPan.vue'
+import DepPan from '@renderer/components/popBox/DepPan.vue'
 import Icon from '@renderer/components/Icon.vue'
 import { getVersion } from '@renderer/function/utils/systemUtil'
 import useRuntimeData from '@renderer/state/runtimeData'
-import UpdateRecordBox from './UpdateRecordBox.vue'
+import UpdateRecordBox from '@renderer/components/popBox/UpdateRecordBox.vue'
 
 const { showUI } = defineProps<{
 	showUI: boolean

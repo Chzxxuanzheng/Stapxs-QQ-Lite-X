@@ -1,4 +1,4 @@
-import { MenuEventData } from '../elements/information'
+import { MenuEventData } from '@renderer/function/elements/information'
 
 /**
  * 用来封装一个停留事件的处理, 支持传递额外上下文

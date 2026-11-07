@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SuperFaceSeg } from '@renderer/function/model/seg'
-import LazyLottie from '../LazyLottie.vue'
+import LazyLottie from '@renderer/components/LazyLottie.vue'
 
 const { seg } = defineProps<{
 	seg: SuperFaceSeg

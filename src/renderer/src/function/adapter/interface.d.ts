@@ -6,12 +6,12 @@
  * @Description: 定义适配器的基本接口，所有适配器应当实现这个的接口。
  */
 import { type Component } from 'vue'
-import { GroupFile, GroupFileFolder } from '../model/file'
-import { Msg } from '../model/msg'
-import { Resource } from '../model/resource'
-import { GroupSession, Session, UserSession } from '../model/session'
-import { Member } from '../model/user'
-import { Gender, Role } from './enmu'
+import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
+import { Msg } from '@renderer/function/model/msg'
+import { Resource } from '@renderer/function/model/resource'
+import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import { Member } from '@renderer/function/model/user'
+import { Gender, Role } from '@renderer/function/adapter/enmu'
 
 export interface AdapterInterface {
 	// 基础信息

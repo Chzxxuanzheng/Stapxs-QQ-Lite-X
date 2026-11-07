@@ -102,7 +102,7 @@ import { sendMsgRaw, singleForward } from '@renderer/function/utils/msgUtil'
 import { copyToClipboard } from '@renderer/function/utils/systemUtil'
 import app from '@renderer/main'
 import { shallowReactive, shallowRef } from 'vue'
-import EmojiFace from '../EmojiFace.vue'
+import EmojiFace from '@renderer/components/EmojiFace.vue'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { ensurePopBox } from '@renderer/function/utils/popBox'
 

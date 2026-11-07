@@ -2,7 +2,7 @@
 import { VueCompData } from '@renderer/function/elements/vueComp'
 import { Msg } from '@renderer/function/model/msg'
 import { ForwardSeg } from '@renderer/function/model/seg'
-import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue'
+import MsgPrevTooltip from '@renderer/components/tooltip/MsgPrevTooltip.vue'
 import { popInfo } from '@renderer/function/base.js'
 import app from '@renderer/main.js'
 import { vTooltip } from '@renderer/function/utils/vcmd'

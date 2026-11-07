@@ -19,9 +19,9 @@ import type {
 	RecallEventData,
 	ResponseEventData,
 	SessionEventType,
-} from '../adapter/interface'
-import { Message } from './message'
-import { Msg } from './msg'
+} from '@renderer/function/adapter/interface'
+import { Message } from '@renderer/function/model/message'
+import { Msg } from '@renderer/function/model/msg'
 import {
 	BanLiftNotice,
 	BanNotice,
@@ -30,9 +30,9 @@ import {
 	PokeNotice,
 	RecallNotice,
 	ResponseNotice,
-} from './notice'
-import { GroupSession, Session } from './session'
-import { BaseUser, getSender, Member } from './user'
+} from '@renderer/function/model/notice'
+import { GroupSession, Session } from '@renderer/function/model/session'
+import { BaseUser, getSender, Member } from '@renderer/function/model/user'
 
 type EventConstructor = { new (...args: any[]): Event }
 const eventType: Map<string, EventConstructor> = new Map()

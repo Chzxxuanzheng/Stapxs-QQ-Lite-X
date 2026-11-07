@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import useRuntimeData from '@renderer/state/runtimeData'
-import { OneBotAdapter } from './adapter'
+import { OneBotAdapter } from '@renderer/function/adapter/ob/adapter'
 import { computed, markRaw } from 'vue'
 const runtimeData = useRuntimeData()
 const adapter = computed<OneBotAdapter>(() =>

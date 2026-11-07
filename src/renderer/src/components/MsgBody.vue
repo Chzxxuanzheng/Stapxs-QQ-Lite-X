@@ -188,7 +188,7 @@
 </template>
 
 <script setup lang="ts">
-import EmojiFace from './EmojiFace.vue'
+import EmojiFace from '@renderer/components/EmojiFace.vue'
 
 import { Role } from '@renderer/function/adapter/enmu'
 import { MenuEventData } from '@renderer/function/elements/information'
@@ -207,9 +207,9 @@ import { vUserTooltip } from '@renderer/function/tooltip'
 
 import useRuntimeData from '@renderer/state/runtimeData'
 import { getCm } from '@renderer/function/utils/baseUtil'
-import MsgLinkPreview from './msg-component/MsgLinkPreview.vue'
+import MsgLinkPreview from '@renderer/components/msg-component/MsgLinkPreview.vue'
 import app from '@renderer/main.js'
-import Segs from './msg-component/Segs.vue'
+import Segs from '@renderer/components/msg-component/Segs.vue'
 
 //#region == 声明变量 ================================================================
 const {

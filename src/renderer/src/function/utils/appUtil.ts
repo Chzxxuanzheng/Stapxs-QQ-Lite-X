@@ -5,8 +5,8 @@ import FileDownloader from 'js-file-downloader'
 import { logger, popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { defineAsyncComponent, h, markRaw } from 'vue'
-import { GroupSession, Session, UserSession } from '../model/session'
-import { changeSession } from './msgUtil'
+import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import { changeSession } from '@renderer/function/utils/msgUtil'
 
 /**
  * 滚动到目标消息（不自动加载）
@@ -203,16 +203,16 @@ export function downloadFile(
 	}).catch((e) => logger.error(e as Error, '下载文件失败'))
 }
 
-import { FriendData, GroupData } from '../adapter/interface'
-import driver from '../driver'
-import { NoticeBodyV3 } from '../elements/system'
-import { SessionBox } from '../model/box'
-import { Message } from '../model/message'
-import { ProxyUrl } from '../model/proxyUrl'
-import { htmlPopBox, popBox, PopBoxButton } from './popBox'
+import { FriendData, GroupData } from '@renderer/function/adapter/interface'
+import driver from '@renderer/function/driver'
+import { NoticeBodyV3 } from '@renderer/function/elements/system'
+import { SessionBox } from '@renderer/function/model/box'
+import { Message } from '@renderer/function/model/message'
+import { ProxyUrl } from '@renderer/function/model/proxyUrl'
+import { htmlPopBox, popBox, PopBoxButton } from '@renderer/function/utils/popBox'
 import WelPan from '@renderer/components/popBox/WelPan.vue'
 import SvgMedal from '@renderer/components/svg/SvgMedal.vue'
-import { useLocalStorage } from '../composable/useLocalStorage'
+import { useLocalStorage } from '@renderer/function/composable/useLocalStorage'
 
 /**
  * 检查更新

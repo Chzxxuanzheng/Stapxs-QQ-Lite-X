@@ -72,7 +72,7 @@ import {
 	useTemplateRef,
 	watchEffect,
 } from 'vue'
-import TinySessionBody from './TinySessionBody.vue'
+import TinySessionBody from '@renderer/components/TinySessionBody.vue'
 import { fitScroll } from '@renderer/function/utils/appUtil'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { useKeyboard } from '@renderer/function/composable/useKeyboard.js'

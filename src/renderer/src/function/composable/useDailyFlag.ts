@@ -1,5 +1,5 @@
 import { shallowRef, ShallowRef, watch } from 'vue'
-import { useLocalStorage } from './useLocalStorage'
+import { useLocalStorage } from '@renderer/function/composable/useLocalStorage'
 
 const timesEnd = useLocalStorage('last-times', 0)
 const uptime = Date.now()

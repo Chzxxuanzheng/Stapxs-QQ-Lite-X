@@ -1,4 +1,4 @@
-import { useEventListener } from './useEventListener'
+import { useEventListener } from '@renderer/function/composable/useEventListener'
 
 /**
  * 添加一个按键监听，支持组合键，注意，不支持多普通键组合，如`a+b`

@@ -7,10 +7,10 @@
  */
 
 import { Component, markRaw, shallowReactive, shallowRef } from 'vue'
-import { Session } from '../model/session'
-import { SessionBox } from '../model/box'
+import { Session } from '@renderer/function/model/session'
+import { SessionBox } from '@renderer/function/model/box'
 import FriendMenu from '@renderer/components/menu/FriendMenu.vue'
-import { VueCompData } from '../elements/vueComp'
+import { VueCompData } from '@renderer/function/elements/vueComp'
 
 export interface ContextMenuData {
 	id: string

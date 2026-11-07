@@ -58,9 +58,9 @@ import type {
 	UserData,
 	VideoSegData,
 	XmlSegData,
-} from '../interface'
-import { LoginInfo } from '../interface'
-import ObInfo from './ObInfo.vue'
+} from '@renderer/function/adapter/interface'
+import { LoginInfo } from '@renderer/function/adapter/interface'
+import ObInfo from '@renderer/function/adapter/ob/ObInfo.vue'
 import type {
 	ObAnonymousSender,
 	ObAtSeg,
@@ -96,8 +96,8 @@ import type {
 	ObTextSeg,
 	ObVideoSeg,
 	ObXmlSeg,
-} from './type'
-import { $t, createSender, getGender, getRole, ObConnector } from './utils'
+} from '@renderer/function/adapter/ob/type'
+import { $t, createSender, getGender, getRole, ObConnector } from '@renderer/function/adapter/ob/utils'
 import { logger } from '@renderer/function/base'
 import Emoji from '@renderer/function/model/emoji'
 
@@ -199,9 +199,9 @@ export class OneBotAdapter implements AdapterInterface {
 		const implInfo = await this.getImplInfo()
 		if (!implInfo) return undefined
 
-		const LagrangeOneBot = (await import('./LagrangeOneBot')).default
-		const NapCatOneBot = (await import('./NapCapOneBot')).default
-		const LLBTOneBot = (await import('./LLBotOneBot')).default
+		const LagrangeOneBot = (await import('@renderer/function/adapter/ob/LagrangeOneBot')).default
+		const NapCatOneBot = (await import('@renderer/function/adapter/ob/NapCapOneBot')).default
+		const LLBTOneBot = (await import('@renderer/function/adapter/ob/LLBotOneBot')).default
 		if (LagrangeOneBot.match(implInfo))
 			return new LagrangeOneBot(this.connector, this.botInfo.value)
 		if (NapCatOneBot.match(implInfo))

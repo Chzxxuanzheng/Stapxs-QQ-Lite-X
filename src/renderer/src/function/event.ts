@@ -10,7 +10,7 @@
  */
 
 import useRuntimeData from '@renderer/state/runtimeData'
-import { EventData, EventType } from './adapter/interface'
+import { EventData, EventType } from '@renderer/function/adapter/interface'
 import {
 	BanEvent,
 	BanLiftEvent,
@@ -21,9 +21,9 @@ import {
 	PokeEvent,
 	RecallEvent,
 	ResponseEvent,
-} from './model/event'
-import { Session } from './model/session'
-import { newMsg, recallMsg } from './msg'
+} from '@renderer/function/model/event'
+import { Session } from '@renderer/function/model/session'
+import { newMsg, recallMsg } from '@renderer/function/msg'
 
 type EventHook<T extends Event> = (event: T) => void | Promise<void>
 const eventHooks: Map<EventType, EventHook<any>[]> = new Map()

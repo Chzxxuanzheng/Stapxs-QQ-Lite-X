@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ReplySeg } from '@renderer/function/model/seg'
 import { vTooltip } from '@renderer/function/utils/vcmd'
-import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue'
+import MsgPrevTooltip from '@renderer/components/tooltip/MsgPrevTooltip.vue'
 import { Msg } from '@renderer/function/model/msg'
 import { VueCompData } from '@renderer/function/elements/vueComp.js'
 import { computed } from 'vue'

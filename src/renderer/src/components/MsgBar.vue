@@ -73,8 +73,8 @@
 </template>
 <script setup lang="ts">
 import { shallowReactive, shallowRef } from 'vue'
-import MsgBody from './MsgBody.vue'
-import NoticeBody from './NoticeBody.vue'
+import MsgBody from '@renderer/components/MsgBody.vue'
+import NoticeBody from '@renderer/components/NoticeBody.vue'
 
 import { MenuEventData } from '@renderer/function/elements/information'
 import { Message } from '@renderer/function/model/message'

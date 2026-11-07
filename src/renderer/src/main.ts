@@ -1,4 +1,4 @@
-import App from './App.vue'
+import App from '@renderer/App.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
@@ -21,9 +21,9 @@ import '@renderer/assets/css/sys_notice.css'
 import '@renderer/assets/css/view.css'
 import '@renderer/assets/css/color.css'
 
-import { getPortableFileLang, getVersion } from './function/utils/systemUtil'
-import win from './runtime/win'
-import useOptionStore from './state/option'
+import { getPortableFileLang, getVersion } from '@renderer/function/utils/systemUtil'
+import win from '@renderer/runtime/win'
+import useOptionStore from '@renderer/state/option'
 
 const zh = getPortableFileLang('zh-CN')
 

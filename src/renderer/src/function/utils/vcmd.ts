@@ -17,13 +17,13 @@ import {
 	watchEffect,
 	WatchHandle,
 } from 'vue'
-import { Role } from '../adapter/enmu'
-import { MenuEventData } from '../elements/information'
-import { shouldAutoFocus } from './appUtil'
-import { wheelMask } from './input'
-import { VueCompData } from '../elements/vueComp'
-import { addTooltip, TooltipController } from '../tooltip'
-import { useStayEvent } from '../composable/useStayEvent'
+import { Role } from '@renderer/function/adapter/enmu'
+import { MenuEventData } from '@renderer/function/elements/information'
+import { shouldAutoFocus } from '@renderer/function/utils/appUtil'
+import { wheelMask } from '@renderer/function/utils/input'
+import { VueCompData } from '@renderer/function/elements/vueComp'
+import { addTooltip, TooltipController } from '@renderer/function/tooltip'
+import { useStayEvent } from '@renderer/function/composable/useStayEvent'
 
 /**
  * 根据用户角色设置元素的 class 属性

@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
 import { Session } from '@renderer/function/model/session'
-import BoxTag from './BoxTag.vue'
+import BoxTag from '@renderer/components/BoxTag.vue'
 import { vOverflowHide } from '@renderer/function/utils/vcmd'
 
 const {

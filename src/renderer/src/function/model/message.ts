@@ -6,8 +6,8 @@
  * @Description: 直接在消息栏上展示的模型
  */
 
-import { Session } from './session'
-import { Time } from './data'
+import { Session } from '@renderer/function/model/session'
+import { Time } from '@renderer/function/model/data'
 
 export abstract class Message {
 	/**

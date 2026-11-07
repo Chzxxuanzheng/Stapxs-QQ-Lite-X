@@ -7,7 +7,7 @@
  */
 
 import { markRaw, shallowReactive } from 'vue'
-import { getTimeConfig, getTrueLang } from '../utils/systemUtil'
+import { getTimeConfig, getTrueLang } from '@renderer/function/utils/systemUtil'
 
 export function autoReactive<T extends new (...args: any[]) => any>(con: T): T {
 	return class extends con {

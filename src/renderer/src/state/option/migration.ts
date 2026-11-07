@@ -1,4 +1,4 @@
-import { loadAllOptions } from './utils'
+import { loadAllOptions } from '@renderer/state/option/utils'
 
 const migrationFunc = {
 	// 0 -> 1
@@ -144,7 +144,7 @@ export async function checkAndMigration(): Promise<void> {
 	const newOptions = await migration(options)
 	// 保存
 	if (oldVersion !== newOptions['_version']) {
-		const saveAllOptions = await import('./utils').then(
+		const saveAllOptions = await import('@renderer/state/option/utils').then(
 			(mod) => mod.saveAllOptions,
 		)
 		await saveAllOptions(newOptions)

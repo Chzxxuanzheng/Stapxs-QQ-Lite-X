@@ -3,7 +3,7 @@ import { Session } from '@renderer/function/model/session'
 import { defineStore } from 'pinia'
 // oxlint-disable-next-line no-restricted-imports
 import { computed, shallowReactive, shallowRef, ref, watchEffect } from 'vue'
-import useOptionStore from './option'
+import useOptionStore from '@renderer/state/option'
 import type { User } from '@renderer/function/model/user'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 import { AdapterInterface } from '@renderer/function/adapter/interface'

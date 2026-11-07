@@ -6,7 +6,7 @@
  * @Description: 提供分组的收纳盒
  */
 
-import { Name } from './data'
+import { Name } from '@renderer/function/model/data'
 import {
 	shallowReactive,
 	ShallowReactive,
@@ -16,10 +16,10 @@ import {
 	computed,
 	ComputedRef,
 } from 'vue'
-import { Message } from './message'
-import { GroupSession, Session } from './session'
+import { Message } from '@renderer/function/model/message'
+import { GroupSession, Session } from '@renderer/function/model/session'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { Msg } from './msg'
+import { Msg } from '@renderer/function/model/msg'
 import win from '@renderer/runtime/win'
 
 // 对于会话而言，收纳盒是有序的，对于收纳盒，会话是无序的，所以不把content塞到这个表里
