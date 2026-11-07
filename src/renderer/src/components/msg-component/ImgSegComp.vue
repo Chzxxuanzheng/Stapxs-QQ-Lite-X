@@ -140,6 +140,9 @@ void init()
 function imgClick() {
 	viewer?.value?.open(seg.imgData)
 }
+
+const transitionName = shallowRef('none')
+setTimeout(() => (transitionName.value = 'fade-out-in'), 500)
 </script>
 
 <template>
@@ -148,7 +151,7 @@ function imgClick() {
 		:class="['msg-img', pos, type, state, { 'msg-inline': seg.inline }]"
 		:style="boxStyle"
 	>
-		<Transition name="fade-out-in" mode="out-in">
+		<Transition :name="transitionName" mode="out-in">
 			<font-awesome-icon
 				v-if="state === 'loading'"
 				:icon="['fas', 'spinner']"
