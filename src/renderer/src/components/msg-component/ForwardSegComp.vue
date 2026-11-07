@@ -6,7 +6,7 @@ import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue'
 import { popInfo } from '@renderer/function/base.js'
 import app from '@renderer/main.js'
 import { vTooltip } from '@renderer/function/utils/vcmd'
-import { useMergePan } from '@renderer/function/utils/vuse.js'
+import { useMergePan } from '@renderer/function/composable/inject/useMergePan.js'
 
 const { seg } = defineProps<{
 	seg: ForwardSeg

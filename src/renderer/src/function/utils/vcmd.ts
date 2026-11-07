@@ -21,9 +21,9 @@ import { Role } from '../adapter/enmu'
 import { MenuEventData } from '../elements/information'
 import { shouldAutoFocus } from './appUtil'
 import { wheelMask } from './input'
-import { useStayEvent } from './vuse'
 import { VueCompData } from '../elements/vueComp'
 import { addTooltip, TooltipController } from '../tooltip'
+import { useStayEvent } from '../composable/useStayEvent'
 
 /**
  * 根据用户角色设置元素的 class 属性

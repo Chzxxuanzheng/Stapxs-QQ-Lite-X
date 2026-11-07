@@ -12,22 +12,19 @@ import { faSquare } from '@fortawesome/free-regular-svg-icons'
 import VueAMap, { initAMapApiLoader } from '@vuemap/vue-amap'
 import '@vuemap/vue-amap/dist/style.css'
 
-import './assets/css/style.css'
-import './assets/css/chat.css'
-import './assets/css/doc.css'
-import './assets/css/msg.css'
-import './assets/css/options.css'
-import './assets/css/sys_notice.css'
-import './assets/css/view.css'
-import './assets/css/color.css'
+import '@renderer/assets/css/style.css'
+import '@renderer/assets/css/chat.css'
+import '@renderer/assets/css/doc.css'
+import '@renderer/assets/css/msg.css'
+import '@renderer/assets/css/options.css'
+import '@renderer/assets/css/sys_notice.css'
+import '@renderer/assets/css/view.css'
+import '@renderer/assets/css/color.css'
 
 import { getPortableFileLang, getVersion } from './function/utils/systemUtil'
-import { useLocalStorage } from './function/utils/vuse'
 import win from './runtime/win'
 import useOptionStore from './state/option'
-// import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
-/* oxlint-disable no-console */
 const zh = getPortableFileLang('zh-CN')
 
 // 载入 l10n
@@ -42,7 +39,6 @@ export const i18n = createI18n({
 })
 // 创建 Pinia
 const pinia = createPinia()
-// pinia.use(piniaPluginPersistedstate)
 
 // 创建 App
 const app = createApp(App).use(i18n).use(pinia).use(VueAMap)
@@ -58,16 +54,9 @@ initAMapApiLoader({
 export default app
 export const uptime = Date.now()
 
-const _nowTimes = useLocalStorage('now-times', 0)
-const timesEnd = useLocalStorage('last-times', 0)
-if (uptime > timesEnd.value) {
-	_nowTimes.value += 1
-	const dailyFlag = useLocalStorage('daily-flag', '')
-	timesEnd.value = uptime + 24 * 60 * 60 * 1000
-	dailyFlag.value = ''
-}
+const day = 1000 * 3600 * 24
 
-export const nowTimes = _nowTimes.value
+export const nowTimes = Math.floor(uptime / day)
 
 // 奇奇怪怪的日志
 const strList = ['VERSION', 'WELCOME', 'HELLO']
@@ -85,6 +74,7 @@ const colorList = [
 ]
 const color = colorList[Math.floor(Math.random() * colorList.length)]
 const str = strList[Math.floor(Math.random() * strList.length)]
+/* oxlint-disable no-console */
 console.log(
 	`%c${str}%c Stapxs QQ Lite X - ${getVersion()} ( ${import.meta.env.DEV ? 'development' : 'production'} ) `,
 	`font-weight:bold;background:#${color};color:#fff;border-radius:7px 0 0 7px;padding:7px 14px;margin:7px 0 7px 7px;`,

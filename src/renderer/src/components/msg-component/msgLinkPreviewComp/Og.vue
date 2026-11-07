@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { useViewer } from '@renderer/function/composable/inject/useViewer'
 import { Img } from '@renderer/function/model/img'
 import { LinkInfo } from '@renderer/function/utils/linkViewUtil'
-import { useViewer } from '@renderer/function/utils/vuse'
 
 const { info } = defineProps<{
 	info: LinkInfo & { type: 'og' }

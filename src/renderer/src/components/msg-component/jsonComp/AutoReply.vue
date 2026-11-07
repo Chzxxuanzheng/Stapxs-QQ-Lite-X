@@ -24,9 +24,9 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { logger } from '@renderer/function/base'
+import { useCurrentMsg } from '@renderer/function/composable/inject/useCurrentMsg'
 import { AtSeg, JsonSeg, TxtSeg } from '@renderer/function/model/seg'
 import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
-import { useCurrentMsg } from '@renderer/function/utils/vuse'
 import * as z from 'zod'
 
 const { seg } = defineProps<{

@@ -64,7 +64,6 @@ import { Session } from '@renderer/function/model/session'
 import { changeSession } from '@renderer/function/utils/msgUtil'
 import { hasPopBox } from '@renderer/function/utils/popBox'
 import { vSearch } from '@renderer/function/utils/vcmd'
-import { useKeyboard } from '@renderer/function/utils/vuse'
 import {
 	computed,
 	nextTick,
@@ -76,6 +75,7 @@ import {
 import TinySessionBody from './TinySessionBody.vue'
 import { fitScroll } from '@renderer/function/utils/appUtil'
 import useRuntimeData from '@renderer/state/runtimeData'
+import { useKeyboard } from '@renderer/function/composable/useKeyboard.js'
 
 //#region == 常量声明 ====================================================================
 const show = shallowRef<boolean>(false)

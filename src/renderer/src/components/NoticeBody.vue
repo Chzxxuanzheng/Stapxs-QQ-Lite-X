@@ -148,17 +148,23 @@ import {
 } from '@renderer/function/model/notice'
 import { scrollToMsg } from '@renderer/function/utils/appUtil'
 import { vTooltip } from '@renderer/function/utils/vcmd'
-import { usePasttime } from '@renderer/function/utils/vuse'
-import { ComputedRef } from 'vue'
+import { computed, ComputedRef } from 'vue'
 import EmojiFace from './EmojiFace.vue'
 import NoticeUser from './NoticeUser.vue'
 import MsgPrevTooltip from './tooltip/MsgPrevTooltip.vue'
+import { useUpdateFlag } from '@renderer/function/composable/useUpdateFlag.js'
+import { pastTimeFormat } from '@renderer/function/utils/systemUtil.js'
 const { data, id } = defineProps<{
 	data: Notice
 	id?: string
 }>()
 let pastTime: ComputedRef<string> | undefined
-if (data instanceof TimeNotice && data.time != undefined) {
-	pastTime = usePasttime(data.time.time)
+
+if (data instanceof TimeNotice && data.time !== undefined) {
+	const updateFlag = useUpdateFlag()
+	pastTime = computed(() => {
+		void updateFlag.value
+		return pastTimeFormat(data.time!.time)
+	})
 }
 </script>

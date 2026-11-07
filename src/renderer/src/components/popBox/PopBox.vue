@@ -74,10 +74,10 @@ import {
 	vMove,
 	VMoveOptions,
 } from '@renderer/function/utils/vcmd'
-import { useViewportUnits } from '@renderer/function/utils/vuse'
 import { animate } from 'animejs'
 import { type Component, nextTick, shallowRef, useTemplateRef } from 'vue'
 import { getCm } from '@renderer/function/utils/baseUtil'
+import { useViewportUnits } from '@renderer/function/composable/useViewportUnits'
 
 const { props } = defineProps<{ props: { id: string; data: PopBoxData<T> } }>()
 

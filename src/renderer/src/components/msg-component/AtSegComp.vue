@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { useCurrentMsg } from '@renderer/function/composable/inject/useCurrentMsg'
 import { AtSeg } from '@renderer/function/model/seg'
 import { IUser } from '@renderer/function/model/user'
 import { vUserTooltip } from '@renderer/function/tooltip'
-import { useCurrentMsg } from '@renderer/function/utils/vuse'
 import useRuntimeData from '@renderer/state/runtimeData'
 
 const { seg, showToMe = true } = defineProps<{

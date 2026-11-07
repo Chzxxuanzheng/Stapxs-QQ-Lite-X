@@ -211,7 +211,7 @@
 						session.getMe().banTime
 					"
 					class="ban"
-					:u="update"
+					:u="updateFlag"
 				>
 					<font-awesome-icon :icon="['fas', 'ban']" />
 					{{
@@ -268,14 +268,12 @@ import { fitScroll } from '@renderer/function/utils/appUtil'
 import { FileSender } from '@renderer/function/utils/fileSender'
 import { uploadFile } from '@renderer/function/input'
 import { InputMsg } from '@renderer/function/model/inputMsg'
-import {
-	useFrame,
-	useResizeObserver,
-	useUpdate,
-	useViewer,
-} from '@renderer/function/utils/vuse'
 import { calcTextareaHeight } from '@renderer/function/utils/calcTextareaHiehgt'
 import useRuntimeData from '@renderer/state/runtimeData'
+import { useViewer } from '@renderer/function/composable/inject/useViewer'
+import { useUpdateFlag } from '@renderer/function/composable/useUpdateFlag'
+import { useFrame } from '@renderer/function/composable/useFrame'
+import { useResizeObserver } from '@renderer/function/composable/useResizeObserver'
 
 const viewer = useViewer()
 
@@ -298,7 +296,7 @@ const atSelected = shallowRef<number>(0)
 const details = shallowRef<'face' | 'essence' | undefined>()
 const onAtFind = shallowRef(false)
 const inputPanHeight = shallowRef(0)
-const update = useUpdate()
+const updateFlag = useUpdateFlag()
 const inputHeight = shallowRef(0)
 
 const hover = shallowRef(false)

@@ -280,13 +280,14 @@
 
 <script setup lang="ts">
 import { popInfo } from '@renderer/function/base'
+import { useKeyboard } from '@renderer/function/composable/useKeyboard'
+import { useViewportUnits } from '@renderer/function/composable/useViewportUnits'
 import { mousemoveMask } from '@renderer/function/input'
 import { Img } from '@renderer/function/model/img'
 import { downloadFile } from '@renderer/function/utils/appUtil'
 import { getCm } from '@renderer/function/utils/baseUtil'
 import { copyToClipboard } from '@renderer/function/utils/systemUtil'
 import { vEsc, vHide, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
-import { useKeyboard, useViewportUnits } from '@renderer/function/utils/vuse'
 import { i18n } from '@renderer/main'
 import useRuntimeData from '@renderer/state/runtimeData'
 import {
