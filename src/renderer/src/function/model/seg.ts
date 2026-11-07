@@ -19,17 +19,17 @@ import type {
 	UnknownSegData,
 	VideoSegData,
 	XmlSegData,
-} from '../adapter/interface'
-import { popInfo } from '../base'
-import { downloadFile } from '../utils/appUtil'
-import { getSizeFromBytes } from '../utils/systemUtil'
-import Emoji from './emoji'
-import { Img } from './img'
-import { ForwardMsg, Msg } from './msg'
-import { ProxyUrl } from './proxyUrl'
-import { Resource } from './resource'
-import { autoMarkRaw } from './utils'
-import { parseUrlFromMsg } from '../utils/baseUtil'
+} from '@renderer/function/adapter/interface'
+import { popInfo } from '@renderer/function/base'
+import { downloadFile } from '@renderer/function/utils/appUtil'
+import { getSizeFromBytes } from '@renderer/function/utils/systemUtil'
+import Emoji from '@renderer/function/model/emoji'
+import { Img } from '@renderer/function/model/img'
+import { ForwardMsg, Msg } from '@renderer/function/model/msg'
+import { ProxyUrl } from '@renderer/function/model/proxyUrl'
+import { Resource } from '@renderer/function/model/resource'
+import { autoMarkRaw } from '@renderer/function/model/utils'
+import { parseUrlFromMsg } from '@renderer/function/utils/baseUtil'
 
 export const segType = {}
 type SegCon<T extends Seg> = { new (...args: any[]): T; type: string }

@@ -17,12 +17,12 @@ import qed from '@renderer/assets/qed.txt?raw'
 import Umami from '@stapxs/umami-logger-typescript'
 
 import { randomNum } from '@renderer/function/utils/systemUtil'
-import { logger } from './base'
-import { Msg, SelfMsg } from './model/msg'
-import { Notify } from './notify'
-import { htmlPopBox } from './utils/popBox'
-import { FileSender } from './utils/fileSender'
-import { RecallEvent } from './model/event'
+import { logger } from '@renderer/function/base'
+import { Msg, SelfMsg } from '@renderer/function/model/msg'
+import { Notify } from '@renderer/function/notify'
+import { htmlPopBox } from '@renderer/function/utils/popBox'
+import { FileSender } from '@renderer/function/utils/fileSender'
+import { RecallEvent } from '@renderer/function/model/event'
 import useRuntimeData from '@renderer/state/runtimeData'
 
 export function recallMsg(event: RecallEvent) {

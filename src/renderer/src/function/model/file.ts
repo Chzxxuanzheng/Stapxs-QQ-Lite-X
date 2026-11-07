@@ -8,15 +8,15 @@
 
 import app from '@renderer/main'
 import { shallowRef, ShallowRef } from 'vue'
-import { GroupFileData, GroupFolderData } from '../adapter/interface'
-import { popInfo } from '../base'
+import { GroupFileData, GroupFolderData } from '@renderer/function/adapter/interface'
+import { popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { downloadFile } from '../utils/appUtil'
-import { getSizeFromBytes } from '../utils/systemUtil'
-import { Name, Time } from './data'
-import { GroupSession } from './session'
-import { BaseUser, IUser } from './user'
-import { ProxyUrl } from './proxyUrl'
+import { downloadFile } from '@renderer/function/utils/appUtil'
+import { getSizeFromBytes } from '@renderer/function/utils/systemUtil'
+import { Name, Time } from '@renderer/function/model/data'
+import { GroupSession } from '@renderer/function/model/session'
+import { BaseUser, IUser } from '@renderer/function/model/user'
+import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 
 export class GroupFile {
 	type: string = 'file'

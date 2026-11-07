@@ -7,8 +7,8 @@
 
 import index from '@renderer/assets/img/qq-face/public/assets/qq_emoji/_index.json'
 import app from '@renderer/main'
-import { logger } from '../base'
-import { randomChoice } from '../utils/systemUtil'
+import { logger } from '@renderer/function/base'
+import { randomChoice } from '@renderer/function/utils/systemUtil'
 
 export default class Emoji {
 	static readonly apngMap = new Map<

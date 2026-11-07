@@ -1,8 +1,8 @@
 import app from '@renderer/main'
-import driver from '../../driver'
-import { Gender, Role } from '../enmu'
-import { SenderData } from '../interface'
-import { ObRequest, ObResponse } from './type'
+import driver from '@renderer/function/driver'
+import { Gender, Role } from '@renderer/function/adapter/enmu'
+import { SenderData } from '@renderer/function/adapter/interface'
+import { ObRequest, ObResponse } from '@renderer/function/adapter/ob/type'
 import { logger } from '@renderer/function/base'
 
 class WsError extends Error {

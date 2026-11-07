@@ -16,11 +16,11 @@ import {
 } from '@renderer/function/adapter/interface'
 import app, { nowTimes } from '@renderer/main'
 import { computed } from 'vue'
-import { Gender, Role } from '../adapter/enmu'
+import { Gender, Role } from '@renderer/function/adapter/enmu'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { Name, Time } from './data'
-import { ProxyUrl } from './proxyUrl'
-import { GroupSession, Session, TempSession, UserSession } from './session'
+import { Name, Time } from '@renderer/function/model/data'
+import { ProxyUrl } from '@renderer/function/model/proxyUrl'
+import { GroupSession, Session, TempSession, UserSession } from '@renderer/function/model/session'
 
 export interface IUser {
 	user_id: number

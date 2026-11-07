@@ -356,7 +356,7 @@ import {
 	ShallowRef,
 	watchEffect,
 } from 'vue'
-import FileInfo from './FileInfo.vue'
+import FileInfo from '@renderer/pages/info/FileInfo.vue'
 
 const { chat } = defineProps<{
 	chat: Session

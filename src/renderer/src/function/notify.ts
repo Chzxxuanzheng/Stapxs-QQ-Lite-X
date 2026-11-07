@@ -1,7 +1,7 @@
 import app from '@renderer/main'
-import { NotifyInfo, NotificationElem } from './elements/system'
-import { jumpToSession } from './utils/appUtil'
-import { Session } from './model/session'
+import { NotifyInfo, NotificationElem } from '@renderer/function/elements/system'
+import { jumpToSession } from '@renderer/function/utils/appUtil'
+import { Session } from '@renderer/function/model/session'
 
 export class Notify {
 	// 针对 MSG 类型的通知，记录用户的通知数量

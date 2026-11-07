@@ -8,15 +8,15 @@
  */
 
 import app from '@renderer/main'
-import { Message } from './model/message'
-import { GroupSession, Session } from './model/session'
-import { Notice, ReceivedNotice, SystemNotice } from './model/notice'
+import { Message } from '@renderer/function/model/message'
+import { GroupSession, Session } from '@renderer/function/model/session'
+import { Notice, ReceivedNotice, SystemNotice } from '@renderer/function/model/notice'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { Msg } from './model/msg'
-import { NotifyInfo } from './elements/system'
-import { Notify } from './notify'
-import { isImportant as userIsImportant } from './utils/msgUtil'
-import { refreshFavicon } from './utils/favicon'
+import { Msg } from '@renderer/function/model/msg'
+import { NotifyInfo } from '@renderer/function/elements/system'
+import { Notify } from '@renderer/function/notify'
+import { isImportant as userIsImportant } from '@renderer/function/utils/msgUtil'
+import { refreshFavicon } from '@renderer/function/utils/favicon'
 
 /**
  * 给正在输入差屁股...

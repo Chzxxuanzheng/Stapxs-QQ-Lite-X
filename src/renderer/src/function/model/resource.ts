@@ -8,7 +8,7 @@
 
 import { markRaw, shallowRef } from 'vue'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { ProxyUrl } from './proxyUrl'
+import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 
 export class Resource {
 	_id?: string

@@ -380,7 +380,7 @@ import useRuntimeData from '@renderer/state/runtimeData'
 import { sendIdentifyData } from '@renderer/function/utils/appUtil'
 import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
 import imageCompression from 'browser-image-compression'
-import languages from '../../assets/l10n/_l10nconfig.json'
+import languages from '@renderer/assets/l10n/_l10nconfig.json'
 import app from '@renderer/main'
 import { logger, popInfo } from '@renderer/function/base'
 

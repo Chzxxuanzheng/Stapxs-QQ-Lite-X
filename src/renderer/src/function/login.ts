@@ -1,9 +1,9 @@
 import app from '@renderer/main'
 import { markRaw } from 'vue'
-import { AdapterInterface } from './adapter/interface'
-import { logger, popInfo } from './base'
-import { User } from './model/user'
-import { reloadUsers, sendIdentifyData, sendStatEvent } from './utils/appUtil'
+import { AdapterInterface } from '@renderer/function/adapter/interface'
+import { logger, popInfo } from '@renderer/function/base'
+import { User } from '@renderer/function/model/user'
+import { reloadUsers, sendIdentifyData, sendStatEvent } from '@renderer/function/utils/appUtil'
 
 const SSL_WHITE_LIST = new Set<string>(['localhost', '127.0.0.1'])
 
@@ -181,11 +181,11 @@ async function preCheck(
 	return { protocol, ssl, url, token }
 }
 
-import { popBox } from './utils/popBox'
-import { dns } from './utils/systemUtil'
+import { popBox } from '@renderer/function/utils/popBox'
+import { dns } from '@renderer/function/utils/systemUtil'
 import WhyNeedToken from '@renderer/components/popBox/doc/WhyNeedToken.vue'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { URL } from './utils/baseUtil'
+import { URL } from '@renderer/function/utils/baseUtil'
 
 /**
  * 判断传入的 host 是否为公网 IP。

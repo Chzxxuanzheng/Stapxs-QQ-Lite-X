@@ -7,7 +7,7 @@
  */
 
 import { shallowRef } from 'vue'
-import { Resource } from './resource'
+import { Resource } from '@renderer/function/model/resource'
 
 export class Img {
 	_src: Resource

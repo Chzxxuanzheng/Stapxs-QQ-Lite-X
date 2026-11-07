@@ -7,7 +7,7 @@
  */
 
 import { shallowReactive } from 'vue'
-import { PopInfoElem } from './elements/system'
+import { PopInfoElem } from '@renderer/function/elements/system'
 import useOptionStore from '@renderer/state/option'
 import useRuntimeData from '@renderer/state/runtimeData'
 

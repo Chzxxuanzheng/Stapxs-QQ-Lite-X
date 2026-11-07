@@ -138,7 +138,7 @@ import { Session } from '@renderer/function/model/session'
 import { randomChoice, randomNum } from '@renderer/function/utils/systemUtil'
 import { vMenu } from '@renderer/function/utils/vcmd'
 import { i18n } from '@renderer/main'
-import FriendBody from './FriendBody.vue'
+import FriendBody from '@renderer/components/FriendBody.vue'
 import {
 	friendMenuInfo,
 	openFriendMenu,

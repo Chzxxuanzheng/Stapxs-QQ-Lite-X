@@ -18,15 +18,15 @@ import type {
 	ResponseEventData,
 	SenderData,
 	SessionData,
-} from '../adapter/interface'
+} from '@renderer/function/adapter/interface'
 import useRuntimeData from '@renderer/state/runtimeData'
-import Emoji from './emoji'
-import { Message } from './message'
-import { Msg } from './msg'
-import { ProxyUrl } from './proxyUrl'
-import { GroupSession, Session } from './session'
-import { getSender, IUser } from './user'
-import { autoReactive, formatTime } from './utils'
+import Emoji from '@renderer/function/model/emoji'
+import { Message } from '@renderer/function/model/message'
+import { Msg } from '@renderer/function/model/msg'
+import { ProxyUrl } from '@renderer/function/model/proxyUrl'
+import { GroupSession, Session } from '@renderer/function/model/session'
+import { getSender, IUser } from '@renderer/function/model/user'
+import { autoReactive, formatTime } from '@renderer/function/model/utils'
 
 export abstract class Notice extends Message {
 	abstract readonly type: string

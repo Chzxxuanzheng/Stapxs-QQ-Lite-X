@@ -22,7 +22,7 @@
 </template>
 <script setup lang="ts">
 import { contextMenus } from '@renderer/function/utils/contextMenu'
-import ContextMenu from './ContextMenu.vue'
+import ContextMenu from '@renderer/components/menu/ContextMenu.vue'
 
 function getAnimationName(el: Element): string {
 	const menuEl = el.children[0]

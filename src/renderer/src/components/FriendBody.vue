@@ -90,7 +90,7 @@ import { computed } from 'vue'
 
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
 import { vOverflowHide } from '@renderer/function/utils/vcmd'
-import BoxTag from './BoxTag.vue'
+import BoxTag from '@renderer/components/BoxTag.vue'
 import { friendMenuInfo } from '@renderer/function/utils/contextMenu'
 import useRuntimeData from '@renderer/state/runtimeData'
 

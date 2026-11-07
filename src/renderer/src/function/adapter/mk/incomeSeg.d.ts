@@ -2,7 +2,7 @@ import type {
 	IncomingMarkdownSeg,
 	IncomingSegment,
 	IncomingSegmentV1,
-} from './types'
+} from '@renderer/function/adapter/mk/types'
 
 // 具体的接收消息段类型（1.3.0 当前形态）
 export type TextSeg = Extract<IncomingSegment, { type: 'text' }>

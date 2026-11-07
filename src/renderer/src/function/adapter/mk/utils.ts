@@ -1,6 +1,6 @@
 import app from '@renderer/main'
-import { Gender, Role } from '../enmu'
-import { SenderData } from '../interface'
+import { Gender, Role } from '@renderer/function/adapter/enmu'
+import { SenderData } from '@renderer/function/adapter/interface'
 
 export function $t(value: string, args: Record<string, any> = {}): string {
 	return app.config.globalProperties.$t(value, args)

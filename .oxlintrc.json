@@ -40,6 +40,12 @@
 						"importNames": ["ref", "reactive"],
 						"message": "禁止使用 ref 和 reactive"
 					}
+				],
+				"patterns": [
+					{
+						"regex": "^\\.\\.?/",
+						"message": "禁止使用相对导入，请使用 @renderer 别名。"
+					}
 				]
 			}
 		],

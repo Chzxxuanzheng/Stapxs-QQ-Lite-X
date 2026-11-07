@@ -133,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import MsgBar from './MsgBar.vue'
+import MsgBar from '@renderer/components/MsgBar.vue'
 
 import { popInfo } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
@@ -156,7 +156,7 @@ import {
 	useTemplateRef,
 	watch,
 } from 'vue'
-import ChatMsgMenu from './menu/ChatMsgMenu.vue'
+import ChatMsgMenu from '@renderer/components/menu/ChatMsgMenu.vue'
 import { getCm } from '@renderer/function/utils/baseUtil'
 import { useViewportUnits } from '@renderer/function/composable/useViewportUnits.js'
 

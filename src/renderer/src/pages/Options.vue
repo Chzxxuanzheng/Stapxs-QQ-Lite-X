@@ -157,10 +157,10 @@
 
 <script setup lang="ts">
 import Tab from '@renderer/components/Tab.vue'
-import OptAccount from './options/OptAccount.vue'
-import OptDev from './options/OptDev.vue'
-import OptFunction from './options/OptFunction.vue'
-import OptView from './options/OptView.vue'
+import OptAccount from '@renderer/pages/options/OptAccount.vue'
+import OptDev from '@renderer/pages/options/OptDev.vue'
+import OptFunction from '@renderer/pages/options/OptFunction.vue'
+import OptView from '@renderer/pages/options/OptView.vue'
 
 import { openLink } from '@renderer/function/utils/appUtil'
 import { getVersion } from '@renderer/function/utils/systemUtil'

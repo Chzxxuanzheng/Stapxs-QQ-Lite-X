@@ -1,14 +1,14 @@
 import { i18n } from '@renderer/main'
-import { GroupSession, UserSession } from '../model/session'
-import { Msg } from '../model/msg'
+import { GroupSession, UserSession } from '@renderer/function/model/session'
+import { Msg } from '@renderer/function/model/msg'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { popInfo } from '../base'
-import { noticePopBox, waitPopBox } from './popBox'
-import { GroupFileFolder } from '../model/file'
-import { FileSegData } from '../adapter/interface'
-import { FileSeg } from '../model/seg'
-import { uploadFile } from '../input'
-import { TimeoutSet } from './baseUtil'
+import { popInfo } from '@renderer/function/base'
+import { noticePopBox, waitPopBox } from '@renderer/function/utils/popBox'
+import { GroupFileFolder } from '@renderer/function/model/file'
+import { FileSegData } from '@renderer/function/adapter/interface'
+import { FileSeg } from '@renderer/function/model/seg'
+import { uploadFile } from '@renderer/function/input'
+import { TimeoutSet } from '@renderer/function/utils/baseUtil'
 
 export class FileSender {
 	private static lock: number = 0

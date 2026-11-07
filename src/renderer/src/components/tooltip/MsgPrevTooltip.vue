@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { Msg } from '@renderer/function/model/msg'
-import MsgBar from '../MsgBar.vue'
+import MsgBar from '@renderer/components/MsgBar.vue'
 
 const { msgs } = defineProps<{
 	msgs: Msg[] | string

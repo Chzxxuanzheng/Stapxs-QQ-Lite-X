@@ -1,15 +1,15 @@
 // import { animate } from 'animejs'
 
 import useRuntimeData from '@renderer/state/runtimeData'
-import { Msg, SelfMsg } from '../model/msg'
-import { Seg } from '../model/seg'
-import { GroupSession, Session, UserSession } from '../model/session'
-import { IUser } from '../model/user'
-import { BubbleBox, SessionBox } from '../model/box'
-import { popBox } from './popBox'
+import { Msg, SelfMsg } from '@renderer/function/model/msg'
+import { Seg } from '@renderer/function/model/seg'
+import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import { IUser } from '@renderer/function/model/user'
+import { BubbleBox, SessionBox } from '@renderer/function/model/box'
+import { popBox } from '@renderer/function/utils/popBox'
 import app from '@renderer/main'
 import { useSessionHistoryStore } from '@renderer/state/sessionHistory'
-import { Notify } from '../notify'
+import { Notify } from '@renderer/function/notify'
 
 /**
  * 发送消息

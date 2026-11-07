@@ -133,7 +133,7 @@ import { vMenu } from '@renderer/function/utils/vcmd'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
 import useRuntimeData from '@renderer/state/runtimeData'
-import FileMenu from './menu/FileMenu.vue'
+import FileMenu from '@renderer/components/menu/FileMenu.vue'
 
 const isOpenMenu = shallowRef(false)
 

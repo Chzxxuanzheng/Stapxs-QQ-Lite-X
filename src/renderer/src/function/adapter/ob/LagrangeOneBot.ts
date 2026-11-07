@@ -33,8 +33,8 @@ import type {
 	PokeEventData,
 	LeaveEventData,
 	ImplInfo,
-} from '../interface'
-import { OneBotAdapter, api } from './adapter'
+} from '@renderer/function/adapter/interface'
+import { OneBotAdapter, api } from '@renderer/function/adapter/ob/adapter'
 import type {
 	LgrObGetVersionInfo,
 	ObGetVersionInfo,
@@ -59,8 +59,8 @@ import type {
 	ObPrivateSender,
 	ObGroupSender,
 	ObTextSeg,
-} from './type'
-import { ObConnector, getGender, createSender } from './utils'
+} from '@renderer/function/adapter/ob/type'
+import { ObConnector, getGender, createSender } from '@renderer/function/adapter/ob/utils'
 
 export default class LagrangeOneBot
 	extends OneBotAdapter

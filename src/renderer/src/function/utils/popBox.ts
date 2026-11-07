@@ -9,7 +9,7 @@
 import app from '@renderer/main'
 import { Component, h, markRaw, shallowReactive, VNode } from 'vue'
 import InputPopBox from '@renderer/components/popBox/InputPopBox.vue'
-import { VueCompData } from '../elements/vueComp'
+import { VueCompData } from '@renderer/function/elements/vueComp'
 
 export interface PopBoxButton {
 	master?: boolean // 是否高亮（主按钮）

@@ -10,9 +10,9 @@
  * 注:历史遗留问题,这里的Onebot指的是后端代理ws http之类的
  */
 
-import { logger, popInfo } from './base'
+import { logger, popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { openLoginPan } from './utils/systemUtil'
+import { openLoginPan } from '@renderer/function/utils/systemUtil'
 
 type OnMessageData = string
 

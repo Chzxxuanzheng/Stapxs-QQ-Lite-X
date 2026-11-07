@@ -13,5 +13,5 @@
 
 <script setup lang="ts">
 import { tooltipList } from '@renderer/function/tooltip'
-import Tooltip from './Tooltip.vue'
+import Tooltip from '@renderer/components/tooltip/Tooltip.vue'
 </script>

@@ -34,8 +34,8 @@ import {
 	PokeEventData,
 	ResponseEventData,
 	UserData,
-} from '../interface'
-import { api, OneBotAdapter } from './adapter'
+} from '@renderer/function/adapter/interface'
+import { api, OneBotAdapter } from '@renderer/function/adapter/ob/adapter'
 import type {
 	NcForwardData,
 	NcObCreateGroupFileFolder,
@@ -67,8 +67,8 @@ import type {
 	ObMsg,
 	ObSendMsg,
 	RkeyType,
-} from './type'
-import { createSender, fileToBase64, getGender, ObConnector } from './utils'
+} from '@renderer/function/adapter/ob/type'
+import { createSender, fileToBase64, getGender, ObConnector } from '@renderer/function/adapter/ob/utils'
 import semver from 'semver'
 
 export default class NapCapOneBot extends OneBotAdapter {

@@ -31,9 +31,9 @@ import {
 	PokeEventData,
 	ResponseEventData,
 	UserData,
-} from '../interface'
-import { api, OneBotAdapter } from './adapter'
-import { createSender, fileToBase64, getGender, ObConnector } from './utils'
+} from '@renderer/function/adapter/interface'
+import { api, OneBotAdapter } from '@renderer/function/adapter/ob/adapter'
+import { createSender, fileToBase64, getGender, ObConnector } from '@renderer/function/adapter/ob/utils'
 import type {
 	LltbObCreateGroupFileFolder,
 	LltbObFetchCustomFace,
@@ -63,7 +63,7 @@ import type {
 	ObMsg,
 	ObSendMsg,
 	RkeyType,
-} from './type'
+} from '@renderer/function/adapter/ob/type'
 
 export default class LLBTOneBot extends OneBotAdapter {
 	override name = 'LuckyLillia OneBot'

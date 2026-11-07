@@ -1,8 +1,8 @@
 import z from 'zod'
-import { logger } from '../base'
-import { ProxyUrl } from '../model/proxyUrl'
-import { sendStatEvent } from './appUtil'
-import { getApi } from './systemUtil'
+import { logger } from '@renderer/function/base'
+import { ProxyUrl } from '@renderer/function/model/proxyUrl'
+import { sendStatEvent } from '@renderer/function/utils/appUtil'
+import { getApi } from '@renderer/function/utils/systemUtil'
 import useRuntimeData from '@renderer/state/runtimeData'
 
 const specialLinkList = {

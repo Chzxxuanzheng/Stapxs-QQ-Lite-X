@@ -1,5 +1,5 @@
 import { shallowRef, ShallowRef } from 'vue'
-import { useInterval } from './useInterval'
+import { useInterval } from '@renderer/function/composable/useInterval'
 
 /**
  * 定时更新一个数值，用于刷新视图
