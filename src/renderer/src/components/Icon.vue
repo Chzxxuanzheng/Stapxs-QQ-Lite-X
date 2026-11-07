@@ -85,8 +85,9 @@
 
 <script setup lang="ts">
 import { useTemplateRef, shallowReactive } from 'vue'
-import { useEventListener, useInterval } from '@renderer/function/utils/vuse'
 import { delay, randomNum } from '@renderer/function/utils/systemUtil'
+import { useEventListener } from '@renderer/function/composable/useEventListener'
+import { useInterval } from '@renderer/function/composable/useInterval'
 
 const svg = useTemplateRef('svg')
 

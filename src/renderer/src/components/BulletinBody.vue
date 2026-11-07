@@ -6,10 +6,10 @@
 -->
 
 <script setup lang="ts">
+import { useViewer } from '@renderer/function/composable/inject/useViewer'
 import { Ann } from '@renderer/function/model/ann'
 import { openLink } from '@renderer/function/utils/appUtil'
 import { parseUrlFromMsg } from '@renderer/function/utils/baseUtil'
-import { useViewer } from '@renderer/function/utils/vuse'
 import { computed, nextTick, onMounted, shallowRef } from 'vue'
 
 const { data, index } = defineProps<{

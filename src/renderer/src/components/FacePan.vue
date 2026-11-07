@@ -180,9 +180,9 @@ import { VueCompData } from '@renderer/function/elements/vueComp'
 import CustomFaceTooltip from './tooltip/CustomFaceTooltip.vue'
 
 import { vTooltip } from '@renderer/function/utils/vcmd'
-import { useLocalStorage } from '@renderer/function/utils/vuse'
 import useRuntimeData from '@renderer/state/runtimeData'
 import useCustomFaceStore from '@renderer/state/customFace'
+import { useLocalStorage } from '@renderer/function/composable/useLocalStorage.js'
 
 const emit = defineEmits<{
 	sendMsg: []

@@ -193,12 +193,6 @@ import {
 	getViewTime,
 } from '@renderer/function/utils/systemUtil'
 import { vHide, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
-import {
-	useBackHoldup,
-	useFrame,
-	useKeyboard,
-	useViewportUnits,
-} from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
 import {
 	nextTick,
@@ -211,6 +205,10 @@ import {
 	provide,
 } from 'vue'
 import { getCm } from '@renderer/function/utils/baseUtil'
+import { useViewportUnits } from '@renderer/function/composable/useViewportUnits'
+import { useFrame } from '@renderer/function/composable/useFrame'
+import { useKeyboard } from '@renderer/function/composable/useKeyboard'
+import { useBackHoldup } from '@renderer/function/composable/useBackHoldup'
 //#region == 常量声明 ====================================================================
 const { chat } = defineProps<{ chat: Session }>()
 const inputMsg = defineModel<InputMsg>({ required: true })

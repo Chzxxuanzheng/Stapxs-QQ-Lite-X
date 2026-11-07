@@ -15,9 +15,9 @@
 
 <script setup lang="ts">
 import { logger } from '@renderer/function/base'
+import { useViewer } from '@renderer/function/composable/inject/useViewer'
 import { Img } from '@renderer/function/model/img'
 import { JsonSeg } from '@renderer/function/model/seg'
-import { useViewer } from '@renderer/function/utils/vuse'
 import * as z from 'zod'
 
 const { seg } = defineProps<{

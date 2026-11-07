@@ -95,11 +95,6 @@ import { mousemoveMask } from '@renderer/function/input'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { popBox } from '@renderer/function/utils/popBox'
 import { VMoveOptions, vMove } from '@renderer/function/utils/vcmd'
-import {
-	useEventListener,
-	useKeyboard,
-	useLocalStorage,
-} from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
 import { computed, shallowRef, useTemplateRef } from 'vue'
 import Boxes from './Boxes.vue'
@@ -107,6 +102,9 @@ import Friends from './Friends.vue'
 import Messages from './Messages.vue'
 import Options from './Options.vue'
 import { getCm } from '@renderer/function/utils/baseUtil'
+import { useLocalStorage } from '@renderer/function/composable/useLocalStorage.js'
+import { useEventListener } from '@renderer/function/composable/useEventListener.js'
+import { useKeyboard } from '@renderer/function/composable/useKeyboard.js'
 
 const $t = app.config.globalProperties.$t
 const runtimeData = useRuntimeData()

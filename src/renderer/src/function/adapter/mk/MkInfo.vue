@@ -43,8 +43,8 @@
 import useRuntimeData from '@renderer/state/runtimeData'
 import { type MilkyAdapter } from './adapter'
 import { computed, markRaw, shallowReactive } from 'vue'
-import { useInterval } from '@renderer/function/utils/vuse'
 import type { GetImplInfoOutput } from './types'
+import { useInterval } from '@renderer/function/composable/useInterval'
 
 const runtimeData = useRuntimeData()
 const adapter = computed<MilkyAdapter>(() =>

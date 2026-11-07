@@ -83,13 +83,14 @@ import { getVersion, openLoginPan } from '@renderer/function/utils/systemUtil'
 import GlobalSessionSearchBar from '@renderer/components/GlobalSessionSearchBar.vue'
 import Viewer from '@renderer/components/Viewer.vue'
 import { vHide } from '@renderer/function/utils/vcmd'
-import { useBackHoldup, useFrame } from '@renderer/function/utils/vuse'
 import Chat from '@renderer/pages/Chat.vue'
 import SideBar from '@renderer/pages/SideBar.vue'
 import ContextMenus from '@renderer/components/menu/ContextMenus.vue'
 import Tooltips from '@renderer/components/tooltip/Tooltips.vue'
 import PopBoxes from '@renderer/components/popBox/PopBoxes.vue'
 import useRuntimeData from './state/runtimeData'
+import { useFrame } from './function/composable/useFrame'
+import { useBackHoldup } from './function/composable/useBackHoldup'
 
 //#region == 定义变量 ===================================================
 const fps = shallowReactive({

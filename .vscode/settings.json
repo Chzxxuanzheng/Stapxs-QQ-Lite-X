@@ -21,7 +21,6 @@
 		"ungroup",
 		"uuidv",
 		"vcmd",
-		"vuse",
 		"xmark"
 	],
 	"editor.formatOnSave": true,
@@ -29,9 +28,6 @@
 	"editor.codeActionsOnSave": {
 		"source.fixAll.oxc": "explicit"
 	},
-	"typescript.experimental.useTsgo": false,
-	"typescript.native-preview.tsdk": "node_modules/@typescript/native-preview",
-	"typescript.tsdk": "node_modules/typescript/lib",
 	"[css]": {
 		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},

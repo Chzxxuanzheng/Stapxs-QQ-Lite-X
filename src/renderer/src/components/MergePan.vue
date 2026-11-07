@@ -147,7 +147,6 @@ import {
 	getViewTime,
 } from '@renderer/function/utils/systemUtil'
 import { vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
-import { useViewportUnits } from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
 import {
 	markRaw,
@@ -159,6 +158,7 @@ import {
 } from 'vue'
 import ChatMsgMenu from './menu/ChatMsgMenu.vue'
 import { getCm } from '@renderer/function/utils/baseUtil'
+import { useViewportUnits } from '@renderer/function/composable/useViewportUnits.js'
 
 const { vw } = useViewportUnits()
 const stack = shallowReactive<ForwardSeg[]>([])

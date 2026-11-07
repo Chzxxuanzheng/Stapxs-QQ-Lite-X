@@ -1,8 +1,6 @@
 import app from '@renderer/main'
 import Umami from '@stapxs/umami-logger-typescript'
 import FileDownloader from 'js-file-downloader'
-import semver from 'semver'
-import appInfo from '../../../../../package.json'
 
 import { logger, popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
@@ -214,7 +212,7 @@ import { ProxyUrl } from '../model/proxyUrl'
 import { htmlPopBox, popBox, PopBoxButton } from './popBox'
 import WelPan from '@renderer/components/popBox/WelPan.vue'
 import SvgMedal from '@renderer/components/svg/SvgMedal.vue'
-import { useLocalStorage } from './vuse'
+import { useLocalStorage } from '../composable/useLocalStorage'
 
 /**
  * 检查更新
@@ -258,107 +256,6 @@ function stableVersionCheck() {
 	// localStorage.setItem('version', appInfo.version)
 }
 
-/**
- * 展示更新弹窗
- *
- * 保留为对外 API：`stableVersionCheck` 中的正式版检查尚未启用，
- * 启用时直接用此处实现即可，避免逻辑丢失。
- * @param data 更新数据
- */
-export function showUpdateLog(data: any) {
-	const appVersion = appInfo.version // 当前版本
-	const cacheVersion = useLocalStorage<undefined | string>(
-		'version',
-		undefined,
-	) // 缓存版本
-	// 这儿有两种情况：
-	//    如果当前版本小于获取到的版本就是有更新
-	//    如果缓存版本小于获取到的版本但是当前版本等于获取到的版本就是更新完成首次启动
-	const latestVersion = data.tag_name.substring(1)
-
-	if (semver.lt(appVersion, latestVersion)) {
-		// 有更新
-		// showReleaseLog(data, false)
-	}
-	if (
-		cacheVersion.value &&
-		semver.eq(appVersion, latestVersion) &&
-		semver.lt(cacheVersion.value, latestVersion)
-	) {
-		// 更新完成首次启动
-		// showReleaseLog(data, true)
-	}
-}
-// function showReleaseLog(data: any, isUpdated: boolean) {
-//     const { $t } = app.config.globalProperties
-//     let msg = data.body
-//     // 处理 title，取开头到下一个 “\r\n” 之间的内容
-//     const title = msg.split('\r\n')[0].substring(1)
-//     // 处理 msg，取 “## 更新内容” 到下一个 “##” 之间的内容
-//     const start = msg.indexOf('## 更新内容\r\n')
-//     if (start != -1) {
-//         msg = msg.substring(start + 9)
-//         const end = msg.indexOf('##')
-//         if (end != -1) {
-//             msg = msg.substring(0, end)
-//         }
-//     }
-//     msg = title + '\r\n' + msg
-//     const info = {
-//         version:
-//             (isUpdated ? localStorage.getItem('version') + ' -> ' : '') +
-//             data.tag_name.substring(1),
-//         date: data.published_at,
-//         user: {
-//             name: data.author.login,
-//             avatar: data.author.avatar_url,
-//             url: data.author.html_url,
-//         },
-//         message: msg,
-//         updated: isUpdated,
-//     }
-//     const buttonGoUpdate = !backend.isWeb()
-//         ? [
-//               {
-//                   text: $t('知道了'),
-//               },
-//               {
-//                   text: $t('下载更新…'),
-//                   master: true,
-//                   noClose: true,
-//                   fun: () => openLink(data.html_url, true),
-//               },
-//           ]
-//         : [
-//               {
-//                   text: $t('查看…'),
-//                   noClose: true,
-//                   fun: () => openLink(data.html_url),
-//               },
-//               {
-//                   text: $t('刷新页面'),
-//                   master: true,
-//                   fun: () => location.reload(),
-//               },
-//           ]
-//     popBox({
-//         comp: UpdatePan,
-//         props: toRaw(info),
-//         button: isUpdated
-//             ? [
-//                   {
-//                       text: $t('查看…'),
-//                       noClose: true,
-//                       fun: () => openLink(data.html_url, true),
-//                   },
-//                   {
-//                       text: $t('知道了'),
-//                       master: true,
-//                   },
-//               ]
-//             : buttonGoUpdate,
-//     })
-// }
 function showTestLog(data: GhCommits) {
 	const { $t } = app.config.globalProperties
 	const pages = () =>

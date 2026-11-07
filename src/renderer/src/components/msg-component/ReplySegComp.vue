@@ -4,11 +4,11 @@ import { vTooltip } from '@renderer/function/utils/vcmd'
 import MsgPrevTooltip from '../tooltip/MsgPrevTooltip.vue'
 import { Msg } from '@renderer/function/model/msg'
 import { VueCompData } from '@renderer/function/elements/vueComp.js'
-import { useCurrentMsg } from '@renderer/function/utils/vuse'
 import { computed } from 'vue'
 import { popInfo } from '@renderer/function/base.js'
 import { scrollToMsg } from '@renderer/function/utils/appUtil.js'
 import app from '@renderer/main.js'
+import { useCurrentMsg } from '@renderer/function/composable/inject/useCurrentMsg.js'
 
 const { seg } = defineProps<{
 	seg: ReplySeg

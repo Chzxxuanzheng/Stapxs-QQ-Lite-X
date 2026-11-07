@@ -22,8 +22,8 @@
 	</div>
 </template>
 <script setup lang="ts">
+import { useEventListener } from '@renderer/function/composable/useEventListener'
 import { ContextMenuData } from '@renderer/function/utils/contextMenu'
-import { useEventListener } from '@renderer/function/utils/vuse'
 import { onMounted, useTemplateRef } from 'vue'
 
 //#region == 声明变量 ===============================================

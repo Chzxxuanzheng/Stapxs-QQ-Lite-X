@@ -6,9 +6,9 @@
  * @Description: 图片消息的单独组件，主要用于处理图片加载完成后的消息尺寸刷新问题
 -->
 <script setup lang="ts">
+import { useViewer } from '@renderer/function/composable/inject/useViewer'
 import { ImgSeg, MfaceSeg } from '@renderer/function/model/seg'
 import { computed, nextTick, shallowRef, useTemplateRef } from 'vue'
-import { useViewer } from '@renderer/function/utils/vuse.js'
 
 const { seg, pos } = defineProps<{
 	seg: ImgSeg | MfaceSeg
