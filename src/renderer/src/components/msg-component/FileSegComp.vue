@@ -37,7 +37,7 @@ function getTxtUrl(view: any) {
 </script>
 
 <template>
-	<div :class="{ 'msg-inline': seg.inline }">
+	<div :class="{ 'msg-inline': seg.inline }" class="msg-file">
 		<div>
 			<div>
 				<a>
