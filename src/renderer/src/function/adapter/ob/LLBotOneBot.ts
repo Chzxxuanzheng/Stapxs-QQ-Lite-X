@@ -428,7 +428,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 			},
 		)
 
-		return data.data.url
+		return `${data.data.url}${file.name}`
 	}
 	/**
 	 * 发送文件到群里
@@ -588,7 +588,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 			type: 'file',
 			name: data.data.file,
 			size: Number(data.data.file_size),
-			url: data.data.url,
+			url: `${data.data.url}${data.data.file}`,
 			file_id: data.data.file_id,
 		}
 	}

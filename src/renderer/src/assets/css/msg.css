@@ -79,32 +79,30 @@
     width: calc(100% - 50px);
 }
 
-.message-body a {
+.message-body button {
     color: var(--color-font);
 }
 
-.message-body.special a {
+.message-body.special button {
     color: var(--color-font-r);
 }
 
-.message-body a.link,
-.message-body a:link {
+.message-body button.link {
     text-decoration: underline;
     display: inline-block;
     padding: 0 5px;
     opacity: 0.8;
 }
 
-.message-body a.link:before,
-.message-body a:link:before {
+.message-body button.link:before {
     text-align: center;
     content: '🔗';
     color: transparent;
     text-shadow: 0 0 0 var(--color-font-1);
 }
 
-.message-body.special a.link:before,
-.message-body.special a:link:before {
+.message-body.special button.link:before,
+.message-body.special button:link:before {
     text-shadow: 0 0 0 var(--color-font-1-r);
 }
 
@@ -121,7 +119,7 @@
     justify-content: end;
 }
 
-.message-info > a {
+.message-info > button {
     color: var(--color-font-1);
     display: inline;
     font-size: 0.9rem;
@@ -131,7 +129,7 @@
     word-break: keep-all;
 }
 
-.message-info > a.sender-name {
+.message-info > button.sender-name {
     color: var(--color-font-1);
 }
 
@@ -181,38 +179,12 @@
     opacity: 1;
 }
 
-.message-ex-info > div.content > a {
+.message-ex-info > div.content > button {
     margin: 0 2px;
 }
 
 .message-space {
     flex: 1;
-}
-
-.message-mine {
-    background: var(--color-main) !important;
-    color: var(--color-font-r) !important;
-}
-
-.message-mine a {
-    color: var(--color-font-r) !important;
-}
-
-.message-mine a.link,
-.message-mine a:link {
-    opacity: 0.8;
-}
-
-.message-mine a.link:before,
-.message-mine a:link:before {
-    text-align: center;
-    content: '🔗';
-    color: transparent;
-    text-shadow: 0 0 0 var(--color-font-1-r);
-}
-
-.message-mine svg {
-    color: var(--color-font-r) !important;
 }
 
 .msg-inline {
@@ -514,7 +486,7 @@
     margin-left: 10px;
 }
 
-.msg-record > div a {
+.msg-record > div button {
     line-height: 2rem;
 }
 
@@ -537,60 +509,40 @@
     flex-wrap: wrap;
 }
 
-.msg-file svg {
+.msg-file > div > header svg {
     color: var(--color-font-1);
 }
 
-.message-body.special .msg-file svg {
+.special .msg-file > div > header svg {
     color: var(--color-font-1-r);
 }
 
-.msg-file > div:nth-child(1) {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+.msg-file > div > header {
+	font-size: 0.75em;
+	opacity: 0.7;
 }
 
-.msg-file > div:nth-child(1) a {
-    font-size: 0.75rem;
-    display: block;
-    opacity: 0.7;
+.msg-file > div > span {
+	margin: 0;
 }
 
-.msg-file > div:nth-child(1) i {
-    font-size: 0.8rem;
-    font-style: normal;
-    overflow-wrap: anywhere;
+.msg-file > div > footer {
+	font-size: 0.75em;
+	opacity: 0.7;
+	margin-bottom: -0.3em;
 }
 
-.msg-file > div:nth-child(1) p {
-    display: inline-block;
-    font-size: 1rem;
-    margin: 5px 0 0 0;
-}
-
-.msg-file > div:nth-child(2) {
-    background: #0000002e;
-    border-radius: 100%;
-    margin-left: 40px;
-    margin-right: 5px;
-    cursor: pointer;
-}
-
-.msg-file > div:nth-child(2) svg {
-    margin: 15px 10px 10px 10px;
-    height: 20px;
-    width: 27px;
-}
-
-.msg-file > div:nth-child(2) svg.download-bar {
-    --main-size: 24px;
-    margin: 3px 1px -4px 0 !important;
-    padding: 10px;
-}
-
-.msg-file.me > div:nth-child(2) svg.download-bar > circle:last-child {
-    stroke: var(--color-card-2);
+.msg-file > button {
+	all: unset;
+	margin-left: 10px;
+	width: 3rem;
+	height: 3rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	background-color: #0000002e;
+	border-radius: 1.5rem;
 }
 
 .msg-link-view {
@@ -717,7 +669,7 @@
 	opacity: 0.6;
 }
 
-.msg-link-view.bilibili>a::-webkit-scrollbar {
+.msg-link-view.bilibili>button::-webkit-scrollbar {
 	background: transparent;
 }
 
@@ -1136,7 +1088,7 @@ span.user-title.robot {
     margin: 0 3px;
 }
 
-.note-base a {
+.note-base button {
     margin: 0 3px;
     color: var(--color-main);
     font-weight: bold;
@@ -1146,11 +1098,11 @@ span.user-title.robot {
     border: 1px solid var(--color-main);
 }
 
-.note-base > a.me {
+.note-base > button.me {
     color: var(--color-font-1);
 }
 
-a.chat-hr-note {
+button.chat-hr-note {
     color: var(--font-color);
     font-size: 0.8rem;
     padding: 0 20px;
@@ -1186,7 +1138,7 @@ a.chat-hr-note {
     width: 100%;
 }
 
-.file-view > span.txt > a {
+.file-view > span.txt > button {
     display: block;
     width: 100%;
 }

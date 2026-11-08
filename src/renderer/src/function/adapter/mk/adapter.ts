@@ -758,7 +758,7 @@ export class MilkyAdapter implements AdapterInterface {
 			file_id: file.id,
 		})
 
-		return data.download_url
+		return `${data.download_url}${file.name}`
 	}
 	/**
 	 * 发送文件到群里
@@ -1174,7 +1174,7 @@ export class MilkyAdapter implements AdapterInterface {
 			type: 'file',
 			name: data.data.file_name,
 			size: data.data.file_size,
-			url: url,
+			url: `${url}${data.data.file_name}`,
 			file_id: data.data.file_id,
 		}
 	}

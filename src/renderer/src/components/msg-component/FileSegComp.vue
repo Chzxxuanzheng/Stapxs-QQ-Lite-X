@@ -37,58 +37,22 @@ function getTxtUrl(view: any) {
 </script>
 
 <template>
-	<div :class="{ 'msg-inline': seg.inline }" class="msg-file">
+	<section :class="{ 'msg-inline': seg.inline }" class="msg-file">
 		<div>
-			<div>
-				<a>
-					<font-awesome-icon :icon="['fas', 'file']" />
-					{{
-						msg?.session?.type == 'group'
-							? $t('群文件')
-							: $t('离线文件')
-					}}
-				</a>
-				<p>{{ seg.name }}</p>
-			</div>
-			<i>{{ seg.formatSize }}</i>
+			<header>
+				<font-awesome-icon :icon="['fas', 'file']" />
+				{{
+					msg?.session?.type == 'group'
+						? $t('群文件')
+						: $t('离线文件')
+				}}
+			</header>
+			<span>{{ seg.name }}</span>
+			<footer>{{ seg.formatSize }}</footer>
 		</div>
-		<div>
-			<font-awesome-icon
-				v-if="seg.download_percent === undefined"
-				:icon="['fas', 'angle-down']"
-				@click="seg.download()"
-			/>
-			<svg
-				v-else-if="
-					seg.download_percent !== undefined &&
-					seg.download_percent < 100
-				"
-				class="download-bar"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<circle
-					cx="50%"
-					cy="50%"
-					r="40%"
-					stroke-width="15%"
-					ill="none"
-					stroke-linecap="round"
-				/>
-				<circle
-					cx="50%"
-					cy="50%"
-					r="40%"
-					stroke-width="15%"
-					fill="none"
-					:stroke-dasharray="
-						seg.download_percent === undefined
-							? '0,10000'
-							: `${(Math.floor(2 * Math.PI * 25) * seg.download_percent) / 100},10000`
-					"
-				/>
-			</svg>
-			<font-awesome-icon v-else :icon="['fas', 'check']" />
-		</div>
+		<button @click="seg.download" target="_blank">
+			<font-awesome-icon :icon="['fas', 'angle-down']" />
+		</button>
 		<div v-if="seg.fileView" class="file-view">
 			<img
 				v-if="IMAGE_SUFFIX.includes(seg.fileView.ext)"
@@ -118,5 +82,5 @@ function getTxtUrl(view: any) {
 				{{ getTxtUrl(seg.fileView) }}{{ seg.fileView.txt }}
 			</span>
 		</div>
-	</div>
+	</section>
 </template>

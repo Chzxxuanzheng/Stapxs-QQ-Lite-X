@@ -347,3 +347,39 @@ export function parseUrlFromMsg(
 
 	return result
 }
+
+function isSameOrigin(url: string): boolean {
+	try {
+		const target = new globalThis.URL(url, document.baseURI)
+		return (
+			target.protocol === 'blob:' ||
+			target.protocol === 'data:' ||
+			target.origin === document.location.origin
+		)
+	} catch {
+		return false
+	}
+}
+
+export function urlDownload(url: string, filename?: string) {
+	if (isSameOrigin(url)) sameOriginDownload(url, filename)
+	else noSameOriginDownload(url)
+}
+
+function sameOriginDownload(url: string, filename?: string) {
+	const a = document.createElement('a')
+	a.href = url
+	if (filename) a.download = filename
+	a.style.display = 'none'
+	document.body.appendChild(a) // Firefox / 老 Safari 需要它真的在文档里
+	a.click()
+	a.remove()
+}
+
+function noSameOriginDownload(url: string) {
+	const iframe = document.createElement('iframe')
+	iframe.style.display = 'none'
+	iframe.src = url
+	document.body.appendChild(iframe)
+	setTimeout(() => iframe.remove(), 60 * 1000)
+}
