@@ -20,8 +20,6 @@ import type {
 	VideoSegData,
 	XmlSegData,
 } from '@renderer/function/adapter/interface'
-import { popInfo } from '@renderer/function/base'
-import { downloadFile } from '@renderer/function/utils/appUtil'
 import { getSizeFromBytes } from '@renderer/function/utils/systemUtil'
 import Emoji from '@renderer/function/model/emoji'
 import { Img } from '@renderer/function/model/img'
@@ -29,7 +27,7 @@ import { ForwardMsg, Msg } from '@renderer/function/model/msg'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 import { Resource } from '@renderer/function/model/resource'
 import { autoMarkRaw } from '@renderer/function/model/utils'
-import { parseUrlFromMsg } from '@renderer/function/utils/baseUtil'
+import { parseUrlFromMsg, urlDownload } from '@renderer/function/utils/baseUtil'
 
 export const segType = {}
 type SegCon<T extends Seg> = { new (...args: any[]): T; type: string }
@@ -406,7 +404,6 @@ export class FileSeg extends Seg {
 	_url: ProxyUrl
 	size: number
 	ext: string
-	download_percent?: number
 	static readonly viewerSupport = [
 		'jpg',
 		'jpeg',
@@ -474,30 +471,8 @@ export class FileSeg extends Seg {
 		}
 	}
 
-	download(): void {
-		const { $t } = app.config.globalProperties
-		if (this.url === '') {
-			popInfo.info($t('url加载失败，无法下载'))
-			return
-		}
-		if (this.download_percent !== undefined) {
-			popInfo.info($t('别催了，已经在下了(>_<)'))
-			return
-		}
-		this.download_percent = 0
-		// 传原始链接，由 downloadFile 统一走代理，避免对已代理的链接二次包装
-		downloadFile(
-			this._url,
-			this.name,
-			(event: ProgressEvent) => {
-				if (!event.lengthComputable) return
-				const percent = Math.floor((event.loaded / event.total) * 100)
-				this.download_percent = percent
-			},
-			() => {
-				this.download_percent = undefined
-			},
-		)
+	download() {
+		urlDownload(this.rawUrl)
 	}
 
 	override serializeData(): FileSegData {

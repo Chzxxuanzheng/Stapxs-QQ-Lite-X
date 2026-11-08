@@ -14,12 +14,11 @@ import {
 } from '@renderer/function/adapter/interface'
 import { popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { downloadFile } from '@renderer/function/utils/appUtil'
 import { getSizeFromBytes } from '@renderer/function/utils/systemUtil'
 import { Name, Time } from '@renderer/function/model/data'
 import { GroupSession } from '@renderer/function/model/session'
 import { BaseUser, IUser } from '@renderer/function/model/user'
-import { ProxyUrl } from '@renderer/function/model/proxyUrl'
+import { urlDownload } from '@renderer/function/utils/baseUtil'
 
 export class GroupFile {
 	type: string = 'file'
@@ -32,10 +31,8 @@ export class GroupFile {
 	deadTime?: number
 	creator: IUser
 	createTime?: Time
-	url?: ProxyUrl
+	url?: string
 	folder?: GroupFileFolder
-
-	downloadPercent: ShallowRef<number | undefined> = shallowRef()
 
 	constructor(
 		data: GroupFileData,
@@ -61,52 +58,12 @@ export class GroupFile {
 	 * @returns 文件是否下载成功
 	 */
 	async download(): Promise<boolean> {
-		const { $t } = app.config.globalProperties
-		const runtimeData = useRuntimeData()
+		if (!this.url) await this.getUrl()
+		if (!this.url) return false
 
-		// web 端下载需要读取响应内容，受同源策略限制，不具备跨域能力时必定失败
-		// 这里提前拦截，避免无意义的请求和一直停留在下载中状态
-		if (!runtimeData.tags.canCors) {
-			popInfo.error(
-				$t('当前环境无法跨域下载文件，请先在设置中配置跨域代理'),
-			)
-			return false
-		}
+		urlDownload(this.url)
 
-		this.downloadPercent.value = 0
-
-		// 如果没有url，则获取url
-		if (!this.url) {
-			const re = await this.getUrl()
-			this.downloadPercent.value = undefined
-			if (!re) return false
-		}
-
-		let re: boolean | undefined
-
-		downloadFile(
-			this.url!,
-			this.name,
-			(event: ProgressEvent) => {
-				if (!event.lengthComputable) return
-				const percent = Math.floor((event.loaded / event.total) * 100)
-				this.downloadPercent.value = percent
-				if (percent >= 100) re = true
-			},
-			() => {
-				this.downloadPercent.value = undefined
-				re = false
-			},
-		)
-
-		return await new Promise((resolve) => {
-			const timer = setInterval(() => {
-				if (re !== undefined) {
-					clearInterval(timer)
-					resolve(re)
-				}
-			}, 100)
-		})
+		return true
 	}
 
 	/**
@@ -125,7 +82,7 @@ export class GroupFile {
 			return false
 		}
 
-		this.url = new ProxyUrl(data)
+		this.url = data
 		return true
 	}
 

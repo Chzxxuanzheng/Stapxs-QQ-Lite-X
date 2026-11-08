@@ -30,70 +30,31 @@
 				<span>{{ item.name }}</span>
 				<div>
 					<span>{{ item.creator.name }}</span>
-					<span>{{
-						item.createTime
-							? item.createTime.format('year', 'day')
-							: '-'
-					}}</span>
+					<span>
+						{{
+							item.createTime
+								? item.createTime.format('year', 'day')
+								: '-'
+						}}
+					</span>
 					<span
 						v-if="item instanceof GroupFile && item.deadTimeFormat"
-						>{{ item.deadTimeFormat + $t('天后') }}</span
 					>
-					<span v-if="item instanceof GroupFileFolder">{{
-						$t('共 {num} 个文件', { num: item.count })
-					}}</span>
+						{{ item.deadTimeFormat + $t('天后') }}
+					</span>
+					<span v-if="item instanceof GroupFileFolder">
+						{{ $t('共 {num} 个文件', { num: item.count }) }}
+					</span>
 					<span v-else>{{ item.formatSize }}</span>
 				</div>
 			</div>
 			<template v-if="item instanceof GroupFile">
 				<div
-					v-if="downloadPercent === undefined"
 					class="download"
 					:class="{ disabled: !runtimeData.tags.canCors }"
-					:title="
-						runtimeData.tags.canCors
-							? ''
-							: $t(
-									'当前环境无法跨域下载文件，请先在设置中配置跨域代理',
-								)
-					"
-					@click.stop="
-						runtimeData.tags.canCors ? item.download() : ''
-					"
+					@click.stop="item.download()"
 				>
 					<font-awesome-icon :icon="['fas', 'angle-down']" />
-				</div>
-				<svg
-					v-else-if="
-						downloadPercent !== undefined && downloadPercent < 100
-					"
-					class="download-bar"
-					xmlns="http://www.w3.org/2000/svg"
-					@click.stop=""
-				>
-					<circle
-						cx="50%"
-						cy="50%"
-						r="40%"
-						stroke-width="15%"
-						fill="none"
-						stroke-linecap="round"
-					/>
-					<circle
-						cx="50%"
-						cy="50%"
-						r="40%"
-						stroke-width="15%"
-						fill="none"
-						:stroke-dasharray="
-							downloadPercent === undefined
-								? '0,10000'
-								: `${(Math.floor(2 * Math.PI * 25) * downloadPercent) / 100},10000`
-						"
-					/>
-				</svg>
-				<div v-else class="download" @click.stop="">
-					<font-awesome-icon :icon="['fas', 'check']" />
 				</div>
 			</template>
 		</div>
@@ -143,9 +104,6 @@ const { item } = defineProps<{
 
 const runtimeData = useRuntimeData()
 
-const downloadPercent = computed(() => {
-	return item instanceof GroupFile ? item.downloadPercent.value : undefined
-})
 const folderItems = computed(() => {
 	return item instanceof GroupFileFolder ? item.items.value : undefined
 })
