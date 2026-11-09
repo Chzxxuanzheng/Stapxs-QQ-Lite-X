@@ -32,6 +32,7 @@ interface ImgCache {
 @autoMarkRaw
 export class InputMsg {
 	private readonly _reply = shallowRef<Msg | undefined>()
+	private needPrefixReplyTarget = false
 	private readonly _content = shallowRef<string>('')
 	private readonly _isVoid = computed<boolean>(() => {
 		if (this.reply) return false
@@ -51,17 +52,19 @@ export class InputMsg {
 	 * 设置当前回复消息
 	 * @param msg
 	 */
-	setReply(msg: Msg) {
+	setReply(msg: Msg, autoAddAt: boolean = true) {
 		this._reply.value = msg
 		const runtimeData = useRuntimeData()
-		if (
-			runtimeData.sysConfig.reply_with_at === 'insert' &&
-			msg.sender?.user_id &&
-			msg.sender.user_id !== runtimeData.loginInfo!.uin
-		) {
-			this.addSq(new AtSeg(msg.sender.user_id))
-		}
 		this.focus()
+
+		if (!autoAddAt) return
+
+		if (runtimeData.sysConfig.reply_with_at === 'none') return
+		if (msg.sender?.user_id === runtimeData.loginInfo!.uin) return
+
+		if (runtimeData.sysConfig.reply_with_at === 'insert')
+			this.addSq(new AtSeg(msg.sender.user_id))
+		else this.needPrefixReplyTarget = true
 	}
 	/**
 	 * 移除当前回复消息
@@ -212,11 +215,7 @@ export class InputMsg {
 		// 插入引用
 		if (this.reply?.message_id) {
 			const front: Seg[] = [new ReplySeg(this.reply.message_id)]
-			if (
-				runtimeData.sysConfig.reply_with_at === 'prefix' &&
-				this.reply.sender?.user_id &&
-				this.reply.sender?.user_id !== runtimeData.loginInfo!.uin
-			)
+			if (this.needPrefixReplyTarget)
 				front.push(new AtSeg(this.reply.sender.user_id))
 			back = [...front, ...back]
 		}
@@ -250,7 +249,7 @@ export class InputMsg {
 			// TODO 支持图片
 			if (seg instanceof ReplySeg) {
 				const replyMsg = this.session.getMsgById(seg.id)
-				if (replyMsg) this.setReply(replyMsg)
+				if (replyMsg) this.setReply(replyMsg, false)
 			} else if (seg instanceof TxtSeg) {
 				this.content += seg.text
 			} else {
