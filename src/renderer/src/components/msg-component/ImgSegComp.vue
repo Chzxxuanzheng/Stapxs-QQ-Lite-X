@@ -151,7 +151,7 @@ setTimeout(() => (transitionName.value = 'fade-out-in'), 500)
 		:class="['msg-img', pos, type, state, { 'msg-inline': seg.inline }]"
 		:style="boxStyle"
 	>
-		<Transition :name="transitionName" mode="out-in">
+		<Transition :name="transitionName" mode="out-in" type="transition">
 			<font-awesome-icon
 				v-if="state === 'loading'"
 				:icon="['fas', 'spinner']"
@@ -169,7 +169,9 @@ setTimeout(() => (transitionName.value = 'fade-out-in'), 500)
 			<div v-else class="fail-load">
 				<font-awesome-icon :icon="['fas', 'face-frown']" />
 				{{ $t('加载图片失败') }}
-				<a :href="src" target="_blank">{{ $t('预览图片') }}</a>
+				<a :href="src" target="_blank" class="link">
+					{{ $t('预览图片') }}
+				</a>
 			</div>
 		</Transition>
 	</div>

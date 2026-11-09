@@ -87,13 +87,16 @@
     color: var(--color-font-r);
 }
 
+.message-body a.link,
 .message-body button.link {
+	all: unset;
     text-decoration: underline;
     display: inline-block;
     padding: 0 5px;
     opacity: 0.8;
 }
 
+.message-body a.link:before,
 .message-body button.link:before {
     text-align: center;
     content: '🔗';
@@ -101,8 +104,8 @@
     text-shadow: 0 0 0 var(--color-font-1);
 }
 
-.message-body.special button.link:before,
-.message-body.special button:link:before {
+.message-body.special a.link:before,
+.message-body.special button.link:before {
     text-shadow: 0 0 0 var(--color-font-1-r);
 }
 
@@ -348,6 +351,7 @@
 }
 
 .msg-img > .fail-load {
+	all: unset;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1150,5 +1154,5 @@ button.chat-hr-note {
 
 .fade-out-in-enter-from,
 .fade-out-in-leave-to {
-	opacity: 0;
+	opacity: 0.5;
 }
