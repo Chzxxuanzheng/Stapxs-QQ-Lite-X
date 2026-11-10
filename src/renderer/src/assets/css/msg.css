@@ -899,7 +899,8 @@
 
 .msg-json > img {
     max-width: 30vw;
-    height: 25vh;
+    max-height: 25vh;
+	min-width: 100%;
     border-radius: 7px;
     margin-top: 7px;
     display: block;
