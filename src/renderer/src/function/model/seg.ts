@@ -121,7 +121,7 @@ export class TxtSeg extends Seg {
 @registerSegType
 @autoMarkRaw
 export class MdSeg extends Seg {
-	static readonly type = 'markdown'
+	static readonly type = 'md'
 	static readonly inline = true
 	content: string
 	constructor(data: MdSegData) {
@@ -707,6 +707,7 @@ export class UnknownSeg extends Seg {
 	private readonly _type: string
 	data: object
 	constructor(data: UnknownSegData) {
+		console.log('构建未知消息:', data)
 		super()
 		this._type = data.segType
 		this.data = data.data

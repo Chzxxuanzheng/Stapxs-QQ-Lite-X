@@ -419,9 +419,9 @@ footer header span {
 }
 
 pre {
-    background: transparent !important;
-    overflow: visible !important;
-    padding: 0 !important;
+    background: transparent;
+    overflow: visible;
+    padding: 0;
 }
 pre:before {
     display: none !important;
@@ -438,29 +438,6 @@ pre > code {
     {
         font-family: 'Fira Code VF', monospace !important;
     }
-}
-pre[class*=language-]>code {
-    border-left: 0px solid var(--color-main) !important;
-    background-color: var(--color-card-2) !important;
-    background-image: none !important;
-    border-left: 10px solid #358ccb;
-    background-origin: content-box;
-    background-attachment: local;
-    box-shadow: none !important;
-    background-size: 3em 3em;
-    margin-bottom: -75px;
-    border-radius: 7px;
-    position: relative;
-    margin-top: -10px;
-    z-index: 1;
-}
-code[class*=language-] {
-    max-height: inherit;
-    font-size: 0.8rem;
-    height: inherit;
-    padding: 0 1em;
-    display: block;
-    overflow: auto;
 }
 
 .about-text {
