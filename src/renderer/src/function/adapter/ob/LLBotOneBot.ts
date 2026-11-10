@@ -656,7 +656,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		}
 	}
 	async faceSerializer(seg: FaceSeg): Promise<LlbotObFaceSeg> {
-		let type: number = 0
+		let type: number
 		if (seg.id < 222) type = 1
 		else if (seg.id < 100000) type = 2
 		else type = 4

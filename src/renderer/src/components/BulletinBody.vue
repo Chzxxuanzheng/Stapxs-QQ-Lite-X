@@ -10,9 +10,9 @@ import { useViewer } from '@renderer/function/composable/inject/useViewer'
 import { Ann } from '@renderer/function/model/ann'
 import { openLink } from '@renderer/function/utils/appUtil'
 import { parseUrlFromMsg } from '@renderer/function/utils/baseUtil'
-import { computed, nextTick, onMounted, shallowRef } from 'vue'
+import { computed, shallowRef } from 'vue'
 
-const { data, index } = defineProps<{
+const { data } = defineProps<{
 	data: Ann
 	index: number
 }>()

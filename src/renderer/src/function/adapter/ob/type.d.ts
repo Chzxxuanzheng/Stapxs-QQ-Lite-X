@@ -1277,7 +1277,7 @@ export type LlbotObFaceSeg = ObSeg<
 	'face',
 	{
 		id: number
-		sub_type: 1 | 2 | 3 | 5
+		sub_type: number
 	}
 >
 
