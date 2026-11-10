@@ -23,42 +23,18 @@ const showAll = shallowRef(false)
 const needShow = shallowRef(true)
 
 const parsedMsg = computed(() => parseUrlFromMsg(data.content))
-
-onMounted(() => {
-	nextTick(() => {
-		const tab1 = document.getElementById('info-pan-notices')
-		const tab2 = document.getElementById('info-pan-member')
-		const pan = document.getElementById('bulletins-msg-' + index)
-		if (pan && tab1 && tab2) {
-			// PS：display none 不渲染无法获取实际高度
-			tab1.click()
-			const maxHeight = Number(
-				getComputedStyle(pan).maxHeight.replace('px', ''),
-			)
-			const height = pan.offsetHeight
-			tab2.click()
-			needShow.value = height == maxHeight
-		}
-	})
-})
 </script>
 
 <template>
-	<div class="base" @click="showAll = !showAll">
+	<section class="bulletin" @click="showAll = !showAll">
 		<header>
 			<font-awesome-icon :icon="['fas', 'bookmark']" />
 			<span>{{ $t('公告') }}</span>
-			<div style="flex: 1" />
-			<span>{{ data.time.format() }}</span>
+			<div class="space" />
+			<span class="time">{{ data.time.format() }}</span>
 		</header>
-		<div
-			:id="'bulletins-msg-' + index"
-			:class="{
-				body: true,
-				all: showAll,
-			}"
-		>
-			<div class="bulletin-content">
+		<div class="body" :class="{ all: showAll }">
+			<div class="content">
 				<template v-for="(data, id) in parsedMsg" :key="id">
 					<span v-if="data.type === 'txt'">{{ data.content }}</span>
 					<a
@@ -80,24 +56,22 @@ onMounted(() => {
 				v-if="data.img"
 				:alt="'[' + $t('图片') + ']'"
 				:src="data.img"
-				:class="{
-					img: true,
-					all: showAll,
-				}"
 				@click.stop="viewer?.open(data.imgData!)"
 			/>
 		</div>
-		<span v-show="needShow && !showAll">{{ $t('点击展开') }}</span>
-		<div class="info">
+		<button v-if="needShow && !showAll">{{ $t('点击展开') }}</button>
+		<footer>
 			<img :src="data.sender.face" :alt="data.sender.name" />
 			<a>{{ data.sender.name }}</a>
-			<div />
-			<span v-if="data.read !== undefined">{{
-				$t('{readNum} 人已读 | {isRead}', {
-					isRead: data.read ? $t('已读') : $t('未读'),
-					readNum: data.readNum,
-				})
-			}}</span>
-		</div>
-	</div>
+			<span class="space" />
+			<span v-if="data.read !== undefined" class="read-status">
+				{{
+					$t('{readNum} 人已读 | {isRead}', {
+						isRead: data.read ? $t('已读') : $t('未读'),
+						readNum: data.readNum,
+					})
+				}}
+			</span>
+		</footer>
+	</section>
 </template>

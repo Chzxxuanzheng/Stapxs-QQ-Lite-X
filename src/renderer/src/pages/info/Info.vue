@@ -207,7 +207,6 @@
 								v-for="(item, index) in annSearchInfo!.isSearch
 									? annSearchInfo!.query
 									: chat.anns"
-								:key="'bulletins-' + index"
 								:data="item"
 								:index="index"
 							/>

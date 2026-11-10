@@ -199,6 +199,18 @@
     white-space: pre-wrap;
 }
 
+.msg-md *:first-child {
+	margin-top: 0;
+}
+
+.msg-md *:last-child {
+	margin-bottom: 0;
+}
+
+.msg-md code {
+	word-wrap:break-word;
+}
+
 .msg-md h1,
 .msg-md h2,
 .msg-md h3,
@@ -215,12 +227,54 @@
 }
 
 .msg-md blockquote {
+	background-color: #00000017;
     border-left: 3px solid var(--color-font-2);
-    color: var(--color-font-2);
+    color: var(--color-font-1);
     border-radius: 3px;
     font-size: 0.8rem;
     padding: 0 10px;
     margin: 0;
+}
+
+.msg-md pre {
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.msg-md pre {
+	background-color: #00000017;
+	padding: 5px;
+	border-radius: 5px;
+}
+
+.msg-md table {
+	border-collapse: separate;   /* 关键：放开折叠 */
+	border-spacing: 0;           /* 关键：默认 2px 会撑出缝隙 */
+	border: 1px solid;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.msg-md table > thead {
+	background-color: #00000017;
+	color: var(--color-font-1)
+}
+
+.msg-md table > thead > tr > th,
+.msg-md table > tbody > tr > td {
+	border-right: 1px solid;
+	border-bottom: 1px solid;
+	padding: 8px;
+	text-align: left;
+}
+
+.msg-md table > thead > tr > th:last-child,
+.msg-md table > tbody > tr > td:last-child {
+	border-right: none
+}
+
+.msg-md table > tbody > tr:last-child > td {
+	border-bottom: none
 }
 
 .msg-unknown {
@@ -845,7 +899,8 @@
 
 .msg-json > img {
     max-width: 30vw;
-    height: 25vh;
+    max-height: 25vh;
+	min-width: 100%;
     border-radius: 7px;
     margin-top: 7px;
     display: block;

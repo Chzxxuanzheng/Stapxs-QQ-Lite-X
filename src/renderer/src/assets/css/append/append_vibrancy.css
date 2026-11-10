@@ -228,6 +228,10 @@ body.vibrancy {
     background-color: rgba(var(--color-card-rgb), 0.8);
 }
 
+.vibrancy .msg-md table {
+	box-shadow: 0 0 15px var(--color-bg);
+}
+
 @media (max-width: 500px) {
     .vibrancy .chat-head > div.info {
         margin-top: 35px;

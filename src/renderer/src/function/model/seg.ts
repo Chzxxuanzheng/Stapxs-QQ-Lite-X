@@ -121,7 +121,7 @@ export class TxtSeg extends Seg {
 @registerSegType
 @autoMarkRaw
 export class MdSeg extends Seg {
-	static readonly type = 'markdown'
+	static readonly type = 'md'
 	static readonly inline = true
 	content: string
 	constructor(data: MdSegData) {
