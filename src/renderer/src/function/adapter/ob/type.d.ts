@@ -1038,7 +1038,7 @@ export type NcObGetRkey = ObResponse<
    Common / Shared types
    --------------------------- */
 
-export interface LltbObBuddy {
+export interface LlbotObBuddy {
 	user_id: number
 	nickname: string
 	remark: string
@@ -1057,28 +1057,28 @@ export interface LltbObBuddy {
 	richTime: number
 }
 
-export interface LltbObCategory {
+export interface LlbotObCategory {
 	categoryId: number
 	categoryName: string
 	categoryMbCount: number
-	buddyList: LltbObBuddy[]
+	buddyList: LlbotObBuddy[]
 }
 
 /* Image structure used in some messages / notices */
-export interface LltbObImageItem {
+export interface LlbotObImageItem {
 	height?: string
 	width?: string
 	id: string // note: image url can be constructed with https://gdynamic.qpic.cn/gdynamic/<id>/0
 }
 
 /* Group notice message body */
-export interface LltbObGroupNoticeMessage {
+export interface LlbotObGroupNoticeMessage {
 	text: string
-	images: LltbObImageItem[]
+	images: LlbotObImageItem[]
 }
 
 /* Generic message image item (used inside history messages) */
-export interface LltbObMsgImageData {
+export interface LlbotObMsgImageData {
 	file: string
 	subType?: number
 	url: string
@@ -1086,7 +1086,7 @@ export interface LltbObMsgImageData {
 }
 
 /* Message sender shape for friend/group messages */
-export interface LltbObMsgSender {
+export interface LlbotObMsgSender {
 	user_id: number
 	nickname: string
 	card?: string
@@ -1095,7 +1095,7 @@ export interface LltbObMsgSender {
 }
 
 /* File & Folder records for group file APIs */
-export interface LltbObGroupFileRecord {
+export interface LlbotObGroupFileRecord {
 	group_id: number
 	file_id: string
 	file_name: string
@@ -1109,7 +1109,7 @@ export interface LltbObGroupFileRecord {
 	uploader_name: string
 }
 
-export interface LltbObGroupFolderRecord {
+export interface LlbotObGroupFolderRecord {
 	group_id: number
 	folder_id: string
 	folder_name: string
@@ -1127,13 +1127,13 @@ export interface LltbObGroupFolderRecord {
  * get_friends_with_category
  * Example `data` is an array of categories, each containing a buddyList.
  */
-export type LltbObGetFriendsWithCategory = ObResponse<LltbObCategory[]>
+export type LlbotObGetFriendsWithCategory = ObResponse<LlbotObCategory[]>
 
 /**
  * get_stranger_info
  * Example `data` is an object describing a stranger / user profile.
  */
-export type LltbObGetStrangerInfo = ObResponse<{
+export type LlbotObGetStrangerInfo = ObResponse<{
 	user_id: number
 	nickname: string
 	sex: 'male' | 'female' | 'unknown'
@@ -1154,11 +1154,11 @@ export type LltbObGetStrangerInfo = ObResponse<{
  * _get_group_notice
  * Example `data` is an array of notices.
  */
-export type LltbObGetGroupNotice = ObResponse<
+export type LlbotObGetGroupNotice = ObResponse<
 	Array<{
 		sender_id: number
 		publish_time: number
-		message: LltbObGroupNoticeMessage
+		message: LlbotObGroupNoticeMessage
 	}>
 >
 
@@ -1166,17 +1166,17 @@ export type LltbObGetGroupNotice = ObResponse<
  * fetch_custom_face
  * Example `data` is an array of custom face image URLs.
  */
-export type LltbObFetchCustomFace = ObResponse<string[]>
+export type LlbotObFetchCustomFace = ObResponse<string[]>
 
 /**
  * get_friend_msg_history
  * Example `data` has a `messages` array with message entries (private).
  */
-export type LltbObGetMsgHistory = ObResponse<{
-	messages: LltbObMsg[]
+export type LlbotObGetMsgHistory = ObResponse<{
+	messages: LlbotObMsg[]
 }>
 
-export type LltbObForwardNode = {
+export type LlbotObForwardNode = {
 	content: ObSeg[]
 	sender: {
 		nickname: string
@@ -1191,24 +1191,24 @@ export type LltbObForwardNode = {
  * get_forward_msg
  * Example `data` includes forwarded messages (content array).
  */
-export type LltbObGetForwardMsg = ObResponse<{
-	messages: LltbObForwardNode[]
+export type LlbotObGetForwardMsg = ObResponse<{
+	messages: LlbotObForwardNode[]
 }>
 
 /**
  * get_group_root_files
  * Example `data` contains files and folders in the group root.
  */
-export type LltbObGetGroupFiles = ObResponse<{
-	files: LltbObGroupFileRecord[]
-	folders: LltbObGroupFolderRecord[]
+export type LlbotObGetGroupFiles = ObResponse<{
+	files: LlbotObGroupFileRecord[]
+	folders: LlbotObGroupFolderRecord[]
 }>
 
 /**
  * get_group_file_url
  * Example `data` contains a single `url` for a file resource.
  */
-export type LltbObGetGroupFileUrl = ObResponse<{
+export type LlbotObGetGroupFileUrl = ObResponse<{
 	url: string
 }>
 
@@ -1216,7 +1216,7 @@ export type LltbObGetGroupFileUrl = ObResponse<{
  * upload_group_file
  * Example `data` returns an uploaded file id.
  */
-export type LltbObUploadGroupFile = ObResponse<{
+export type LlbotObUploadGroupFile = ObResponse<{
 	file_id: string
 }>
 
@@ -1224,7 +1224,7 @@ export type LltbObUploadGroupFile = ObResponse<{
  * upload_private_file
  * Example `data` returns an uploaded file id.
  */
-export type LltbObUploadPrivateFile = ObResponse<{
+export type LlbotObUploadPrivateFile = ObResponse<{
 	file_id: string
 }>
 
@@ -1232,13 +1232,13 @@ export type LltbObUploadPrivateFile = ObResponse<{
  * create_group_file_folder
  * Example `data` returns a created folder id.
  */
-export type LltbObCreateGroupFileFolder = ObResponse<{
+export type LlbotObCreateGroupFileFolder = ObResponse<{
 	folder_id: string
 }>
 
-export type LltbObGetEssenceMsgList = ObResponse<LltbObEssenceMsg[]>
+export type LlbotObGetEssenceMsgList = ObResponse<LlbotObEssenceMsg[]>
 
-export type LltbObGetRkey = ObResponse<{
+export type LlbotObGetRkey = ObResponse<{
 	private_key: string
 	group_key: string
 	expired_time: number
@@ -1247,7 +1247,7 @@ export type LltbObGetRkey = ObResponse<{
 
 // == 消息 =================
 
-export type LltbObEssenceMsg = {
+export type LlbotObEssenceMsg = {
 	sender_id: number
 	sender_nick: string
 	sender_time: number
@@ -1257,9 +1257,9 @@ export type LltbObEssenceMsg = {
 	message_id: number
 }
 
-export type LltbObMdSeg = ObSeg<'markdown', { content: string }>
+export type LlbotObMdSeg = ObSeg<'markdown', { content: string }>
 
-export type LltbObImageSeg = ObSeg<
+export type LlbotObImageSeg = ObSeg<
 	'image',
 	{
 		file: string
@@ -1273,7 +1273,15 @@ export type LltbObImageSeg = ObSeg<
 	}
 >
 
-export type LltbObMfaceSeg = ObSeg<
+export type LlbotObFaceSeg = ObSeg<
+	'face',
+	{
+		id: number
+		sub_type: 1 | 2 | 3 | 5
+	}
+>
+
+export type LlbotObMfaceSeg = ObSeg<
 	'mface',
 	{
 		emoji_package_id: number
@@ -1284,7 +1292,7 @@ export type LltbObMfaceSeg = ObSeg<
 	}
 >
 
-export type LltbObFileSeg = ObSeg<
+export type LlbotObFileSeg = ObSeg<
 	'file',
 	{
 		file: string
@@ -1299,7 +1307,7 @@ export type LltbObFileSeg = ObSeg<
 
 // == 事件 =================
 
-export interface LltbObPokeEvent extends ObPokeEvent {
+export interface LlbotObPokeEvent extends ObPokeEvent {
 	raw_info: [
 		{ uid: string },
 		{ src: string },
@@ -1309,7 +1317,7 @@ export interface LltbObPokeEvent extends ObPokeEvent {
 	]
 }
 
-export interface LltbObAbsMessageSendEvent extends ObEvent {
+export interface LlbotObAbsMessageSendEvent extends ObEvent {
 	user_id: number
 	message_id: number
 	message_seq: number
@@ -1319,7 +1327,7 @@ export interface LltbObAbsMessageSendEvent extends ObEvent {
 	post_type: 'message_sent'
 	target_id: number
 }
-export interface LltbObPrivateMessageSendEvent extends LltbObAbsMessageSendEvent {
+export interface LlbotObPrivateMessageSendEvent extends LlbotObAbsMessageSendEvent {
 	message_type: 'private'
 	sender: {
 		user_id: number
@@ -1327,7 +1335,7 @@ export interface LltbObPrivateMessageSendEvent extends LltbObAbsMessageSendEvent
 		card: string
 	}
 }
-export interface LltbObGroupMessageSendEvent extends LltbObAbsMessageSendEvent {
+export interface LlbotObGroupMessageSendEvent extends LlbotObAbsMessageSendEvent {
 	group_id: number
 	group_name: string
 	message_type: 'group'
@@ -1339,15 +1347,15 @@ export interface LltbObGroupMessageSendEvent extends LltbObAbsMessageSendEvent {
 	}
 }
 
-export type LltbObMessageSendEvent =
-	| LltbObPrivateMessageSendEvent
-	| LltbObGroupMessageSendEvent
+export type LlbotObMessageSendEvent =
+	| LlbotObPrivateMessageSendEvent
+	| LlbotObGroupMessageSendEvent
 
-export interface LltbObMsg extends ObMsg {
+export interface LlbotObMsg extends ObMsg {
 	message_seq: number
 }
 
-export interface LltbObGroupMsgEmojiLikeEvent extends ObNoticeEvent {
+export interface LlbotObGroupMsgEmojiLikeEvent extends ObNoticeEvent {
 	notice_type: 'group_msg_emoji_like'
 	likes: [
 		{

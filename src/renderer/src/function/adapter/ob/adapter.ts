@@ -158,8 +158,9 @@ export class OneBotAdapter implements AdapterInterface {
 
 		this.segSerializer['text'] = this.textSerializer.bind(this)
 		this.segSerializer['image'] = this.imageSerializer.bind(this)
-		this.segSerializer['face'] = this.faceSerializer.bind(this)
-		this.segSerializer['super-face'] = this.superFaceSerializer.bind(this)
+		this.segSerializer['face'] = this.llbotFaceSerializer.bind(this)
+		this.segSerializer['super-face'] =
+			this.llbotSuperFaceSerializer.bind(this)
 		this.segSerializer['at'] = this.atSerializer.bind(this)
 		this.segSerializer['atall'] = this.atallSerializer.bind(this)
 		this.segSerializer['video'] = this.videoSerializer.bind(this)
@@ -695,7 +696,7 @@ export class OneBotAdapter implements AdapterInterface {
 			},
 		}
 	}
-	async faceSerializer(seg: FaceSeg): Promise<ObFaceSeg> {
+	async llbotFaceSerializer(seg: FaceSeg): Promise<ObFaceSeg> {
 		return {
 			type: 'face',
 			data: {
@@ -703,7 +704,7 @@ export class OneBotAdapter implements AdapterInterface {
 			},
 		}
 	}
-	async superFaceSerializer(seg: SuperFaceSeg): Promise<ObFaceSeg> {
+	async llbotSuperFaceSerializer(seg: SuperFaceSeg): Promise<ObFaceSeg> {
 		return {
 			type: 'face',
 			data: {

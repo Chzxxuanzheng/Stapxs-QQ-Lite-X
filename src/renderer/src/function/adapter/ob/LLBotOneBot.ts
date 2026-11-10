@@ -2,11 +2,13 @@ import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
 import { Msg } from '@renderer/function/model/msg'
 import { Resource } from '@renderer/function/model/resource'
 import {
+	FaceSeg,
 	FileSeg,
 	ForwardSeg,
 	ImgSeg,
 	MdSeg,
 	MfaceSeg,
+	SuperFaceSeg,
 } from '@renderer/function/model/seg'
 import {
 	GroupSession,
@@ -17,6 +19,7 @@ import { Member } from '@renderer/function/model/user'
 import {
 	EssenceData,
 	EssenceSeg,
+	FaceSegData,
 	FilesData,
 	FileSegData,
 	ForwardNodeData,
@@ -30,6 +33,7 @@ import {
 	MsgData,
 	PokeEventData,
 	ResponseEventData,
+	SuperFaceSegData,
 	UserData,
 } from '@renderer/function/adapter/interface'
 import { api, OneBotAdapter } from '@renderer/function/adapter/ob/adapter'
@@ -40,27 +44,28 @@ import {
 	ObConnector,
 } from '@renderer/function/adapter/ob/utils'
 import type {
-	LltbObCreateGroupFileFolder,
-	LltbObFetchCustomFace,
-	LltbObFileSeg,
-	LltbObForwardNode,
-	LltbObGetEssenceMsgList,
-	LltbObGetForwardMsg,
-	LltbObGetFriendsWithCategory,
-	LltbObGetGroupFiles,
-	LltbObGetGroupFileUrl,
-	LltbObGetGroupNotice,
-	LltbObGetMsgHistory,
-	LltbObGetStrangerInfo,
-	LltbObGroupMsgEmojiLikeEvent,
-	LltbObImageSeg,
-	LltbObMdSeg,
-	LltbObMessageSendEvent,
-	LltbObMfaceSeg,
-	LltbObMsg,
-	LltbObPokeEvent,
-	LltbObUploadGroupFile,
-	LltbObUploadPrivateFile,
+	LlbotObCreateGroupFileFolder,
+	LlbotObFaceSeg,
+	LlbotObFetchCustomFace,
+	LlbotObFileSeg,
+	LlbotObForwardNode,
+	LlbotObGetEssenceMsgList,
+	LlbotObGetForwardMsg,
+	LlbotObGetFriendsWithCategory,
+	LlbotObGetGroupFiles,
+	LlbotObGetGroupFileUrl,
+	LlbotObGetGroupNotice,
+	LlbotObGetMsgHistory,
+	LlbotObGetStrangerInfo,
+	LlbotObGroupMsgEmojiLikeEvent,
+	LlbotObImageSeg,
+	LlbotObMdSeg,
+	LlbotObMessageSendEvent,
+	LlbotObMfaceSeg,
+	LlbotObMsg,
+	LlbotObPokeEvent,
+	LlbotObUploadGroupFile,
+	LlbotObUploadPrivateFile,
 	ObForwardNodeSeg,
 	ObForwardSeg,
 	ObGetVersionInfo,
@@ -69,6 +74,7 @@ import type {
 	ObSendMsg,
 	RkeyType,
 } from '@renderer/function/adapter/ob/type'
+import Emoji from '@renderer/function/model/emoji'
 
 export default class LLBTOneBot extends OneBotAdapter {
 	override name = 'LuckyLillia OneBot'
@@ -87,10 +93,14 @@ export default class LLBTOneBot extends OneBotAdapter {
 	protected override init(): void {
 		super.init()
 		this.segParsers['markdown'] = this.mdParser.bind(this)
+		this.segParsers['face'] = this.llbotFaceParser.bind(this)
 		this.segParsers['mface'] = this.mfaceParser.bind(this)
 		this.segParsers['file'] = this.fileParser.bind(this)
 
 		this.segSerializer['markdown'] = this.mdSerializer.bind(this)
+		this.segSerializer['face'] = this.llbotFaceSerializer.bind(this)
+		this.segSerializer['super-face'] =
+			this.llbotSuperFaceSerializer.bind(this)
 		this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
 		this.segSerializer['file'] = this.fileSerializer.bind(this)
 
@@ -105,7 +115,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 	private remarkCache: undefined | Map<number, string>
 	@api
 	override async getFriendList(_?: boolean): Promise<FriendData[]> {
-		const data: LltbObGetFriendsWithCategory = await this.connector.send(
+		const data: LlbotObGetFriendsWithCategory = await this.connector.send(
 			'get_friends_with_category',
 			{},
 		)
@@ -129,7 +139,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 	override async getUserInfo(userId: number, _?: boolean): Promise<UserData> {
 		if (!this.remarkCache) await this.getFriendList()
 		// 获取用户信息
-		const data: LltbObGetStrangerInfo = await this.connector.send(
+		const data: LlbotObGetStrangerInfo = await this.connector.send(
 			'get_stranger_info',
 			{
 				user_id: userId,
@@ -167,7 +177,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		group: GroupSession,
 	): Promise<GroupAnnouncementData[]> {
 		// 获取群公告信息
-		const data: LltbObGetGroupNotice = await this.connector.send(
+		const data: LlbotObGetGroupNotice = await this.connector.send(
 			'_get_group_notice',
 			{
 				group_id: group.id,
@@ -186,7 +196,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 	}
 	@api
 	async getGroupEssence(group: GroupSession): Promise<EssenceData[]> {
-		const data: LltbObGetEssenceMsgList = await this.connector.send(
+		const data: LlbotObGetEssenceMsgList = await this.connector.send(
 			'get_essence_msg_list',
 			{
 				group_id: group.id,
@@ -221,7 +231,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 
 	@api
 	async getCustomFace(): Promise<string[] | undefined> {
-		const data: LltbObFetchCustomFace = await this.connector.send(
+		const data: LlbotObFetchCustomFace = await this.connector.send(
 			'fetch_custom_face',
 			{},
 		)
@@ -284,7 +294,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		else if (session instanceof GroupSession) type = 'group'
 		else throw new Error('不支持临时会话')
 
-		let data: LltbObGetMsgHistory
+		let data: LlbotObGetMsgHistory
 
 		if (type === 'user') {
 			data = await this.connector.send('get_friend_msg_history', {
@@ -351,9 +361,9 @@ export default class LLBTOneBot extends OneBotAdapter {
 	@api
 	override async getForwardMsg(
 		forwardId: string,
-		msg?: LltbObMsg,
+		msg?: LlbotObMsg,
 	): Promise<ForwardNodeData[]> {
-		const { data }: LltbObGetForwardMsg = await this.connector.send(
+		const { data }: LlbotObGetForwardMsg = await this.connector.send(
 			'get_forward_msg',
 			{
 				id: forwardId,
@@ -394,7 +404,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 	//#region == 文件相关 ======================
 	@api
 	async getGroupFile(group: GroupSession): Promise<FilesData> {
-		const data: LltbObGetGroupFiles = await this.connector.send(
+		const data: LlbotObGetGroupFiles = await this.connector.send(
 			'get_group_root_files',
 			{
 				group_id: group.id,
@@ -408,7 +418,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		group: GroupSession,
 		folderId: string,
 	): Promise<FilesData | undefined> {
-		const data: LltbObGetGroupFiles = await this.connector.send(
+		const data: LlbotObGetGroupFiles = await this.connector.send(
 			'get_group_files_by_folder',
 			{
 				group_id: group.id,
@@ -420,7 +430,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 
 	@api
 	async getGroupFileUrl(file: GroupFile): Promise<string | undefined> {
-		const data: LltbObGetGroupFileUrl = await this.connector.send(
+		const data: LlbotObGetGroupFileUrl = await this.connector.send(
 			'get_group_file_url',
 			{
 				group_id: file.group.id,
@@ -442,7 +452,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		file: File,
 		fold?: GroupFileFolder,
 	): Promise<string | undefined> {
-		const data: LltbObUploadGroupFile = await this.connector.send(
+		const data: LlbotObUploadGroupFile = await this.connector.send(
 			'upload_group_file',
 			{
 				group_id: group.id,
@@ -463,7 +473,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		session: UserSession,
 		file: File,
 	): Promise<string | undefined> {
-		const data: LltbObUploadPrivateFile = await this.connector.send(
+		const data: LlbotObUploadPrivateFile = await this.connector.send(
 			'upload_private_file',
 			{
 				user_id: session.id,
@@ -483,7 +493,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		group: GroupSession,
 		folderName: string,
 	): Promise<string | undefined> {
-		const data: LltbObCreateGroupFileFolder = await this.connector.send(
+		const data: LlbotObCreateGroupFileFolder = await this.connector.send(
 			'create_group_file_folder',
 			{
 				group_id: group.id,
@@ -544,20 +554,20 @@ export default class LLBTOneBot extends OneBotAdapter {
 	//#endregion
 
 	//#region == 消息相关 ===========================================
-	override async parseMsg(msg: LltbObMsg): Promise<MsgData> {
+	override async parseMsg(msg: LlbotObMsg): Promise<MsgData> {
 		const base = await super.parseMsg(msg)
 		this.setMsgSeq(base, msg.message_seq)
 		return base
 	}
 	//#region == 反序列化 ===========================
-	async mdParser(data: LltbObMdSeg, _?: ObMsg): Promise<MdSegData> {
+	async mdParser(data: LlbotObMdSeg, _?: ObMsg): Promise<MdSegData> {
 		return {
 			type: 'md',
 			content: data.data.content,
 		}
 	}
 	override async imageParser(
-		data: LltbObImageSeg,
+		data: LlbotObImageSeg,
 		msg?: ObMsg,
 	): Promise<ImgSegData> {
 		let type: RkeyType
@@ -573,7 +583,22 @@ export default class LLBTOneBot extends OneBotAdapter {
 			summary: data.data.summary,
 		}
 	}
-	async mfaceParser(data: LltbObMfaceSeg, _?: ObMsg): Promise<MfaceSegData> {
+	async llbotFaceParser(
+		data: LlbotObFaceSeg,
+		msg?: ObMsg,
+	): Promise<FaceSegData | SuperFaceSegData> {
+		const id = Number(data.data.id)
+		if (data.data.sub_type === 3 && Emoji.superList.includes(id))
+			return { type: 'super-face', id }
+		else if (
+			data.data.sub_type === undefined &&
+			msg?.message.length === 1 &&
+			Emoji.superList.includes(id)
+		)
+			return { type: 'super-face', id }
+		return { type: 'face', id }
+	}
+	async mfaceParser(data: LlbotObMfaceSeg, _?: ObMsg): Promise<MfaceSegData> {
 		return {
 			type: 'mface',
 			url: data.data.url,
@@ -583,7 +608,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 			key: data.data.key,
 		}
 	}
-	async fileParser(data: LltbObFileSeg, _?: ObMsg): Promise<FileSegData> {
+	async fileParser(data: LlbotObFileSeg, _?: ObMsg): Promise<FileSegData> {
 		return {
 			type: 'file',
 			name: data.data.file,
@@ -593,8 +618,8 @@ export default class LLBTOneBot extends OneBotAdapter {
 		}
 	}
 	async lltbNodeParser(
-		data: LltbObForwardNode,
-		msg?: LltbObMsg,
+		data: LlbotObForwardNode,
+		msg?: LlbotObMsg,
 	): Promise<ForwardNodeData> {
 		return {
 			sender: {
@@ -607,7 +632,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 	//#endregion
 
 	//#region == 序列化 =============================
-	async mdSerializer(seg: MdSeg): Promise<LltbObMdSeg> {
+	async mdSerializer(seg: MdSeg): Promise<LlbotObMdSeg> {
 		return {
 			type: 'markdown',
 			data: {
@@ -615,7 +640,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 			},
 		}
 	}
-	override async imageSerializer(seg: ImgSeg): Promise<LltbObImageSeg> {
+	override async imageSerializer(seg: ImgSeg): Promise<LlbotObImageSeg> {
 		return {
 			type: 'image',
 			data: {
@@ -630,7 +655,30 @@ export default class LLBTOneBot extends OneBotAdapter {
 			},
 		}
 	}
-	async mfaceSerializer(seg: MfaceSeg): Promise<LltbObMfaceSeg> {
+	async faceSerializer(seg: FaceSeg): Promise<LlbotObFaceSeg> {
+		let type: number = 0
+		if (seg.id < 222) type = 1
+		else if (seg.id < 100000) type = 2
+		else type = 4
+
+		return {
+			type: 'face',
+			data: {
+				id: seg.id,
+				sub_type: type,
+			},
+		}
+	}
+	async superFaceSerializer(seg: SuperFaceSeg): Promise<LlbotObFaceSeg> {
+		return {
+			type: 'face',
+			data: {
+				id: seg.id,
+				sub_type: 3,
+			},
+		}
+	}
+	async mfaceSerializer(seg: MfaceSeg): Promise<LlbotObMfaceSeg> {
 		return {
 			type: 'mface',
 			data: {
@@ -642,7 +690,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 			},
 		}
 	}
-	async fileSerializer(seg: FileSeg): Promise<LltbObFileSeg> {
+	async fileSerializer(seg: FileSeg): Promise<LlbotObFileSeg> {
 		if (!seg.file_id) throw new Error('文件消息必须有 file_id')
 		return {
 			type: 'file',
@@ -701,7 +749,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 	//#endregion
 
 	//#region == 事件处理 ===========================================
-	override async pokeEvent(event: LltbObPokeEvent): Promise<PokeEventData> {
+	override async pokeEvent(event: LlbotObPokeEvent): Promise<PokeEventData> {
 		const re = await super.pokeEvent(event)
 		re.action = event.raw_info[2].txt
 		re.suffix = event.raw_info[4].txt
@@ -710,7 +758,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		return re
 	}
 	async groupMsgEmojiLikeEvent(
-		event: LltbObGroupMsgEmojiLikeEvent,
+		event: LlbotObGroupMsgEmojiLikeEvent,
 	): Promise<ResponseEventData> {
 		return {
 			type: 'response',
@@ -726,7 +774,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		}
 	}
 	async messageSentEvent(
-		event: LltbObMessageSendEvent,
+		event: LlbotObMessageSendEvent,
 	): Promise<MessageEventData> {
 		let data: ObMessageEvent
 		if (event.message_type === 'private') {
@@ -793,7 +841,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		return false
 	}
 
-	private parseFileData(data: LltbObGetGroupFiles): FilesData {
+	private parseFileData(data: LlbotObGetGroupFiles): FilesData {
 		return {
 			files: data.data.files.map((file) => ({
 				file_id: file.file_id,
