@@ -10,125 +10,123 @@
 -->
 
 <template>
-	<div :id="'notice-' + id" class="note">
-		<div class="note-base">
-			<!-- #region == 接收到的消息 ========================================== -->
-			<!-- 撤回 -->
-			<template v-if="data instanceof RecallNotice">
-				<template v-if="data.selfRevoke">
-					<NoticeUser :user="data.user" />
-					<span>
-						{{ $t('撤回了一条消息') }}
-						<template v-if="data.suffix">
-							，{{ data.suffix }}
-						</template>
-					</span>
-				</template>
-				<template v-else>
-					<NoticeUser :user="data.operator" />
-					<span>{{ $t('撤回了') }}</span>
-					<NoticeUser :user="data.user" />
-					<span>{{ $t('的消息') }}</span>
-				</template>
-				<a
-					v-if="data.originMsg"
-					v-tooltip="{
-						comp: MsgPrevTooltip,
-						props: { msgs: [data.originMsg] },
-					}"
-					@click="data.session.inputMsg.reeditFromMsg(data.originMsg)"
-				>
-					{{ $t('重新编辑') }}
-				</a>
+	<section class="notice">
+		<!-- #region == 接收到的消息 ========================================== -->
+		<!-- 撤回 -->
+		<div v-if="notice instanceof RecallNotice">
+			<template v-if="notice.selfRevoke">
+				<NoticeUser :user="notice.user" />
+				<span>
+					{{ $t('撤回了一条消息') }}
+					<template v-if="notice.suffix">
+						，{{ notice.suffix }}
+					</template>
+				</span>
 			</template>
-			<!-- 禁言 -->
-			<template v-else-if="data instanceof BanNotice">
-				<NoticeUser :user="data.operator" />
-				<span>{{ $t('禁言了') }}</span>
-				<NoticeUser :user="data.user" />
-				<span>{{ data.fTime }}</span>
+			<template v-else>
+				<NoticeUser :user="notice.operator" />
+				<span>{{ $t('撤回了') }}</span>
+				<NoticeUser :user="notice.user" />
+				<span>{{ $t('的消息') }}</span>
 			</template>
-			<!-- 解除禁言 -->
-			<template v-else-if="data instanceof BanLiftNotice">
-				<NoticeUser :user="data.operator" />
-				<span>{{ $t('解除了') }}</span>
-				<NoticeUser :user="data.user" />
-				<span>{{ $t('的禁言') }}</span>
-			</template>
-			<!-- 戳一戳 -->
-			<template v-else-if="data instanceof PokeNotice">
-				<NoticeUser :user="data.user" />
-				<img :src="data.ico" :alt="data.action" />
-				<span>{{ data.action }}</span>
-				<NoticeUser :user="data.target" />
-				<span>{{ data.suffix }}</span>
-				<div class="space" />
-			</template>
-			<!-- 加群通知 -->
-			<template v-else-if="data instanceof JoinNotice">
-				<template v-if="data.operator">
-					<NoticeUser :user="data.operator" />
-					<span>{{ $t('通过了') }}</span>
-				</template>
-				<template v-if="data.inviter">
-					<NoticeUser :user="data.inviter" />
-					<span>{{ $t('邀请') }}</span>
-				</template>
-				<NoticeUser :user="data.user" />
-				<span>{{ $t('加入了群聊') }}</span>
-			</template>
-			<!-- 退群通知 -->
-			<template v-else-if="data instanceof LeaveNotice">
-				<template v-if="data.kick">
-					<NoticeUser :user="data.operator" />
-					<span>{{ $t('将') }}</span>
-					<NoticeUser :user="data.user" />
-					<span>{{ $t('移出群聊') }}</span>
-				</template>
-				<template v-else>
-					<NoticeUser :user="data.user" />
-					<span>{{ $t('离开了群聊') }}</span>
-				</template>
-			</template>
-			<!-- 表情回应 -->
-			<template v-else-if="data instanceof ResponseNotice">
-				<NoticeUser :user="data.operator" />
-				<span>{{ $t('回应了') }}</span>
-				<NoticeUser :user="data.user" />
-				<span>{{ $t('的') }}</span>
-				<a
-					v-tooltip="{
-						comp: MsgPrevTooltip,
-						props: { msgs: [data.msg] },
-					}"
-					class="cursor-pointer"
-					@click="scrollToMsg(data.msg)"
-				>
-					{{ $t('消息') }}
-				</a>
-				<span>:</span>
-				<EmojiFace :emoji="Emoji.get(data.emojiId)" />
-			</template>
-			<!-- #endregion -->
-
-			<!-- #region == 内部系统消息 ========================================== -->
-			<!-- 缺失消息 -->
-			<template v-else-if="data instanceof DeleteNotice">
-				<span>{{ $t('这条消息迷失在虚空里了') }}</span>
-			</template>
-			<!-- 时间 -->
-			<template
-				v-else-if="data instanceof TimeNotice && data.time != undefined"
+			<button
+				v-if="notice.originMsg"
+				v-tooltip="{
+					comp: MsgPrevTooltip,
+					props: { msgs: [notice.originMsg] },
+				}"
+				@click="notice.session.inputMsg.reeditFromMsg(notice.originMsg)"
 			>
-				<span>{{ pastTime }}</span>
-			</template>
-			<!-- 通知 -->
-			<template v-else-if="data instanceof InfoNotice">
-				<span>{{ data.message }}</span>
-			</template>
-			<!-- #endregion -->
+				{{ $t('重新编辑') }}
+			</button>
 		</div>
-	</div>
+		<!-- 禁言 -->
+		<div v-else-if="notice instanceof BanNotice">
+			<NoticeUser :user="notice.operator" />
+			<span>{{ $t('禁言了') }}</span>
+			<NoticeUser :user="notice.user" />
+			<span>{{ notice.fTime }}</span>
+		</div>
+		<!-- 解除禁言 -->
+		<div v-else-if="notice instanceof BanLiftNotice">
+			<NoticeUser :user="notice.operator" />
+			<span>{{ $t('解除了') }}</span>
+			<NoticeUser :user="notice.user" />
+			<span>{{ $t('的禁言') }}</span>
+		</div>
+		<!-- 戳一戳 -->
+		<div v-else-if="notice instanceof PokeNotice">
+			<NoticeUser :user="notice.user" />
+			<img :src="notice.ico" :alt="notice.action" />
+			<span>{{ notice.action }}</span>
+			<NoticeUser :user="notice.target" />
+			<span>{{ notice.suffix }}</span>
+			<div class="space" />
+		</div>
+		<!-- 加群通知 -->
+		<div v-else-if="notice instanceof JoinNotice">
+			<template v-if="notice.operator">
+				<NoticeUser :user="notice.operator" />
+				<span>{{ $t('通过了') }}</span>
+			</template>
+			<template v-if="notice.inviter">
+				<NoticeUser :user="notice.inviter" />
+				<span>{{ $t('邀请') }}</span>
+			</template>
+			<NoticeUser :user="notice.user" />
+			<span>{{ $t('加入了群聊') }}</span>
+		</div>
+		<!-- 退群通知 -->
+		<div v-else-if="notice instanceof LeaveNotice">
+			<template v-if="notice.kick">
+				<NoticeUser :user="notice.operator" />
+				<span>{{ $t('将') }}</span>
+				<NoticeUser :user="notice.user" />
+				<span>{{ $t('移出群聊') }}</span>
+			</template>
+			<template v-else>
+				<NoticeUser :user="notice.user" />
+				<span>{{ $t('离开了群聊') }}</span>
+			</template>
+		</div>
+		<!-- 表情回应 -->
+		<div v-else-if="notice instanceof ResponseNotice">
+			<NoticeUser :user="notice.operator" />
+			<span>{{ $t('回应了') }}</span>
+			<NoticeUser :user="notice.user" />
+			<span>{{ $t('的') }}</span>
+			<button
+				v-tooltip="{
+					comp: MsgPrevTooltip,
+					props: { msgs: [notice.msg] },
+				}"
+				class="cursor-pointer"
+				@click="scrollToMsg(notice.msg)"
+			>
+				{{ $t('消息') }}
+			</button>
+			<span>:</span>
+			<EmojiFace :emoji="Emoji.get(notice.emojiId)" />
+		</div>
+		<!-- #endregion -->
+
+		<!-- #region == 内部系统消息 ========================================== -->
+		<!-- 缺失消息 -->
+		<div v-else-if="notice instanceof DeleteNotice">
+			<span>{{ $t('这条消息迷失在虚空里了') }}</span>
+		</div>
+		<!-- 时间 -->
+		<div
+			v-else-if="notice instanceof TimeNotice && notice.time != undefined"
+		>
+			<span>{{ pastTime }}</span>
+		</div>
+		<!-- 通知 -->
+		<div v-else-if="notice instanceof InfoNotice">
+			<span>{{ notice.message }}</span>
+		</div>
+		<!-- #endregion -->
+	</section>
 </template>
 
 <script setup lang="ts">
@@ -154,17 +152,16 @@ import NoticeUser from '@renderer/components/NoticeUser.vue'
 import MsgPrevTooltip from '@renderer/components/tooltip/MsgPrevTooltip.vue'
 import { useUpdateFlag } from '@renderer/function/composable/useUpdateFlag.js'
 import { pastTimeFormat } from '@renderer/function/utils/systemUtil.js'
-const { data, id } = defineProps<{
-	data: Notice
-	id?: string
+const { notice } = defineProps<{
+	notice: Notice
 }>()
 let pastTime: ComputedRef<string> | undefined
 
-if (data instanceof TimeNotice && data.time !== undefined) {
+if (notice instanceof TimeNotice && notice.time !== undefined) {
 	const updateFlag = useUpdateFlag()
 	pastTime = computed(() => {
 		void updateFlag.value
-		return pastTimeFormat(data.time!.time)
+		return pastTimeFormat(notice.time!.time)
 	})
 }
 </script>

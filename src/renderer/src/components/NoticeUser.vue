@@ -1,10 +1,10 @@
 <template>
-	<a v-if="user.user_id === runtimeData.loginInfo?.uin" class="me">
+	<span v-if="user.user_id === runtimeData.loginInfo?.uin">
 		{{ $t('你') }}
-	</a>
-	<a v-else v-user-tooltip="user">
+	</span>
+	<button v-else v-user-tooltip="user">
 		{{ user.name }}
-	</a>
+	</button>
 </template>
 
 <script setup lang="ts">

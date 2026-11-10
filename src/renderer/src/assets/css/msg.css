@@ -1124,13 +1124,13 @@ span.user-title.robot {
 }
 
 
-.note {
+.notice {
     justify-content: center;
     margin: 10px 0;
     display: flex;
 }
 
-.note-base {
+.notice > div {
     border-radius: calc(3rem + 30px);
     background: var(--color-card-1);
     align-items: center;
@@ -1141,23 +1141,28 @@ span.user-title.robot {
     border: 1px solid transparent;
 }
 
-.note-base img {
+.notice img {
     display: inline-block;
     height: 1rem;
     margin: 0 3px;
 }
 
-.note-base button {
+.notice button {
+	all: unset;
     margin: 0 3px;
     color: var(--color-main);
     font-weight: bold;
 }
 
-.note.poking > div.note-notify {
+.notice button:hover {
+	text-decoration: underline;
+}
+
+.notice > div.note-notify {
     border: 1px solid var(--color-main);
 }
 
-.note-base > button.me {
+.notice > button.me {
     color: var(--color-font-1);
 }
 

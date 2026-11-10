@@ -134,7 +134,7 @@ body.vibrancy {
 
 .vibrancy .face-pan,
 .vibrancy .jin-pan,
-.vibrancy .note-base,
+.vibrancy .notice > div,
 .vibrancy .chat-pan > .chat-bottom > .input-pan,
 .vibrancy .chat-pan > .chat-bottom > .img-pan,
 .vibrancy .chat-head > div.info,
@@ -153,7 +153,7 @@ body.vibrancy {
 
 .vibrancy .face-pan,
 .vibrancy .jin-pan,
-.vibrancy .note-base,
+.vibrancy .notice > div,
 .vibrancy .chat-pan > .chat-bottom > .input-pan,
 .vibrancy .chat-pan > .chat-bottom > .img-pan,
 .vibrancy .merge-pan > div.ss-card {

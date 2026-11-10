@@ -13,20 +13,15 @@
 		}"
 		tag="div"
 	>
-		<template v-for="(message, index) in msgs">
+		<template v-for="(message, id) in msgs">
 			<!-- 时间戳 -->
 			<NoticeBody
 				v-if="
 					message.time &&
-					isShowTime(
-						msgs.at(index - 1)?.time?.time,
-						message.time.time,
-					)
+					isShowTime(msgs.at(id - 1)?.time?.time, message.time.time)
 				"
-				:key="
-					'notice-time-' + (message.time.time / (4 * 60)).toFixed(0)
-				"
-				:data="SystemNotice.time(message.time.time)"
+				:key="`notice-time-${id}`"
+				:notice="SystemNotice.time(message.time.time)"
 			/>
 			<!-- [已删除]消息 -->
 			<NoticeBody
@@ -35,13 +30,13 @@
 					message instanceof Msg &&
 					message.isDelete
 				"
-				:key="'delete-' + message.uuid"
-				:data="SystemNotice.delete()"
+				:key="`delete-${id}`"
+				:notice="SystemNotice.delete()"
 			/>
 			<!-- 消息体 -->
 			<MsgBody
 				v-else-if="message instanceof Msg"
-				:key="'msg-' + message.uuid"
+				:key="`msg-${id}`"
 				:msg="message"
 				:multiselect-state="multiselect"
 				:config="config"
@@ -55,9 +50,8 @@
 			<!-- 其他通知消息 -->
 			<NoticeBody
 				v-else-if="message instanceof Notice"
-				:id="message.uuid"
-				:key="'notice-' + index"
-				:data="message"
+				:key="`notice-id`"
+				:notice="message"
 			/>
 		</template>
 	</TransitionGroup>
