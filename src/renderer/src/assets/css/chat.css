@@ -1101,67 +1101,81 @@ input {
     overflow-y: scroll;
 }
 
-.bulletins > div > div {
+.bulletin {
+    cursor: pointer;
     transition: background 0.3s;
     border-radius: 7px;
     padding: 10px 20px;
 }
 
-.bulletins > div > div:hover {
+.bulletin:hover {
     background: var(--color-card-1);
 }
 
-.bulletins > div > div.base {
-    cursor: pointer;
+.bulletin:hover > button,
+.bulletin:hover > footer {
+    background: var(--color-card-2);
 }
 
-.bulletins > div > div.base > span {
+.bulletin > button {
+	all: unset;
+	width: 100%;
     background: var(--color-card-1);
+	color: var(--color-font);
     margin-top: 10px;
     border-radius: 7px;
     text-align: center;
     font-size: 0.8rem;
     display: block;
-    padding: 5px;
+    padding: 5px 0;
 }
 
-.bulletins > div > div.base > header {
+.bulletin .space {
+	margin: auto;
+}
+
+.bulletin > header {
     align-items: center;
     display: flex;
 }
 
-.bulletins > div > div.base > header > svg {
+.bulletin > header > svg {
     color: var(--color-main);
     margin-right: 10px;
     margin-top: 2px;
     height: 1.1rem;
 }
 
-.bulletins > div > div.base > header > span {
+.bulletin > header > span {
     color: var(--color-main);
     font-weight: bold;
     font-size: 1rem;
 }
 
-.bulletins > div > div.base > header > span:last-child {
+.bulletin > header > .time {
     color: var(--color-font-2);
     font-size: 0.8rem;
     font-weight: normal;
 }
 
-.bulletins > div > div.base > div.body {
+.bulletin > div.body {
     text-overflow: ellipsis;
     overflow: hidden;
     max-height: 6rem;
     display: flex;
+	transition: all 0.3s;
 }
 
-.bulletins > div > div.base > div.body.all {
+.bulletin > div.body.all {
     max-height: unset;
     flex-flow: column;
 }
 
-.bulletins > div > div.base > div.body > .img {
+.bulletin > div.body > .content {
+	flex: 1;
+}
+
+.bulletin > div.body > img {
     height: 6rem;
     width: 6rem;
     object-fit: cover;
@@ -1169,17 +1183,17 @@ input {
     border-radius: 7px;
 }
 
-.bulletins > div > div.base > div.body > .img.all {
+.bulletin > div.body > img.all {
     margin-top: 1rem;
     width: 100%;
     height: unset;
 }
 
-.bulletin-content {
+.bulletin .content {
     white-space: pre-line;
 }
 
-.bulletin-content > a {
+.bulletin .content > a {
     color: var(--color-main);
     font-weight: bold;
     text-decoration: underline;
@@ -1187,14 +1201,14 @@ input {
     opacity: 0.8;
 }
 
-.bulletin-content > a:before {
+.bulletin .content > a:before {
     text-align: center;
     content: '🔗';
     color: transparent;
     text-shadow: 0 0 0 var(--color-font-1);
 }
 
-.bulletins > div > div.base > div.info {
+.bulletin > footer {
     background: var(--color-card-1);
     transition: background 0.3s;
     align-items: center;
@@ -1204,11 +1218,7 @@ input {
     display: flex;
 }
 
-.bulletins > div > div.base:hover > div.info {
-    background: var(--color-card-2);
-}
-
-.bulletins > div > div.base > div.info > img {
+.bulletin > footer > img {
     outline: 2px solid var(--color-main);
     border: 2px solid var(--color-card);
     border-radius: 100%;
@@ -1216,17 +1226,13 @@ input {
     height: 20px;
 }
 
-.bulletins > div > div.base > div.info > a {
+.bulletin > footer > a {
     color: var(--color-main);
     margin-left: 10px;
     font-size: 0.9rem;
 }
 
-.bulletins > div > div.base > div.info > div {
-    flex: 1;
-}
-
-.bulletins > div > div.base > div.info > span {
+.bulletin > footer > span {
     color: var(--color-font-2);
     font-size: 0.8rem;
 }
