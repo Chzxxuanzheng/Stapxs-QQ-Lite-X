@@ -22,6 +22,7 @@
 
 > [!NOTE]
 > 由于本人精力有限，且桌面端使用人数不多，该项目不再提供桌面端支持！
+> 如果您有使用桌面端的需求，请使用[上游](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0)。[上游](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0)的开发重心在桌面端。
 
 ## 📦️ 构建应用
 
@@ -89,3 +90,11 @@ pnpm build
     <img src="https://avatars.githubusercontent.com/u/42486439?s=128&v=4">
 </a>
 <img src="https://q1.qlogo.cn/g?b=qq&s=0&nk=2634758584" alt="Logo" width="128">
+
+## ⭐️ Star History
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&theme=dark&legend=top-left" />
+  <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
+  <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
+</picture>
