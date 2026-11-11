@@ -1,7 +1,7 @@
 <template>
-	<div class="msg-json" v-if="success" @click="openLink(data.jumpUrl)">
+	<div class="msg-json" v-if="success" @click="openLink(data.jumpUrl ?? '')">
 		<p>{{ data.title }}</p>
-		<span>{{ data.desc }}</span>
+		<span v-if="data.desc">{{ data.desc }}</span>
 		<img :src="data.img" alt="" />
 		<div class="bottom-bar">
 			<img :src="data.icon" alt="" />
@@ -67,16 +67,18 @@ const feed = z
 				title: z.string(),
 				tagIcon: z.string(),
 				tagName: z.string(),
-				forwardMessage: z.string(),
-				pcJumpUrl: z.string(),
+				forwardMessage: z.string().optional(),
+				pcJumpUrl: z.string().optional(),
+				jumpUrl: z.string().optional(),
 			}),
 		}),
 		prompt: z.string(),
 	})
 	.transform((o) => ({
 		title: o.meta.feed.title,
-		jumpUrl:
-			unpackNestedUrl(o.meta.feed.pcJumpUrl) ?? o.meta.feed.pcJumpUrl,
+		jumpUrl: o.meta.feed.pcJumpUrl
+			? (unpackNestedUrl(o.meta.feed.pcJumpUrl) ?? o.meta.feed.pcJumpUrl)
+			: o.meta.feed.jumpUrl,
 		img: o.meta.feed.cover,
 		icon: o.meta.feed.tagIcon,
 		name: o.meta.feed.tagName,
