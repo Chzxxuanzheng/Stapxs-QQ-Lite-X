@@ -202,6 +202,27 @@
 				</div>
 				<Switch v-model="runtimeData.sysConfig.hide_empty_msg" />
 			</div>
+			<div class="opt-item">
+				<div
+					:class="{
+						changed: !option.checkDefault(
+							'session_messages_max_length',
+						),
+					}"
+				/>
+				<font-awesome-icon :icon="['fas', 'list']" />
+				<div>
+					<span>{{ $t('后台会话消息最大长度') }}</span>
+					<span>{{ $t('屏蔽，不支持消息可能产生的空消息') }}</span>
+				</div>
+				<OptRangeBar
+					v-model="runtimeData.sysConfig.session_messages_max_length"
+					:max="1000"
+					:min="100"
+					:step="20"
+					format="{value} 条"
+				/>
+			</div>
 		</div>
 		<div class="ss-card">
 			<header>{{ $t('输入选项') }}</header>
@@ -449,6 +470,7 @@ import useRuntimeData from '@renderer/state/runtimeData'
 import { popBox } from '@renderer/function/utils/popBox'
 import UmamiInfoPan from '@renderer/components/popBox/UmamiInfoPan.vue'
 import { shallowRef } from 'vue'
+import OptRangeBar from '@renderer/components/OptRangeBar.vue'
 
 const option = useOptionStore()
 const runtimeData = useRuntimeData()

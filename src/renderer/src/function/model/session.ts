@@ -494,13 +494,21 @@ export abstract class Session {
 	/**
 	 * 删除消息
 	 */
-	async removeMsg(msg: Msg) {
-		const index = this.messageList.indexOf(msg)
+	async removeMsg(message: Message) {
+		const index = this.messageList.indexOf(message)
 		if (index < 0) return
-		await this.runHook('beforeRmMessageHook', msg)
+		await this.runHook('beforeRmMessageHook', message)
 		this.messageList.splice(index, 1)
-		this.removeImgList(msg.imgList)
-		await this.runHook('afterRmMessageHook', msg)
+		if (message instanceof Msg) this.removeImgList(message.imgList)
+		if (this.headMsg === message) {
+			for (const headMsg of this.messageList) {
+				if (headMsg instanceof Msg) {
+					this.headMsg = headMsg
+					break
+				}
+			}
+		}
+		await this.runHook('afterRmMessageHook', message)
 	}
 
 	/**
@@ -563,19 +571,19 @@ export abstract class Session {
 	// 删除消息钩子
 	static readonly beforeRmMessageHook: ((
 		session: Session,
-		msg: Msg,
+		msg: Message,
 	) => VoidReturn)[] = []
 	readonly beforeRmMessageHook: ((
 		session: Session,
-		msg: Msg,
+		msg: Message,
 	) => VoidReturn)[] = []
 	static readonly afterRmMessageHook: ((
 		session: Session,
-		msg: Msg,
+		msg: Message,
 	) => VoidReturn)[] = []
 	readonly afterRmMessageHook: ((
 		session: Session,
-		msg: Msg,
+		msg: Message,
 	) => VoidReturn)[] = []
 	// 设置已读消息钩子
 	static readonly beforeSetReadHook: ((session: Session) => VoidReturn)[] = []
@@ -605,7 +613,7 @@ export abstract class Session {
 	): Promise<void>
 	async runHook(
 		hookNames: 'beforeRmMessageHook' | 'afterRmMessageHook',
-		msg: Msg,
+		msg: Message,
 	): Promise<void>
 	async runHook(
 		hookNames: 'beforeSetReadHook' | 'afterSetReadHook',

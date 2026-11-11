@@ -97,6 +97,35 @@ Session.afterNewMessageHook.push((session: Session, msg: Message) => {
 })
 //#endregion
 
+//#region == 维护最大长度消息列表 ==============================================
+const maintainLock = new Set<Session>()
+
+async function maintainMessageList(session: Session) {
+	const runtimeData = useRuntimeData()
+
+	const rmLength =
+		session.messageList.length -
+		runtimeData.sysConfig.session_messages_max_length
+
+	if (rmLength <= 0) return
+	if (runtimeData.nowChat === session) return
+
+	for (const message of session.messageList.slice(0, rmLength)) {
+		await session.removeMsg(message)
+	}
+}
+
+Session.afterNewMessageHook.push(async (session: Session, _: Message) => {
+	if (maintainLock.has(session)) return
+
+	maintainLock.add(session)
+	try {
+		await maintainMessageList(session)
+	} catch {}
+	maintainLock.delete(session)
+})
+//#endregion
+
 //#region == 工具函数 ==============================================
 /**
  * 判断现在窗口是否有必要发通知

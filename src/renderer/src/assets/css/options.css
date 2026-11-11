@@ -403,23 +403,67 @@
     font-size: 0.8rem;
 }
 
-.opt-item div.ss-range {
-    --range-height: 30px !important;
+.opt-range {
+	position: relative;
+	height: 30px;
+	display: flex;
+	margin-top: auto;
     max-width: 170px;
-    margin: 0 0 0 -25px;
+	border-radius: 10px;
 }
 
-.opt-item div.ss-range span {
-    font-size: 0.85rem;
+.opt-range > input {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	min-width: unset;
+	/* Chrome (WebKit) 适配：用背景渐变模拟进度条，由内联 background-size 控制进度 */
+	-webkit-appearance: none;
+	appearance: none;
+	background-image: linear-gradient(var(--color-main), var(--color-main));
+	background-color: var(--color-card-1);
+	background-repeat: no-repeat;
+	background-size: 0% 100%;
+	border-radius: 10px;
+	outline: none;
 }
 
-.opt-item div.ss-range input::-webkit-slider-thumb,
-.opt-item div.ss-range input::-moz-range-thumb {
-    opacity: 0;
+.opt-range > input::-moz-range-thumb {
+	background-color: transparent;
+	border: none;
 }
 
-.opt-item div.ss-range input::-webkit-slider-runnable-track {
-    opacity: 0;
+.opt-range > input::-moz-range-track{
+	background-color: var(--color-card-1);
+	height: 100%;
+}
+
+.opt-range > input::-moz-range-progress{
+	background-color: var(--color-main);
+	height: 100%;
+}
+
+/* Chrome (WebKit) 适配 */
+.opt-range > input::-webkit-slider-runnable-track {
+	background-color: transparent;
+	height: 100%;
+	border-radius: 10px;
+}
+
+.opt-range > input::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: transparent;
+	border: none;
+	width: 20px;
+	height: 100%;
+	border-radius: 10px;
+}
+
+.opt-range > span {
+	margin: auto;
+	z-index: 1;
+	pointer-events: none;
 }
 
 .opt-item > div.file-choice {
@@ -858,7 +902,7 @@
     }
 
     .opt-item select,
-    .opt-item div.ss-range,
+    .opt-item div.opt-range,
     .opt-item input[type='text'],
     .opt-item input[type='number'] {
         margin-left: calc(1.1rem + 20px);
@@ -866,7 +910,7 @@
         margin-top: 10px;
     }
 
-    .opt-item div.ss-range {
+    .opt-item div.opt-range {
         min-width: calc(100% - 40px);
     }
 

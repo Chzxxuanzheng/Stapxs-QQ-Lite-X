@@ -258,6 +258,9 @@ export const OptionInfos = {
 	hide_empty_msg: {
 		default: false,
 	},
+	session_messages_max_length: {
+		default: 500,
+	},
 	jump_forward: {
 		default: true,
 	},

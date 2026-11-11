@@ -166,20 +166,10 @@
 					<span>{{ $t('背景模糊') }}</span>
 					<span>{{ $t('什么都看不见了（恼') }}</span>
 				</div>
-				<div class="ss-range">
-					<input
-						v-model="runtimeData.sysConfig.background_img_blur"
-						:style="`background-size: ${runtimeData.sysConfig.background_img_blur}% 100%;`"
-						type="range"
-						name="background_img_blur"
-					/>
-					<span
-						:style="`color: var(--color-font${runtimeData.sysConfig.background_img_blur > 50 ? '-r' : ''})`"
-					>
-						{{ runtimeData.sysConfig.background_img_blur }}
-						px</span
-					>
-				</div>
+				<OptRangeBar
+					v-model="runtimeData.sysConfig.background_img_blur"
+					format="{value} px"
+				/>
 			</div>
 			<div class="opt-item">
 				<div
@@ -225,22 +215,12 @@
 						$t('难以通过拖拽侧边栏调整时，可以用这个')
 					}}</span>
 				</div>
-				<div class="ss-range">
-					<input
-						v-model="runtimeData.sysConfig.side_bar_width"
-						:style="`background-size: ${(runtimeData.sysConfig.side_bar_width - 250) / 7.5}% 100%;`"
-						min="250"
-						max="1000"
-						type="range"
-						name="side_bar_width"
-					/>
-					<span
-						:style="`color: var(--color-font${runtimeData.sysConfig.side_bar_width > 625 ? '-r' : ''})`"
-					>
-						{{ runtimeData.sysConfig.side_bar_width }}
-						px</span
-					>
-				</div>
+				<OptRangeBar
+					:min="250"
+					:max="1000"
+					v-model="runtimeData.sysConfig.side_bar_width"
+					format="{value} px"
+				/>
 			</div>
 			<div class="opt-item">
 				<div
@@ -383,6 +363,7 @@ import imageCompression from 'browser-image-compression'
 import languages from '@renderer/assets/l10n/_l10nconfig.json'
 import app from '@renderer/main'
 import { logger, popInfo } from '@renderer/function/base'
+import OptRangeBar from '@renderer/components/OptRangeBar.vue'
 
 const option = useOptionStore()
 const runtimeData = useRuntimeData()
