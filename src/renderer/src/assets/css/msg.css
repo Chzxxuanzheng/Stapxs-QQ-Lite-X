@@ -67,10 +67,6 @@
     justify-content: end;
 }
 
-.message-body.special {
-    color: var(--color-font-r);
-}
-
 .message-body.hide-face {
     margin-top: -1rem;
 }
@@ -134,6 +130,10 @@
 
 .message-info > button.sender-name {
     color: var(--color-font-1);
+}
+
+.message-body.special > div.message-content {
+    color: var(--color-font-r);
 }
 
 .message-body.special > div.message-content > div.main {
