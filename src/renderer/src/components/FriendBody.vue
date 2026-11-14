@@ -28,7 +28,7 @@
 			loading="lazy"
 			:title="data.showName"
 			:alt="data.showName"
-			:src="data.face"
+			:src="data.avatar"
 		/>
 		<div>
 			<div>

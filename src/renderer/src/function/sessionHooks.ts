@@ -203,7 +203,7 @@ function sendNotify(
 		title: session.showName,
 		body: msg.preMsg,
 		tag: tag,
-		icon: session.face,
+		icon: session.avatar,
 		image: undefined as any,
 		type: session.type,
 		is_important: important,

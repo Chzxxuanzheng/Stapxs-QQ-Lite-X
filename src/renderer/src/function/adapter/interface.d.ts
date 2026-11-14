@@ -347,10 +347,14 @@ export interface ImplInfo {
  * 群友会话数据
  */
 export interface GroupData {
-	group_id: number // 群ID
-	group_name: string // 群名称
-	member_count: number // 成员数量
-	max_member_count: number // 最大成员数量
+	id: number // 群ID
+	name: string // 群名称
+	avatar: string // 头像
+	desc?: string // 描述
+	remark?: string // 备注
+	created_time?: number // 创建时间
+	memberCount: number // 成员数量
+	maxMemberCount: number // 最大成员数量
 }
 /**
  * 用户信息数据

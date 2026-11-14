@@ -26,7 +26,7 @@
 			v-else
 			loading="lazy"
 			:title="session.showName"
-			:src="session.face"
+			:src="session.avatar"
 		/>
 		<div>
 			<p>

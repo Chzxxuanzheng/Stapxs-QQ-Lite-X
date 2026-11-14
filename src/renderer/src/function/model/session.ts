@@ -8,17 +8,12 @@
  *               用于会话，而非单纯的消息来源
  */
 
-import app, { nowTimes } from '@renderer/main'
-import {
-	ComputedRef,
-	ShallowRef,
-	computed,
-	shallowReactive,
-	shallowRef,
-} from 'vue'
+import app from '@renderer/main'
+import { ShallowRef, shallowReactive, shallowRef } from 'vue'
 import { Role } from '@renderer/function/adapter/enmu'
 import type {
 	FriendData,
+	GroupData,
 	SessionData,
 	UserData,
 } from '@renderer/function/adapter/interface'
@@ -53,7 +48,8 @@ export abstract class Session {
 	abstract sessionClass: SessionClass
 	id: number
 	_name: Name
-	protected abstract _face: ComputedRef<string>
+	_avatar: ProxyUrl
+	_remark?: Name
 	// 消息列表相关
 	readonly messageList: Message[] = shallowReactive([])
 	imgHead: Img | undefined
@@ -98,10 +94,12 @@ export abstract class Session {
 		new Set(),
 	) as unknown as Set<Session>
 
-	constructor(id: number, name: string) {
+	constructor(id: number, name: string, avatar: string, remark?: string) {
 		this.id = id
 		this._name = new Name(name)
+		this._avatar = new ProxyUrl(avatar)
 		Session.sessionList.push(this)
+		this._remark = remark ? new Name(remark) : undefined
 	}
 
 	//#region == 激活会话 ==============================================================
@@ -156,11 +154,6 @@ export abstract class Session {
 	//#endregion
 
 	//#region == 抽象方法 ==============================================================
-	/**
-	 * 是否在搜索时被匹配
-	 * @param str 搜索内容
-	 */
-	abstract match(str: string): boolean
 	/**
 	 * 通过id获取用户
 	 * @param id  用户id
@@ -747,6 +740,22 @@ export abstract class Session {
 		this.boxes.splice(index, 1)
 	}
 
+	/**
+	 * 是否在搜索时被匹配
+	 * @param str 搜索内容
+	 */
+	match(str: string): boolean {
+		str = str.trim().toLowerCase()
+		if (this.name.matchStr(str)) return true
+		if (this._remark?.matchStr(str)) return true
+		if (String(this.id).includes(str)) return true
+		return false
+	}
+
+	get avatar(): string {
+		return this._avatar.url
+	}
+
 	get showName(): string {
 		return this._name.toString()
 	}
@@ -765,12 +774,6 @@ export abstract class Session {
 
 	get name(): Name {
 		return this._name
-	}
-
-	get face(): string {
-		// 用来解决vue自动解包的
-		if (typeof this._face === 'string') return this._face
-		return this._face.value
 	}
 
 	set name(name: string | Name) {
@@ -825,13 +828,13 @@ export class GroupSession extends Session {
 	 * 是否开启通知
 	 */
 	notice: boolean = false
-	constructor(id: number, name: string, memberCount: number) {
+	constructor(data: GroupData) {
 		const { $t } = app.config.globalProperties
-		super(id, name)
+		super(data.id, data.name, data.avatar, data.remark)
 		GroupSession.sessionList.push(this)
 		// 用 null 占位，长度用于在加载成员前展示成员数、判断是否已加载
 		this.memberList = Array.from(
-			{ length: memberCount },
+			{ length: data.memberCount },
 			() => null,
 		) as unknown as Member[]
 		const groupClass =
@@ -941,19 +944,6 @@ export class GroupSession extends Session {
 		this.essenceMsgLoaded = false
 		this.essenceMsgs.length = 0
 	}
-
-	override match(str: string): boolean {
-		str = str.trim().toLowerCase()
-		if (this.name.matchStr(str)) return true
-		if (String(this.id).includes(str)) return true
-		return false
-	}
-
-	override _face = computed(() => {
-		return ProxyUrl.proxy(
-			`https://p.qlogo.cn/gh/${this.id}/${this.id}/0?d=${nowTimes}`,
-		)
-	})
 
 	static override getSessionById(id: number): GroupSession | undefined {
 		return GroupSession.sessionList.find((item) => item.id === id)
@@ -1206,14 +1196,12 @@ export class GroupSession extends Session {
 export class UserSession extends Session {
 	override type = 'user' as const
 	override sessionClass: SessionClass
-	private _remark?: Name
 	user: User
 	static readonly sessionList: UserSession[] = shallowReactive([])
 	constructor(data: FriendData) {
-		super(data.id, data.nickname)
+		super(data.id, data.nickname, data.avatar, data.remark)
 		UserSession.sessionList.push(this)
 		this.user = new User(data)
-		this._remark = data.remark ? new Name(data.remark) : undefined
 		const friendClass =
 			SessionClass.getClass(data.class.id) ??
 			new SessionClass(data.class.id, data.class.name)
@@ -1234,20 +1222,6 @@ export class UserSession extends Session {
 	override prepareUnactive(): void {
 		/**/
 	}
-
-	override match(str: string): boolean {
-		str = str.trim().toLowerCase()
-		if (this.name.matchStr(str)) return true
-		if (this._remark?.matchStr(str)) return true
-		if (String(this.id).includes(str)) return true
-		return false
-	}
-
-	override _face = computed(() => {
-		return ProxyUrl.proxy(
-			`https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.id}&d=${nowTimes}`,
-		)
-	})
 
 	override get showName(): string {
 		if (!this._remark) return super.showName
@@ -1333,7 +1307,7 @@ export class TempSession extends Session {
 	static readonly sessionList: TempSession[] = shallowReactive([])
 	constructor(id: number, group_id: number) {
 		const group = GroupSession.getSessionById(group_id)
-		super(id, `临时会话-${id}`)
+		super(id, `临时会话-${id}`, '')
 		this.group = group ?? group_id
 		const tempClass =
 			SessionClass.getClass(99998) ?? new SessionClass(99998, '临时会话')
@@ -1371,12 +1345,6 @@ export class TempSession extends Session {
 	static override getSessionById(id: number): TempSession | undefined {
 		return TempSession.sessionList.find((item) => item.id === id)
 	}
-
-	override _face = computed(() => {
-		return ProxyUrl.proxy(
-			`https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.id}&d=${nowTimes}`,
-		)
-	})
 
 	override get showName(): string {
 		const { $t } = app.config.globalProperties

@@ -304,10 +304,13 @@ export class MilkyAdapter implements AdapterInterface {
 	): Promise<GroupData[] | undefined> {
 		const data = await this.callApi('GetGroupList', { no_cache: !useCache })
 		return data.groups.map((group) => ({
-			group_id: group.group_id,
-			group_name: group.group_name,
-			member_count: group.member_count,
-			max_member_count: group.max_member_count,
+			id: group.group_id,
+			name: group.group_name,
+			avatar: this.getGroupAvatar(group.group_id),
+			desc: group.description,
+			remark: group.remark,
+			memberCount: group.member_count,
+			maxMemberCount: group.max_member_count,
 		}))
 	}
 	/**
@@ -1805,6 +1808,9 @@ export class MilkyAdapter implements AdapterInterface {
 	//#region == 头像相关 =======================
 	protected getUserAvatar(id: number): string {
 		return `https://q1.qlogo.cn/g?b=qq&s=0&nk=${id}`
+	}
+	protected getGroupAvatar(id: number): string {
+		return `https://p.qlogo.cn/gh/${id}/${id}/0`
 	}
 	//#endregion
 	//#endregion

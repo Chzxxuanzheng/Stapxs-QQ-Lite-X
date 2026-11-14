@@ -110,9 +110,9 @@ export async function reloadUsers(useCache: boolean = true) {
 	SessionBox.clear()
 
 	// 生成新会话
-	for (const item of groupData) {
-		if (!GroupSession.getSessionById(item.group_id)) {
-			new GroupSession(item.group_id, item.group_name, item.member_count)
+	for (const data of groupData) {
+		if (!GroupSession.getSessionById(data.id)) {
+			new GroupSession(data)
 		}
 	}
 	for (const item of friendData) {

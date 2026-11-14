@@ -312,13 +312,14 @@ export class OneBotAdapter implements AdapterInterface {
 			'get_group_list',
 			{},
 		)
-		for (const item of data.data) {
-			if (groupData.has(item.group_id)) continue
-			groupData.set(item.group_id, {
-				group_id: item.group_id,
-				group_name: item.group_name,
-				member_count: item.member_count,
-				max_member_count: item.max_member_count,
+		for (const group of data.data) {
+			if (groupData.has(group.group_id)) continue
+			groupData.set(group.group_id, {
+				id: group.group_id,
+				name: group.group_name,
+				avatar: this.getGroupAvatar(group.group_id),
+				memberCount: group.member_count,
+				maxMemberCount: group.max_member_count,
 			})
 		}
 
@@ -1131,6 +1132,9 @@ export class OneBotAdapter implements AdapterInterface {
 	 */
 	protected getUserAvatar(id: number): string {
 		return `https://q1.qlogo.cn/g?b=qq&s=0&nk=${id}`
+	}
+	protected getGroupAvatar(id: number): string {
+		return `https://p.qlogo.cn/gh/${id}/${id}/0`
 	}
 	//#endregion
 

@@ -9,7 +9,7 @@
 	<div class="chat-info-pan">
 		<div :class="'chat-info-base ' + chat.type">
 			<div>
-				<img :src="chat.face" :alt="chat.showName" />
+				<img :src="chat.avatar" :alt="chat.showName" />
 				<div>
 					<a>{{ chat.showName }}</a>
 					<span>{{ chat.id }}</span>

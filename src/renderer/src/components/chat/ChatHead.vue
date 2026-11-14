@@ -15,7 +15,7 @@
 		@mouseleave="hoverEnd()"
 	>
 		<div class="info">
-			<img :src="session.face" :alt="session.showName" />
+			<img :src="session.avatar" :alt="session.showName" />
 			<div class="info">
 				<p>
 					{{ session.showName }}
