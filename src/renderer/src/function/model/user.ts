@@ -20,7 +20,7 @@ import useRuntimeData from '@renderer/state/runtimeData'
  * 信息不全,保底的
  */
 export class User {
-	user_id: number
+	user_id: string
 	_avatar: ProxyUrl
 	_nickname: Name
 	_remark?: Name
@@ -31,11 +31,11 @@ export class User {
 	age: number
 	sex: Gender
 	class?: {
-		id: number
+		id: string
 		name: string
 	}
 	constructor(data: UserData) {
-		this.user_id = data.id ?? 0
+		this.user_id = data.id ?? '0'
 		this._avatar = new ProxyUrl(data.avatar)
 		this._nickname = new Name(data.nickname)
 		if (data.remark) this._remark = new Name(data.remark)
@@ -181,7 +181,7 @@ export class Member extends User {
 				this.role = Role.Admin
 				break
 			default:
-				if (isRobot(data.id ?? 0)) this.role = Role.Bot
+				if (isRobot(data.id ?? '0')) this.role = Role.Bot
 				else this.role = Role.User
 				break
 		}
@@ -356,7 +356,8 @@ function canBeAdmined(target: Role, other: Role): boolean {
 	return true
 }
 
-function isRobot(id: number): boolean {
+function isRobot(qqId: string): boolean {
+	const id = +qqId
 	if (id >= 4010000000 && id <= 4019999999) return true
 	if (id >= 2854196301 && id <= 2854216399) return true
 	if (id >= 3889000000 && id <= 3889999999) return true

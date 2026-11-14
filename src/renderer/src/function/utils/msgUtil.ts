@@ -169,11 +169,11 @@ export function closeSession() {
  * 判断是否是特别关心
  * @param user 用户/用户id
  */
-export function isImportant(user: User | number): boolean {
-	if (typeof user !== 'number') user = user.user_id
+export function isImportant(user: User | string): boolean {
+	if (typeof user !== 'string') user = user.user_id
 	const userSession = UserSession.getSessionById(user)
 	if (!userSession) return false
-	return userSession.sessionClass.id === 9999
+	return userSession.sessionClass.id === '9999'
 }
 
 /**

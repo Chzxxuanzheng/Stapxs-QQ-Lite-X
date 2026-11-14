@@ -106,7 +106,7 @@ export default class LagrangeOneBot
 		for (const item of data.data) {
 			if (friendData.has(item.user_id)) continue
 			friendData.set(item.user_id, {
-				id: item.user_id,
+				id: item.user_id.toString(),
 				avatar: this.getUserAvatar(item.user_id),
 				nickname: item.nickname,
 				remark: item.remark === '' ? undefined : item.remark,
@@ -115,7 +115,7 @@ export default class LagrangeOneBot
 				age: 0,
 				sex: Gender.Unknown,
 				class: {
-					id: item.group.group_id,
+					id: item.group.group_id.toString(),
 					name: item.group.group_name,
 				},
 			})
@@ -128,14 +128,15 @@ export default class LagrangeOneBot
 
 	@api
 	override async getUserInfo(
-		userId: number,
+		userId: string,
 		useCache: boolean = true,
 	): Promise<UserData> {
+		const userIdNum = Number(userId)
 		// 获取用户信息
 		const data: LgrObGetStrangerInfo = await this.connector.send(
 			'get_stranger_info',
 			{
-				user_id: userId,
+				user_id: userIdNum,
 				no_cache: !useCache,
 			},
 		)
@@ -172,7 +173,10 @@ export default class LagrangeOneBot
 				content: item.message.text,
 				img: `https://p.qlogo.cn/gdynamic/${item.message.images.at(0)?.id}/0/`,
 				time: item.publish_time,
-				sender: await this.getMemberFromGroup(item.sender_id, group.id),
+				sender: await this.getMemberFromGroup(
+					item.sender_id,
+					Number(group.id),
+				),
 			})),
 		)
 		return out
@@ -237,12 +241,12 @@ export default class LagrangeOneBot
 
 		if (session.type === 'group') {
 			msgData = {
-				group_id: session.id,
+				group_id: Number(session.id),
 				...data.data,
 			}
 		} else {
 			msgData = {
-				user_id: session.id,
+				user_id: Number(session.id),
 				...data.data,
 			}
 		}
@@ -365,13 +369,6 @@ export default class LagrangeOneBot
 	//#endregion
 	//#region == 文件相关 ======================
 	@api
-	async getGroupFile?(group: GroupSession): Promise<FilesData> {
-		const data: LgrObGetGroupFile = await this.connector.send(
-			'get_group_root_files',
-			{ group_id: group.id },
-		)
-		return await this.parseFileData(data, group.id)
-	}
 
 	@api
 	async getGroupFolderFile(
@@ -381,11 +378,11 @@ export default class LagrangeOneBot
 		const data: LgrObGetGroupFile = await this.connector.send(
 			'get_group_files_by_folder',
 			{
-				group_id: group.id,
+				group_id: Number(group.id),
 				folder_id: folderId,
 			},
 		)
-		return await this.parseFileData(data, group.id)
+		return await this.parseFileData(data, Number(group.id))
 	}
 
 	@api
@@ -593,7 +590,7 @@ export default class LagrangeOneBot
 		if (msg.message.length !== 1) return false
 		if (
 			(msg.sender as ObPrivateSender | ObGroupSender).user_id !==
-			runtimeData.loginInfo?.uin
+			Number(runtimeData.loginInfo?.uin)
 		)
 			return false
 		if (msg.message[0].type !== 'text') return false

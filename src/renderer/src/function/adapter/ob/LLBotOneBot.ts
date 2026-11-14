@@ -124,10 +124,10 @@ export default class LLBTOneBot extends OneBotAdapter {
 		for (const category of data.data) {
 			for (const friend of category.buddyList) {
 				const id = Number(friend.user_id)
-				this.remarkCache.set(id, friend.remark)
-				out.push({
-					id,
-					avatar: this.getUserAvatar(id),
+					this.remarkCache.set(id, friend.remark)
+					out.push({
+						id: id.toString(),
+						avatar: this.getUserAvatar(id),
 					nickname: friend.nickname,
 					remark: friend.remark === '' ? undefined : friend.remark,
 					regTime: 0,
@@ -135,7 +135,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 					age: 0,
 					sex: Gender.Unknown,
 					class: {
-						id: category.categoryId,
+						id: category.categoryId.toString(),
 						name: category.categoryName,
 					},
 				})
@@ -144,19 +144,20 @@ export default class LLBTOneBot extends OneBotAdapter {
 		return out
 	}
 	@api
-	override async getUserInfo(userId: number, _?: boolean): Promise<UserData> {
+	override async getUserInfo(userId: string, _?: boolean): Promise<UserData> {
 		if (!this.remarkCache) await this.getFriendList()
+		const userIdNum = Number(userId)
 		// 获取用户信息
 		const data: LlbotObGetStrangerInfo = await this.connector.send(
 			'get_stranger_info',
 			{
-				user_id: userId,
+				user_id: userIdNum,
 			},
 		)
 		const user = data.data
 		if (!this.friendListCache) await this.getFriendList()
-		const out = this.buildUnknownUser(userId, user.nickname)
-		const remark = this.remarkCache?.get(userId)
+		const out = this.buildUnknownUser(userIdNum, user.nickname)
+		const remark = this.remarkCache?.get(userIdNum)
 		out.remark = remark === '' ? undefined : remark
 		out.longNick = user.long_nick === '' ? undefined : user.long_nick
 		out.qid = user.qid
@@ -189,7 +190,10 @@ export default class LLBTOneBot extends OneBotAdapter {
 					? `https://p.qlogo.cn/gdynamic/${item.message.images.at(0)!.id}/0/`
 					: undefined,
 				time: item.publish_time,
-				sender: await this.getMemberFromGroup(item.sender_id, group.id),
+				sender: await this.getMemberFromGroup(
+					item.sender_id,
+					Number(group.id),
+				),
 			})),
 		)
 		return out
@@ -317,7 +321,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 
 		if (start) messages.pop() // 去掉第一条，避免重复
 		const out: Promise<MsgData>[] = messages.map((msg) => {
-			if (msg.user_id) msg.user_id = session.id
+			if (msg.user_id) msg.user_id = Number(session.id)
 			return this.parseMsg(msg)
 		})
 
@@ -410,10 +414,10 @@ export default class LLBTOneBot extends OneBotAdapter {
 		const data: LlbotObGetGroupFiles = await this.connector.send(
 			'get_group_root_files',
 			{
-				group_id: group.id,
+				group_id: Number(group.id),
 			},
 		)
-		return await this.parseFileData(data, group.id)
+		return await this.parseFileData(data, Number(group.id))
 	}
 
 	@api
@@ -424,11 +428,11 @@ export default class LLBTOneBot extends OneBotAdapter {
 		const data: LlbotObGetGroupFiles = await this.connector.send(
 			'get_group_files_by_folder',
 			{
-				group_id: group.id,
+				group_id: Number(group.id),
 				folder_id: folderId,
 			},
 		)
-		return await this.parseFileData(data, group.id)
+		return await this.parseFileData(data, Number(group.id))
 	}
 
 	@api
@@ -592,14 +596,14 @@ export default class LLBTOneBot extends OneBotAdapter {
 	): Promise<FaceSegData | SuperFaceSegData> {
 		const id = Number(data.data.id)
 		if (data.data.sub_type === 3 && Emoji.superList.includes(id))
-			return { type: 'super-face', id }
+			return { type: 'super-face', id: id.toString() }
 		else if (
 			data.data.sub_type === undefined &&
 			msg?.message.length === 1 &&
 			Emoji.superList.includes(id)
 		)
-			return { type: 'super-face', id }
-		return { type: 'face', id }
+			return { type: 'super-face', id: id.toString() }
+		return { type: 'face', id: id.toString() }
 	}
 	async mfaceParser(data: LlbotObMfaceSeg, _?: ObMsg): Promise<MfaceSegData> {
 		return {
@@ -660,15 +664,16 @@ export default class LLBTOneBot extends OneBotAdapter {
 		}
 	}
 	async faceSerializer(seg: FaceSeg): Promise<LlbotObFaceSeg> {
+		const id = Number(seg.id)
 		let type: number
-		if (seg.id < 222) type = 1
-		else if (seg.id < 100000) type = 2
+		if (id < 222) type = 1
+		else if (id < 100000) type = 2
 		else type = 4
 
 		return {
 			type: 'face',
 			data: {
-				id: seg.id,
+				id,
 				sub_type: type,
 			},
 		}
@@ -677,7 +682,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		return {
 			type: 'face',
 			data: {
-				id: seg.id,
+				id: Number(seg.id),
 				sub_type: 3,
 			},
 		}
@@ -767,7 +772,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		return {
 			type: 'response',
 			session: {
-				id: event.group_id,
+				id: event.group_id.toString(),
 				type: 'group',
 			},
 			operator: await this.getMemberFromGroup(

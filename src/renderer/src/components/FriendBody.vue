@@ -18,9 +18,9 @@
 		}"
 	>
 		<div :class="{ new: data.showNotice && from === 'message' }" />
-		<font-awesome-icon v-if="data.id == -10000" :icon="['fas', 'bell']" />
+		<font-awesome-icon v-if="data.id == '-10000'" :icon="['fas', 'bell']" />
 		<font-awesome-icon
-			v-else-if="data.id == -10001"
+			v-else-if="data.id == '-10001'"
 			:icon="['fas', 'user-group']"
 		/>
 		<img

@@ -258,7 +258,7 @@ export class MilkyAdapter implements AdapterInterface {
 	async getLoginInfo(): Promise<LoginInfo | undefined> {
 		const data = await this.callApi('GetLoginInfo', {})
 		return {
-			uin: data.uin,
+			uin: data.uin.toString(),
 			nickname: data.nickname,
 		}
 	}
@@ -304,7 +304,7 @@ export class MilkyAdapter implements AdapterInterface {
 	): Promise<GroupData[] | undefined> {
 		const data = await this.callApi('GetGroupList', { no_cache: !useCache })
 		return data.groups.map((group) => ({
-			id: group.group_id,
+			id: group.group_id.toString(),
 			name: group.group_name,
 			avatar: this.getGroupAvatar(group.group_id),
 			desc: group.description,
@@ -320,13 +320,13 @@ export class MilkyAdapter implements AdapterInterface {
 	 */
 	@api
 	async getUserInfo(
-		userId: number,
+		userId: string,
 		_?: boolean,
 	): Promise<UserData | undefined> {
-		const data = await this.callApi('GetUserProfile', { user_id: userId })
+		const data = await this.callApi('GetUserProfile', { user_id: +userId })
 		return {
-			id: userId,
-			avatar: this.getUserAvatar(userId),
+			id: userId.toString(),
+			avatar: this.getUserAvatar(+userId),
 			remark: data.remark,
 			nickname: data.nickname,
 			longNick: data.bio,
@@ -348,7 +348,7 @@ export class MilkyAdapter implements AdapterInterface {
 		useCache: boolean = true,
 	): Promise<MemberData[] | undefined> {
 		const data = await this.callApi('GetGroupMemberList', {
-			group_id: group.id,
+			group_id: +group.id,
 			no_cache: !useCache,
 		})
 		return data.members.map((member) => this.parseMember(member, group.id))
@@ -362,14 +362,17 @@ export class MilkyAdapter implements AdapterInterface {
 		group: GroupSession,
 	): Promise<GroupAnnouncementData[]> {
 		const data = await this.callApi('GetGroupAnnouncements', {
-			group_id: group.id,
+			group_id: Number(group.id),
 		})
 		return await Promise.all(
 			data.announcements.map(async (item) => ({
 				content: item.content ?? undefined,
 				img: item.image_url ?? undefined,
 				time: item.time,
-				sender: await this.getMemberFromGroup(item.user_id, group.id),
+				sender: await this.getMemberFromGroup(
+					item.user_id,
+					Number(group.id),
+				),
 			})),
 		)
 	}
@@ -383,7 +386,7 @@ export class MilkyAdapter implements AdapterInterface {
 		const messages: GroupEssenceMessage[] = []
 		for (let id = 0; true; id++) {
 			const data = await this.callApi('GetGroupEssenceMessages', {
-				group_id: group.id,
+				group_id: Number(group.id),
 				page_index: id,
 				page_size: 50,
 			})
@@ -440,7 +443,7 @@ export class MilkyAdapter implements AdapterInterface {
 	@api
 	async setGroupName(group: GroupSession, name: string): Promise<true> {
 		await this.callApi('SetGroupName', {
-			group_id: group.id,
+			group_id: Number(group.id),
 			new_group_name: name,
 		})
 		return true
@@ -458,8 +461,8 @@ export class MilkyAdapter implements AdapterInterface {
 		card: string,
 	): Promise<true> {
 		await this.callApi('SetGroupMemberCard', {
-			group_id: group.id,
-			user_id: mem.user_id,
+			group_id: Number(group.id),
+			user_id: Number(mem.user_id),
 			card: card,
 		})
 		return true
@@ -477,8 +480,8 @@ export class MilkyAdapter implements AdapterInterface {
 		title: string,
 	): Promise<true> {
 		await this.callApi('SetGroupMemberSpecialTitle', {
-			group_id: group.id,
-			user_id: mem.user_id,
+			group_id: Number(group.id),
+			user_id: Number(mem.user_id),
 			special_title: title,
 		})
 		return true
@@ -496,8 +499,8 @@ export class MilkyAdapter implements AdapterInterface {
 		time: number,
 	): Promise<true> {
 		await this.callApi('SetGroupMemberMute', {
-			group_id: group.id,
-			user_id: mem.user_id,
+			group_id: Number(group.id),
+			user_id: Number(mem.user_id),
 			duration: time,
 		})
 		return true
@@ -510,8 +513,8 @@ export class MilkyAdapter implements AdapterInterface {
 	@api
 	async kickMember(group: GroupSession, mem: Member): Promise<true> {
 		await this.callApi('KickGroupMember', {
-			group_id: group.id,
-			user_id: mem.user_id,
+			group_id: Number(group.id),
+			user_id: Number(mem.user_id),
 			reject_add_request: false,
 		})
 		return true
@@ -522,7 +525,7 @@ export class MilkyAdapter implements AdapterInterface {
 	 */
 	@api
 	async leaveGroup(group: GroupSession): Promise<true> {
-		await this.callApi('QuitGroup', { group_id: group.id })
+		await this.callApi('QuitGroup', { group_id: Number(group.id) })
 		return true
 	}
 	//#endregion
@@ -537,7 +540,7 @@ export class MilkyAdapter implements AdapterInterface {
 	async setMsgReaded(session: Session, msg: Msg): Promise<true> {
 		await this.callApi('MarkMessageAsRead', {
 			message_scene: this.getScene(session.type),
-			peer_id: session.id,
+			peer_id: Number(session.id),
 			message_seq: Number(msg.message_id),
 		})
 
@@ -555,7 +558,7 @@ export class MilkyAdapter implements AdapterInterface {
 	): Promise<MsgData | undefined> {
 		const data = await this.callApi('GetMessage', {
 			message_scene: this.getScene(session.type),
-			peer_id: session.id,
+			peer_id: Number(session.id),
 			message_seq: Number(msgId),
 		})
 		return this.parseMsg(data.message)
@@ -606,12 +609,12 @@ export class MilkyAdapter implements AdapterInterface {
 		let data: SendGroupMessageOutput | SendPrivateMessageOutput
 		if (msg.session?.type === 'group') {
 			data = await this.callApi('SendGroupMessage', {
-				group_id: msg.session.id,
+				group_id: Number(msg.session.id),
 				message: await this.serializeMsg(msg),
 			})
 		} else if (msg.session?.type === 'user') {
 			data = await this.callApi('SendPrivateMessage', {
-				user_id: msg.session.id,
+				user_id: Number(msg.session.id),
 				message: await this.serializeMsg(msg),
 			})
 		} else {
@@ -630,12 +633,12 @@ export class MilkyAdapter implements AdapterInterface {
 	async recallMsg(msg: Msg): Promise<true> {
 		if (msg.session?.type === 'group') {
 			await this.callApi('RecallGroupMessage', {
-				group_id: msg.session.id,
+				group_id: Number(msg.session.id),
 				message_seq: Number(msg.message_id),
 			})
 		} else if (msg.session?.type === 'user') {
 			await this.callApi('RecallPrivateMessage', {
-				user_id: msg.session.id,
+				user_id: Number(msg.session.id),
 				message_seq: Number(msg.message_id),
 			})
 		} else {
@@ -651,8 +654,8 @@ export class MilkyAdapter implements AdapterInterface {
 	@api
 	async sendGroupPoke(session: GroupSession, target: Member): Promise<true> {
 		await this.callApi('SendGroupNudge', {
-			group_id: session.id,
-			user_id: target.user_id,
+			group_id: Number(session.id),
+			user_id: Number(target.user_id),
 		})
 		return true
 	}
@@ -663,7 +666,7 @@ export class MilkyAdapter implements AdapterInterface {
 	@api
 	async sendPrivatePoke(session: UserSession): Promise<true> {
 		await this.callApi('SendFriendNudge', {
-			user_id: session.id,
+			user_id: Number(session.id),
 		})
 		return true
 	}
@@ -679,7 +682,7 @@ export class MilkyAdapter implements AdapterInterface {
 		const reactionType: MilkyReactionType =
 			+emojiId < 1000 ? 'face' : 'emoji'
 		await this.callApi('SendGroupMessageReaction', {
-			group_id: msg.session!.id,
+			group_id: Number(msg.session!.id),
 			message_seq: Number(msg.message_id),
 			reaction: emojiId,
 			// 1.2 起才支持，低版本省略以走协议端默认值
@@ -713,8 +716,10 @@ export class MilkyAdapter implements AdapterInterface {
 	 */
 	@api
 	async getGroupFile(group: GroupSession): Promise<FilesData> {
-		const data = await this.callApi('GetGroupFiles', { group_id: group.id })
-		return await this.parseFiles(data, group.id)
+		const data = await this.callApi('GetGroupFiles', {
+			group_id: Number(group.id),
+		})
+		return await this.parseFiles(data, Number(group.id))
 	}
 	/**
 	 * 获取群文件夹内容
@@ -728,10 +733,10 @@ export class MilkyAdapter implements AdapterInterface {
 		folderId: string,
 	): Promise<FilesData> {
 		const data = await this.callApi('GetGroupFiles', {
-			group_id: group.id,
+			group_id: Number(group.id),
 			parent_folder_id: folderId,
 		})
-		return await this.parseFiles(data, group.id)
+		return await this.parseFiles(data, Number(group.id))
 	}
 	/**
 	 * 获取文件下载连接
@@ -740,7 +745,7 @@ export class MilkyAdapter implements AdapterInterface {
 	@api
 	async getGroupFileUrl(file: GroupFile): Promise<string> {
 		const data = await this.callApi('GetGroupFileDownloadUrl', {
-			group_id: file.group.id,
+			group_id: Number(file.group.id),
 			file_id: file.id,
 		})
 
@@ -759,7 +764,7 @@ export class MilkyAdapter implements AdapterInterface {
 		fold?: GroupFileFolder,
 	): Promise<string | undefined> {
 		const data = await this.callApi('UploadGroupFile', {
-			group_id: group.id,
+			group_id: Number(group.id),
 			parent_folder_id: fold?.id ?? '/',
 			file_uri: `base64://${await fileToBase64(file)}`,
 			file_name: file.name,
@@ -777,7 +782,7 @@ export class MilkyAdapter implements AdapterInterface {
 		file: File,
 	): Promise<string | undefined> {
 		const data = await this.callApi('UploadPrivateFile', {
-			user_id: session.id,
+			user_id: Number(session.id),
 			file_uri: `base64://${await fileToBase64(file)}`,
 			file_name: file.name,
 		})
@@ -794,7 +799,7 @@ export class MilkyAdapter implements AdapterInterface {
 		folderName: string,
 	): Promise<string | undefined> {
 		const data = await this.callApi('CreateGroupFolder', {
-			group_id: group.id,
+			group_id: Number(group.id),
 			folder_name: folderName,
 		})
 		return data.folder_id
@@ -806,7 +811,7 @@ export class MilkyAdapter implements AdapterInterface {
 	@api
 	async deleteGroupFile(file: GroupFile): Promise<true | undefined> {
 		await this.callApi('DeleteGroupFile', {
-			group_id: file.group.id,
+			group_id: Number(file.group.id),
 			file_id: file.id,
 		})
 		return true
@@ -820,7 +825,7 @@ export class MilkyAdapter implements AdapterInterface {
 		folder: GroupFileFolder,
 	): Promise<true | undefined> {
 		await this.callApi('DeleteGroupFolder', {
-			group_id: folder.group.id,
+			group_id: Number(folder.group.id),
 			folder_id: folder.id,
 		})
 		return true
@@ -836,7 +841,7 @@ export class MilkyAdapter implements AdapterInterface {
 		newName: string,
 	): Promise<true | undefined> {
 		await this.callApi('RenameGroupFile', {
-			group_id: file.group.id,
+			group_id: Number(file.group.id),
 			file_id: file.id,
 			parent_folder_id: file.folder?.id ?? '/',
 			new_file_name: newName,
@@ -855,7 +860,7 @@ export class MilkyAdapter implements AdapterInterface {
 		newName: string,
 	): Promise<true | undefined> {
 		await this.callApi('RenameGroupFolder', {
-			group_id: folder.group.id,
+			group_id: Number(folder.group.id),
 			folder_id: folder.id,
 			new_folder_name: newName,
 		})
@@ -941,18 +946,18 @@ export class MilkyAdapter implements AdapterInterface {
 		switch (data.message_scene) {
 			case 'friend':
 				return {
-					id: data.peer_id,
+					id: data.peer_id.toString(),
 					type: 'user',
 				}
 			case 'group':
 				return {
-					id: data.peer_id,
+					id: data.peer_id.toString(),
 					type: 'group',
 				}
 			case 'temp':
 				return {
-					id: data.peer_id,
-					group_id: data.group?.group_id,
+					id: data.peer_id.toString(),
+					group_id: data.group?.group_id.toString(),
 					type: 'temp',
 				}
 		}
@@ -1054,12 +1059,12 @@ export class MilkyAdapter implements AdapterInterface {
 		if (data.data.is_large)
 			return {
 				type: 'super-face',
-				id: Number(data.data.face_id),
+				id: data.data.face_id,
 			}
 		else
 			return {
 				type: 'face',
-				id: Number(data.data.face_id),
+				id: data.data.face_id,
 			}
 	}
 	async v1FaceParser(
@@ -1068,8 +1073,8 @@ export class MilkyAdapter implements AdapterInterface {
 	): Promise<FaceSegData | SuperFaceSegData> {
 		const id = Number(data.data.face_id)
 		if (msg?.segments.length === 1 && Emoji.superList.includes(id))
-			return { type: 'super-face', id }
-		else return { type: 'face', id }
+			return { type: 'super-face', id: data.data.face_id }
+		else return { type: 'face', id: data.data.face_id }
 	}
 	async mentionParser(
 		data: ISeg.MentionSeg,
@@ -1077,7 +1082,7 @@ export class MilkyAdapter implements AdapterInterface {
 	): Promise<AtSegData> {
 		return {
 			type: 'at',
-			user_id: data.data.user_id,
+			user_id: data.data.user_id.toString(),
 		}
 	}
 	async mentionAllParser(
@@ -1142,7 +1147,8 @@ export class MilkyAdapter implements AdapterInterface {
 					is_self_send:
 						versionCompare(this.milkyVersion, '1.3') === -1
 							? undefined
-							: msg.sender_id === runtimeData.loginInfo?.uin,
+							: msg.sender_id ===
+								Number(runtimeData.loginInfo?.uin),
 				})
 				url = re.download_url
 			} else {
@@ -1281,7 +1287,7 @@ export class MilkyAdapter implements AdapterInterface {
 		return {
 			type: 'mention',
 			data: {
-				user_id: seg.user_id,
+				user_id: Number(seg.user_id),
 			},
 		}
 	}
@@ -1311,11 +1317,9 @@ export class MilkyAdapter implements AdapterInterface {
 			},
 		}
 		for (let i = 0; i < messagesList.length; i++) {
+			const senderId = Number(msgs[i].sender.user_id)
 			out.data.messages.push({
-				user_id:
-					msgs[i].sender.user_id === 0
-						? 1094950020
-						: msgs[i].sender.user_id,
+				user_id: senderId === 0 ? 1094950020 : senderId,
 				sender_name: msgs[i].sender.name,
 				segments: messagesList[i],
 			})
@@ -1363,7 +1367,7 @@ export class MilkyAdapter implements AdapterInterface {
 	async nodeSerializer(msg: Msg): Promise<OutgoingForwardedMessage> {
 		return {
 			sender_name: msg.sender.name,
-			user_id: msg.sender.user_id,
+			user_id: Number(msg.sender.user_id),
 			segments: await this.serializeSeg(msg.message),
 		}
 	}
@@ -1397,7 +1401,7 @@ export class MilkyAdapter implements AdapterInterface {
 		}
 		for (let i = 0; i < messagesList.length; i++) {
 			out.data.messages.push({
-				user_id: msgs[i].sender.user_id,
+				user_id: Number(msgs[i].sender.user_id),
 				sender_name: msgs[i].sender.name,
 				segments: messagesList[i],
 			})
@@ -1440,7 +1444,7 @@ export class MilkyAdapter implements AdapterInterface {
 		return {
 			type: 'join',
 			session: {
-				id: data.group_id,
+				id: data.group_id.toString(),
 				type: 'group',
 			},
 			user: await this.getMemberFromGroup(data.user_id, data.group_id),
@@ -1479,7 +1483,7 @@ export class MilkyAdapter implements AdapterInterface {
 		return {
 			type: 'leave',
 			session: {
-				id: data.group_id,
+				id: data.group_id.toString(),
 				type: 'group',
 			},
 			user,
@@ -1495,7 +1499,7 @@ export class MilkyAdapter implements AdapterInterface {
 			return {
 				type: 'ban',
 				session: {
-					id: data.group_id,
+					id: data.group_id.toString(),
 					type: 'group',
 				},
 				user: await this.getMemberFromGroup(
@@ -1513,7 +1517,7 @@ export class MilkyAdapter implements AdapterInterface {
 			return {
 				type: 'banLift',
 				session: {
-					id: data.group_id,
+					id: data.group_id.toString(),
 					type: 'group',
 				},
 				user: await this.getMemberFromGroup(
@@ -1535,7 +1539,7 @@ export class MilkyAdapter implements AdapterInterface {
 		return {
 			type: 'recall',
 			session: {
-				id: data.peer_id,
+				id: data.peer_id.toString(),
 				type: this.parseScene(data.message_scene),
 			},
 			user: this.buildUnknownUser(data.sender_id),
@@ -1552,7 +1556,7 @@ export class MilkyAdapter implements AdapterInterface {
 		return {
 			type: 'poke',
 			session: {
-				id: data.group_id,
+				id: data.group_id.toString(),
 				type: 'group',
 			},
 			sender: this.buildUnknownUser(data.sender_id),
@@ -1572,7 +1576,7 @@ export class MilkyAdapter implements AdapterInterface {
 		return {
 			type: 'response',
 			session: {
-				id: data.group_id,
+				id: data.group_id.toString(),
 				type: 'group',
 			},
 			operator: await this.getMemberFromGroup(
@@ -1594,7 +1598,7 @@ export class MilkyAdapter implements AdapterInterface {
 		return {
 			type: 'poke',
 			session: {
-				id: data.user_id,
+				id: data.user_id.toString(),
 				type: 'user',
 			},
 			sender: this.buildUnknownUser(
@@ -1620,11 +1624,11 @@ export class MilkyAdapter implements AdapterInterface {
 		return {
 			type: 'leave',
 			session: {
-				id: data.group_id,
+				id: data.group_id.toString(),
 				type: 'group',
 			},
 			// 群解散视同自身被移出群聊
-			user: await this.getMemberFromGroup(selfId, data.group_id),
+			user: await this.getMemberFromGroup(Number(selfId), data.group_id),
 			operator: await this.getMemberFromGroup(
 				data.operator_id,
 				data.group_id,
@@ -1681,7 +1685,7 @@ export class MilkyAdapter implements AdapterInterface {
 	): Promise<GetHistoryMessagesOutput> {
 		const data = await this.callApi('GetHistoryMessages', {
 			message_scene: this.getScene(session.type),
-			peer_id: session.id,
+			peer_id: Number(session.id),
 			start_message_seq: startId,
 			limit: limit,
 		})
@@ -1762,9 +1766,12 @@ export class MilkyAdapter implements AdapterInterface {
 			: this.buildUnknownUser(memberId)
 	}
 	//#region == 用户相关 =======================
-	protected buildUnknownUser(id: number, nickname?: string): UserData {
+	protected buildUnknownUser(
+		id: number | string,
+		nickname?: string,
+	): UserData {
 		return {
-			id,
+			id: id.toString(),
 			regTime: 0,
 			avatar: this.getUserAvatar(id),
 			nickname: nickname ?? id.toString(),
@@ -1779,19 +1786,19 @@ export class MilkyAdapter implements AdapterInterface {
 		data.remark =
 			friend.remark === friend.nickname ? undefined : friend.remark
 		data.class = {
-			id: friend.category?.category_id ?? 495,
+			id: (friend.category?.category_id ?? 495).toString(),
 			name: friend.category?.category_name ?? '未分组的好友',
 		}
 		return data
 	}
 	protected parseMember(
 		member: GroupMemberEntity,
-		groupId: number,
+		groupId: string | number,
 	): MemberData {
 		const data = this.buildUnknownUser(member.user_id) as MemberData
 
 		data.card = member.card === '' ? undefined : member.card
-		data.group_id = groupId
+		data.group_id = groupId.toString()
 		data.join_time = member.join_time
 		data.last_sent_time = member.last_sent_time
 		data.level = member.level
@@ -1806,10 +1813,10 @@ export class MilkyAdapter implements AdapterInterface {
 	}
 	//#endregion
 	//#region == 头像相关 =======================
-	protected getUserAvatar(id: number): string {
+	protected getUserAvatar(id: number | string): string {
 		return `https://q1.qlogo.cn/g?b=qq&s=0&nk=${id}`
 	}
-	protected getGroupAvatar(id: number): string {
+	protected getGroupAvatar(id: number | string): string {
 		return `https://p.qlogo.cn/gh/${id}/${id}/0`
 	}
 	//#endregion

@@ -14,7 +14,7 @@ const runtimeData = useRuntimeData()
 
 const msg = useCurrentMsg()
 
-function getAtMember(): User | number {
+function getAtMember(): User | string {
 	if (!msg) return seg.user_id
 	const user = msg.session?.getUserById(seg.user_id)
 	if (user) return user

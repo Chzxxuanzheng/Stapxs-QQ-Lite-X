@@ -69,7 +69,7 @@ if (!success) {
 
 function sendNotify(content: string) {
 	if (!msg?.session) return
-	sendMsgRaw(msg.session, [new AtSeg(2854196310), new TxtSeg(content)])
+	sendMsgRaw(msg.session, [new AtSeg('2854196310'), new TxtSeg(content)])
 }
 </script>
 

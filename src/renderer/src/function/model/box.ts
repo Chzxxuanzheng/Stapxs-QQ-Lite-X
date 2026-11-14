@@ -165,7 +165,7 @@ export class SessionBox {
 
 		// 读取群组对应的收纳盒
 		for (const sessionId in runtimeData.sysConfig.session_box_map) {
-			const session = Session.getSessionById(Number(sessionId))
+			const session = Session.getSessionById(sessionId)
 			if (!session) continue
 			for (const boxId of runtimeData.sysConfig.session_box_map[
 				sessionId

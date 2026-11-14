@@ -122,7 +122,7 @@ export class Notify {
 				const msgId = tag.substring(sessionId.length + 1, tag.length)
 				delete Notify.userNotifyList[sessionId]
 				// 获取对应回话和消息
-				const session = Session.getSessionById(parseInt(sessionId))
+				const session = Session.getSessionById(sessionId)
 				if (!session) return
 				// 跳转到这条消息的发送者页面
 				const msg = session.getMsgById(msgId)

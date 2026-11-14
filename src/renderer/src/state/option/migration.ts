@@ -126,6 +126,26 @@ const migrationFunc = {
 		old['_version'] = 2
 		return old
 	},
+	// 2 -> 3
+	2: async (old: Record<string, any>): Promise<Record<string, any>> => {
+		for (const key in old) {
+			if (key.endsWith('##KEY:pin_sessions#')) {
+				old[key] = old[key].map((i: number) => i.toString())
+			}
+			if (key.endsWith('##KEY:notice_group#')) {
+				old[key] = old[key].map((i: number) => i.toString())
+			}
+			if (key.endsWith('##KEY:session_box_map#')) {
+				const newData: { [sessionId: string]: string[] } = {}
+				for (const sessionId in old[key]) {
+					newData[sessionId.toString()] = old[key][sessionId]
+				}
+				old[key] = newData
+			}
+		}
+		old['_version'] = 3
+		return old
+	},
 } satisfies Record<
 	number,
 	(old: Record<string, any>) => Promise<Record<string, any>>

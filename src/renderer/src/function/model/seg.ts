@@ -275,19 +275,19 @@ export class FaceSeg extends Seg {
 	static readonly type = 'face'
 	static readonly inline = true
 	text?: string
-	id: number
+	id: string
 	face?: Emoji
-	constructor(id: number)
+	constructor(id: string)
 	constructor(data: FaceSegData)
-	constructor(arg: number | FaceSegData) {
+	constructor(arg: string | FaceSegData) {
 		super()
-		if (typeof arg === 'number') {
+		if (typeof arg === 'string') {
 			this.id = arg
 		} else {
 			this.text = arg.text
 			this.id = arg.id
 		}
-		this.face = Emoji.get(this.id)
+		this.face = Emoji.get(+this.id)
 	}
 
 	plaintext(_?: Msg): string {
@@ -311,19 +311,19 @@ export class SuperFaceSeg extends Seg {
 	static readonly type = 'super-face'
 	static readonly inline = true
 	text?: string
-	id: number
+	id: string
 	face?: Emoji
-	constructor(id: number)
+	constructor(id: string)
 	constructor(data: SuperFaceSegData)
-	constructor(arg: number | SuperFaceSegData) {
+	constructor(arg: string | SuperFaceSegData) {
 		super()
-		if (typeof arg === 'number') {
+		if (typeof arg === 'string') {
 			this.id = arg
 		} else {
 			this.text = arg.text
 			this.id = arg.id
 		}
-		this.face = Emoji.get(this.id)
+		this.face = Emoji.get(+this.id)
 	}
 
 	plaintext(_?: Msg): string {
@@ -346,19 +346,19 @@ export class SuperFaceSeg extends Seg {
 export class AtSeg extends Seg {
 	static readonly type = 'at'
 	static readonly inline = true
-	user_id: number
-	constructor(user_id: number)
+	user_id: string
+	constructor(user_id: string)
 	constructor(data: AtSegData)
-	constructor(arg: AtSegData | number) {
+	constructor(arg: AtSegData | string) {
 		super()
-		if (typeof arg === 'number') this.user_id = arg
-		else this.user_id = Number(arg.user_id)
+		if (typeof arg === 'string') this.user_id = arg
+		else this.user_id = arg.user_id
 	}
 
 	plaintext(msg?: Msg): string {
 		if (!msg?.session) return `@${this.user_id}`
 
-		const user = msg.session.getUserById(Number(this.user_id))
+		const user = msg.session.getUserById(this.user_id)
 		if (user) return '@' + user.name
 		return `@${this.user_id}`
 	}

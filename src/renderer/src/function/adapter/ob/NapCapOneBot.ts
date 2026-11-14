@@ -143,7 +143,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 		for (const category of data.data) {
 			for (const friend of category.buddyList) {
 				out.push({
-					id: friend.user_id,
+					id: friend.user_id.toString(),
 					avatar: this.getUserAvatar(friend.user_id),
 					nickname: friend.nickname,
 					remark: friend.remark === '' ? undefined : friend.remark,
@@ -152,7 +152,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 					age: friend.age,
 					sex: Gender.Unknown,
 					class: {
-						id: category.categoryId,
+						id: category.categoryId.toString(),
 						name: category.categoryName,
 					},
 				})
@@ -161,17 +161,18 @@ export default class NapCapOneBot extends OneBotAdapter {
 		return out
 	}
 	@api
-	override async getUserInfo(userId: number, _?: boolean): Promise<UserData> {
+	override async getUserInfo(userId: string, _?: boolean): Promise<UserData> {
+		const userIdNum = Number(userId)
 		// 获取用户信息
 		const data: NcObGetStrangerInfo = await this.connector.send(
 			'get_stranger_info',
 			{
-				user_id: userId,
+				user_id: userIdNum,
 			},
 		)
 		const user = data.data
 		if (!this.friendListCache) await this.getFriendList()
-		const out = this.buildUnknownUser(userId, user.nickname)
+		const out = this.buildUnknownUser(userIdNum, user.nickname)
 		out.remark = user.remark === '' ? undefined : user.remark
 		out.longNick = user.long_nick === '' ? undefined : user.long_nick
 		out.qid = user.qid
@@ -202,7 +203,10 @@ export default class NapCapOneBot extends OneBotAdapter {
 					? `https://p.qlogo.cn/gdynamic/${item.message.image.at(0)!.id}/0/`
 					: undefined,
 				time: item.publish_time,
-				sender: await this.getMemberFromGroup(item.sender_id, group.id),
+				sender: await this.getMemberFromGroup(
+					item.sender_id,
+					Number(group.id),
+				),
 			})),
 		)
 		return out
@@ -309,7 +313,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 		if (start) data.data.messages.pop() // 去掉第一条，避免重复
 
 		const out: Promise<MsgData>[] = data.data.messages.map((msg) => {
-			if (msg.user_id) msg.user_id = session.id // 修正user_id
+			if (msg.user_id) msg.user_id = Number(session.id) // 修正user_id
 			return this.parseMsg(msg)
 		})
 
@@ -395,11 +399,11 @@ export default class NapCapOneBot extends OneBotAdapter {
 		const data: NcObGetGroupFile = await this.connector.send(
 			'get_group_root_files',
 			{
-				group_id: group.id,
+				group_id: Number(group.id),
 				file_count: 1000,
 			},
 		)
-		return await this.parseFileData(data, group.id)
+		return await this.parseFileData(data, Number(group.id))
 	}
 
 	@api
@@ -410,12 +414,12 @@ export default class NapCapOneBot extends OneBotAdapter {
 		const data: NcObGetGroupFile = await this.connector.send(
 			'get_group_files_by_folder',
 			{
-				group_id: group.id,
+				group_id: Number(group.id),
 				folder_id: folderId,
 				file_count: 1000,
 			},
 		)
-		return await this.parseFileData(data, group.id)
+		return await this.parseFileData(data, Number(group.id))
 	}
 
 	@api
@@ -737,7 +741,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 		return {
 			type: 'response',
 			session: {
-				id: event.group_id,
+				id: event.group_id.toString(),
 				type: 'group',
 			},
 			operator: await this.getMemberFromGroup(

@@ -83,7 +83,7 @@ export interface AdapterInterface {
 	 * @param useCache 是否使用缓存
 	 */
 	getUserInfo(
-		userId: number,
+		userId: string,
 		useCache?: boolean,
 	): Promise<UserData | undefined>
 	/**
@@ -333,7 +333,7 @@ export interface AdapterInterface {
  * 基本登陆信息
  */
 export interface LoginInfo {
-	uin: number
+	uin: string
 	nickname: string
 }
 /**
@@ -347,7 +347,7 @@ export interface ImplInfo {
  * 群友会话数据
  */
 export interface GroupData {
-	id: number // 群ID
+	id: string // 群ID
 	name: string // 群名称
 	avatar: string // 头像
 	desc?: string // 描述
@@ -360,7 +360,7 @@ export interface GroupData {
  * 用户信息数据
  */
 export interface UserData {
-	id?: number // 用户ID
+	id?: string // 用户ID
 	avatar: string // 头像
 	remark?: string // 备注
 	nickname: string // 昵称
@@ -368,7 +368,7 @@ export interface UserData {
 	qid?: string // qid
 	remark?: string // 备注
 	class?: {
-		id: number
+		id: string
 		name: string
 	}
 	regTime: number | string // 注册时间
@@ -377,9 +377,9 @@ export interface UserData {
 	sex: Gender // 性别
 }
 export interface FriendData extends UserData {
-	id: number // 用户ID
+	id: string // 用户ID
 	class: {
-		id: number
+		id: string
 		name: string
 	}
 }
@@ -388,7 +388,7 @@ export interface FriendData extends UserData {
  */
 export interface MemberData extends UserData {
 	card?: string // 群内名称
-	group_id: number // 群ID
+	group_id: string // 群ID
 	join_time: number // 加入时间
 	last_sent_time: number // 最后发言时间
 	level: number // 群等级
@@ -437,8 +437,8 @@ export interface GroupFolderData {
 export type FilesData = { files: GroupFileData[]; folders: GroupFolderData[] }
 
 export interface SessionData {
-	id: number // 会话ID
-	group_id?: number // 临时会话群ID
+	id: string // 会话ID
+	group_id?: string // 临时会话群ID
 	type: 'group' | 'user' | 'temp' // 会话类型
 }
 //#endregion
@@ -616,16 +616,16 @@ export interface MfaceSegData extends SegData {
 export interface FaceSegData extends SegData {
 	type: 'face' // 消息段类型
 	text?: string // 文本描述
-	id: number // 表情ID
+	id: string // 表情ID
 }
 export interface SuperFaceSegData extends SegData {
 	type: 'super-face' // 消息段类型
 	text?: string // 文本描述
-	id: number // 表情ID
+	id: string // 表情ID
 }
 export interface AtSegData extends SegData {
 	type: 'at' // 消息段类型
-	user_id: number // 被艾特的用户ID
+	user_id: string // 被艾特的用户ID
 	text?: string // 被艾特的用户昵称
 }
 export interface AtAllSegData extends SegData {

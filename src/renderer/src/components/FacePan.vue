@@ -21,7 +21,7 @@
 							>
 								<div>
 									<EmojiFace
-										:emoji="Emoji.get(num)"
+										:emoji="Emoji.get(+num)"
 										@click="addBaseFace(num)"
 									/>
 								</div>
@@ -36,7 +36,7 @@
 							<div>
 								<EmojiFace
 									:emoji="Emoji.get(num)"
-									@click="addBaseFace(num)"
+									@click="addBaseFace(num.toString())"
 								/>
 							</div>
 						</template>
@@ -49,7 +49,7 @@
 							<div>
 								<EmojiFace
 									:emoji="Emoji.get(num)"
-									@click="addBaseFace(num)"
+									@click="addBaseFace(num.toString())"
 								/>
 							</div>
 						</template>
@@ -64,7 +64,7 @@
 						>
 							<EmojiFace
 								:emoji="Emoji.get(num)"
-								@click="addBaseFace(num)"
+								@click="addBaseFace(num.toString())"
 							/>
 						</div>
 					</div>
@@ -224,7 +224,7 @@ function getRecentEmojiRecord<T>(storeId: string): {
 }
 
 const { recordList: recentEmojisId, showList: recentEmojisList } =
-	getRecentEmojiRecord<number>('recent-emojis-id')
+	getRecentEmojiRecord<string>('recent-emojis-id')
 const { recordList: recentCustomFacesId, showList: recentCustomFacesList } =
 	getRecentEmojiRecord<string>('recent-custom-faces-id')
 
@@ -264,11 +264,11 @@ async function loadCustomFace() {
 function addSpecialSeg(seg: Seg) {
 	runtimeData.nowChat?.inputMsg.addSq(seg)
 }
-function addBaseFace(id: number) {
+function addBaseFace(id: string) {
 	// 记录最近使用的表情
 	recordRecentEmoji(recentEmojisId, id)
-	if (id < 5000) addSpecialSeg(new FaceSeg(id))
-	else addSpecialSeg(new TxtSeg(Emoji.get(id)!.value))
+	if (+id < 5000) addSpecialSeg(new FaceSeg(id))
+	else addSpecialSeg(new TxtSeg(Emoji.get(+id)!.value))
 }
 function addImgFace(url: string) {
 	// 记录最近使用的表情

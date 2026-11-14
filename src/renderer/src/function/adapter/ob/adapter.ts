@@ -247,7 +247,7 @@ export class OneBotAdapter implements AdapterInterface {
 			{},
 		)
 		return {
-			uin: data.data.user_id,
+			uin: data.data.user_id.toString(),
 			nickname: data.data.nickname,
 		}
 	}
@@ -284,7 +284,7 @@ export class OneBotAdapter implements AdapterInterface {
 		for (const item of data.data) {
 			if (friendData.has(item.user_id)) continue
 			friendData.set(item.user_id, {
-				id: item.user_id,
+				id: item.user_id.toString(),
 				avatar: this.getUserAvatar(item.user_id),
 				nickname: item.nickname,
 				remark: item.remark === '' ? undefined : item.remark,
@@ -293,7 +293,7 @@ export class OneBotAdapter implements AdapterInterface {
 				age: 0,
 				sex: Gender.Unknown,
 				class: {
-					id: 0, // 默认分类ID为0
+					id: '0', // 默认分类ID为0
 					name: $t('好友'), // 默认分类名称
 				},
 			})
@@ -315,7 +315,7 @@ export class OneBotAdapter implements AdapterInterface {
 		for (const group of data.data) {
 			if (groupData.has(group.group_id)) continue
 			groupData.set(group.group_id, {
-				id: group.group_id,
+				id: group.group_id.toString(),
 				name: group.group_name,
 				avatar: this.getGroupAvatar(group.group_id),
 				memberCount: group.member_count,
@@ -328,20 +328,21 @@ export class OneBotAdapter implements AdapterInterface {
 
 	@api
 	async getUserInfo(
-		userId: number,
+		userId: string,
 		useCache: boolean = true,
 	): Promise<UserData> {
+		const userIdNum = Number(userId)
 		// 获取用户信息
 		const data: ObGetStrangerInfo = await this.connector.send(
 			'get_stranger_info',
 			{
-				user_id: userId,
+				user_id: userIdNum,
 				no_cache: !useCache,
 			},
 		)
 		if (!this.friendListCache) await this.getFriendList()
 		const baseInfo = this.friendListCache?.find((f) => f.id === userId)
-		const user = this.buildUnknownUser(userId)
+		const user = this.buildUnknownUser(userIdNum)
 		user.remark = baseInfo?.remark
 		user.nickname = baseInfo?.nickname || data.data.nickname
 		user.qid = $t('不支持')
@@ -576,8 +577,8 @@ export class OneBotAdapter implements AdapterInterface {
 	): Promise<FaceSegData | SuperFaceSegData> {
 		const id = Number(data.data.id)
 		if (msg?.message.length === 1 && Emoji.superList.includes(id))
-			return { type: 'super-face', id }
-		else return { type: 'face', id }
+			return { type: 'super-face', id: data.data.id }
+		else return { type: 'face', id: data.data.id }
 	}
 	async atParser(
 		data: ObAtSeg,
@@ -590,7 +591,7 @@ export class OneBotAdapter implements AdapterInterface {
 		} else {
 			return {
 				type: 'at',
-				user_id: Number(data.data.qq),
+				user_id: data.data.qq,
 			}
 		}
 	}
@@ -894,7 +895,7 @@ export class OneBotAdapter implements AdapterInterface {
 		return {
 			type: 'join',
 			session: {
-				id: event.group_id,
+				id: event.group_id.toString(),
 				type: 'group',
 			},
 			user,
@@ -916,7 +917,7 @@ export class OneBotAdapter implements AdapterInterface {
 		return {
 			type: 'leave',
 			session: {
-				id: event.group_id,
+				id: event.group_id.toString(),
 				type: 'group',
 			},
 			user,
@@ -939,7 +940,7 @@ export class OneBotAdapter implements AdapterInterface {
 			return {
 				type: 'ban',
 				session: {
-					id: event.group_id,
+					id: event.group_id.toString(),
 					type: 'group',
 				},
 				user,
@@ -951,7 +952,7 @@ export class OneBotAdapter implements AdapterInterface {
 			return {
 				type: 'banLift',
 				session: {
-					id: event.group_id,
+					id: event.group_id.toString(),
 					type: 'group',
 				},
 				user,
@@ -966,7 +967,7 @@ export class OneBotAdapter implements AdapterInterface {
 		return {
 			type: 'recall',
 			session: {
-				id: event.group_id,
+				id: event.group_id.toString(),
 				type: 'group',
 			},
 			user: this.buildUnknownUser(event.user_id),
@@ -982,7 +983,7 @@ export class OneBotAdapter implements AdapterInterface {
 		return {
 			type: 'recall',
 			session: {
-				id: event.user_id,
+				id: event.user_id.toString(),
 				type: 'user',
 			},
 			user: this.buildUnknownUser(event.user_id),
@@ -996,12 +997,12 @@ export class OneBotAdapter implements AdapterInterface {
 		let session: SessionData
 		if (event.group_id) {
 			session = {
-				id: event.group_id,
+				id: event.group_id.toString(),
 				type: 'group',
 			}
 		} else {
 			session = {
-				id: event.user_id,
+				id: event.user_id.toString(),
 				type: 'user',
 			}
 		}
@@ -1058,7 +1059,7 @@ export class OneBotAdapter implements AdapterInterface {
 	 */
 	protected buildUnknownUser(id: number, nickname?: string): UserData {
 		return {
-			id,
+			id: id.toString(),
 			regTime: 0,
 			avatar: this.getUserAvatar(id),
 			nickname: nickname ?? id.toString(),
@@ -1074,14 +1075,14 @@ export class OneBotAdapter implements AdapterInterface {
 	 */
 	protected parseMember(
 		member: ObGetGroupMemberInfo['data'],
-		groupId: number,
+		groupId: string | number,
 	): MemberData {
 		const data = this.buildUnknownUser(
 			member.user_id,
 			member.nickname,
 		) as MemberData
 		data.card = member.card === '' ? undefined : member.card
-		data.group_id = groupId
+		data.group_id = groupId.toString()
 		data.join_time = member.join_time
 		data.last_sent_time = member.last_sent_time
 		data.level = Number(member.level) || 0
@@ -1116,7 +1117,7 @@ export class OneBotAdapter implements AdapterInterface {
 		}
 		return {
 			...this.buildUnknownUser(memberId),
-			group_id: groupId,
+			group_id: groupId.toString(),
 			join_time: 0,
 			last_sent_time: 0,
 			level: 0,

@@ -46,7 +46,7 @@ export abstract class Session {
 	// 基本信息
 	abstract type: SessionType
 	abstract sessionClass: SessionClass
-	id: number
+	id: string
 	_name: Name
 	_avatar: ProxyUrl
 	_remark?: Name
@@ -94,7 +94,7 @@ export abstract class Session {
 		new Set(),
 	) as unknown as Set<Session>
 
-	constructor(id: number, name: string, avatar: string, remark?: string) {
+	constructor(id: string, name: string, avatar: string, remark?: string) {
 		this.id = id
 		this._name = new Name(name)
 		this._avatar = new ProxyUrl(avatar)
@@ -158,7 +158,7 @@ export abstract class Session {
 	 * 通过id获取用户
 	 * @param id  用户id
 	 */
-	abstract getUserById(id: number): User | undefined
+	abstract getUserById(id: string): User | undefined
 	//#endregion
 
 	//#region == 静态工具 ==============================================================
@@ -167,7 +167,7 @@ export abstract class Session {
 	 * @param id 会话id
 	 * @returns 会话实例
 	 */
-	static getSessionById(id: number): Session | undefined {
+	static getSessionById(id: string): Session | undefined {
 		return Session.sessionList.find((item) => item.id === id)
 	}
 
@@ -182,11 +182,11 @@ export abstract class Session {
 	 * @param id 会话id
 	 * @param group_id 临时会话的群id
 	 */
-	static getSession(type: SessionType, id: number, group_id?: number): Session
+	static getSession(type: SessionType, id: string, group_id?: string): Session
 	static getSession(
 		arg1: SessionType | SessionData,
-		arg2?: number,
-		arg3?: number,
+		arg2?: string,
+		arg3?: string,
 	): Session {
 		if (!arg2) {
 			const data = arg1 as SessionData
@@ -633,7 +633,7 @@ export abstract class Session {
 	/**
 	 * 组装发送参数
 	 */
-	abstract createSendParam(): { user_id?: number; group_id?: number }
+	abstract createSendParam(): { user_id?: string; group_id?: string }
 	/**
 	 * 获取发送API
 	 * @param merge 是否拿去合并转发api
@@ -716,7 +716,7 @@ export abstract class Session {
 	 * @returns 成员对象
 	 */
 	getUserFromData(data: UserData): User {
-		return this.getUserById(data.id ?? 0) ?? new User(data)
+		return this.getUserById(data.id ?? '0') ?? new User(data)
 	}
 
 	/**
@@ -838,7 +838,8 @@ export class GroupSession extends Session {
 			() => null,
 		) as unknown as Member[]
 		const groupClass =
-			SessionClass.getClass(99999) ?? new SessionClass(99999, $t('群组'))
+			SessionClass.getClass('99999') ??
+			new SessionClass('99999', $t('群组'))
 		groupClass.addSession(this)
 		this.sessionClass = groupClass
 	}
@@ -890,7 +891,7 @@ export class GroupSession extends Session {
 			throw new Error('获取群成员列表失败')
 		}
 
-		const newDataMap = new Map<number, Member>()
+		const newDataMap = new Map<string, Member>()
 		for (const item of memData) {
 			const newData = new Member(item)
 			newDataMap.set(newData.user_id, newData)
@@ -898,7 +899,7 @@ export class GroupSession extends Session {
 
 		// 比对数据
 		const newMemberList: Member[] = []
-		const oldDataMap = new Map<number, Member>()
+		const oldDataMap = new Map<string, Member>()
 		for (const item of this.memberList) {
 			if (!item) continue
 			oldDataMap.set(item.user_id, item)
@@ -945,11 +946,11 @@ export class GroupSession extends Session {
 		this.essenceMsgs.length = 0
 	}
 
-	static override getSessionById(id: number): GroupSession | undefined {
+	static override getSessionById(id: string): GroupSession | undefined {
 		return GroupSession.sessionList.find((item) => item.id === id)
 	}
 
-	override createSendParam(): { user_id?: number; group_id?: number } {
+	override createSendParam(): { user_id?: string; group_id?: string } {
 		return { group_id: this.id }
 	}
 
@@ -963,7 +964,7 @@ export class GroupSession extends Session {
 	 * @param id 成员id
 	 * @returns 成员对象
 	 */
-	getUserById(id: number): Member | undefined {
+	getUserById(id: string): Member | undefined {
 		if (this.memberList.at(0) === null)
 			throw new Error('请先加载群成员列表')
 		return this.memberList.find((item) => item.user_id === id)
@@ -1233,7 +1234,7 @@ export class UserSession extends Session {
 		)
 	}
 
-	static override getSessionById(id: number): UserSession | undefined {
+	static override getSessionById(id: string): UserSession | undefined {
 		return UserSession.sessionList.find((item) => item.id === id)
 	}
 
@@ -1246,7 +1247,7 @@ export class UserSession extends Session {
 		else this._remark = new Name(name)
 	}
 
-	override createSendParam(): { user_id?: number; group_id?: number } {
+	override createSendParam(): { user_id?: string; group_id?: string } {
 		return { user_id: this.id }
 	}
 
@@ -1255,7 +1256,7 @@ export class UserSession extends Session {
 		return 'send_msg'
 	}
 
-	override getUserById(id: number): User | undefined {
+	override getUserById(id: string): User | undefined {
 		const runtimeData = useRuntimeData()
 		if (id === runtimeData.loginInfo?.uin) return runtimeData.selfInfo
 		if (id !== this.id) return undefined
@@ -1302,15 +1303,16 @@ export class UserSession extends Session {
 export class TempSession extends Session {
 	override type = 'temp' as const
 	override sessionClass: SessionClass
-	group: GroupSession | number
+	group: GroupSession | string
 	member?: Member
 	static readonly sessionList: TempSession[] = shallowReactive([])
-	constructor(id: number, group_id: number) {
+	constructor(id: string, group_id: string) {
 		const group = GroupSession.getSessionById(group_id)
 		super(id, `临时会话-${id}`, '')
 		this.group = group ?? group_id
 		const tempClass =
-			SessionClass.getClass(99998) ?? new SessionClass(99998, '临时会话')
+			SessionClass.getClass('99998') ??
+			new SessionClass('99998', '临时会话')
 		tempClass.addSession(this)
 		this.sessionClass = tempClass
 		TempSession.sessionList.push(this)
@@ -1342,7 +1344,7 @@ export class TempSession extends Session {
 		return false
 	}
 
-	static override getSessionById(id: number): TempSession | undefined {
+	static override getSessionById(id: string): TempSession | undefined {
 		return TempSession.sessionList.find((item) => item.id === id)
 	}
 
@@ -1359,7 +1361,7 @@ export class TempSession extends Session {
 		)
 	}
 
-	override createSendParam(): { user_id?: number; group_id?: number } {
+	override createSendParam(): { user_id?: string; group_id?: string } {
 		if (this.group instanceof GroupSession) {
 			return { user_id: this.id, group_id: this.group.id }
 		} else {
@@ -1372,12 +1374,12 @@ export class TempSession extends Session {
 		return 'send_temp_msg'
 	}
 
-	get group_id(): number {
+	get group_id(): string {
 		if (this.group instanceof GroupSession) return this.group.id
-		return this.group as number
+		return this.group as string
 	}
 
-	override getUserById(id: number): User | undefined {
+	override getUserById(id: string): User | undefined {
 		const runtimeData = useRuntimeData()
 		if (id === runtimeData.loginInfo?.uin) return runtimeData.selfInfo
 		if (id !== this.id) return undefined
@@ -1401,12 +1403,12 @@ export class TempSession extends Session {
  */
 @autoMarkRaw
 export class SessionClass {
-	id: number
+	id: string
 	name: string
 	content: Session[] = shallowReactive([])
 	_open = shallowRef<boolean>(false)
 	private static readonly AllFriendClass: SessionClass[] = shallowReactive([])
-	constructor(id: number, name: string) {
+	constructor(id: string, name: string) {
 		if (SessionClass.getClass(id)) throw new Error(`分组 ID ${id} 已存在`)
 		this.id = id
 		this.name = name
@@ -1433,17 +1435,16 @@ export class SessionClass {
 	 * @param arg 分组id或者名称
 	 * @returns
 	 */
-	static getClass(arg: number | string): SessionClass | undefined {
-		if (typeof arg === 'number') {
-			return SessionClass.AllFriendClass.find((item) => item.id === arg)
-		} else if (typeof arg === 'string') {
-			return SessionClass.AllFriendClass.find((item) => item.name === arg)
-		}
-		return undefined
+	static getClass(arg: string): SessionClass | undefined {
+		return SessionClass.AllFriendClass.find(
+			(item) => item.id === arg || item.name === arg,
+		)
 	}
 
 	static getClasses(): SessionClass[] {
-		return SessionClass.AllFriendClass.sort((a, b) => a.id - b.id)
+		return SessionClass.AllFriendClass.sort((a, b) =>
+			a.id.localeCompare(b.id),
+		)
 	}
 
 	static clear(): void {

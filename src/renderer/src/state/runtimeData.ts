@@ -18,7 +18,7 @@ const useRuntimeData = defineStore('runtimeData', () => {
 		address: undefined,
 		token: undefined,
 	})
-	const loginInfo = ref<{ nickname: string; uin: number } | undefined>()
+	const loginInfo = ref<{ nickname: string; uin: string } | undefined>()
 	const tags = shallowReactive({
 		firstLoad: false,
 		darkMode: false,

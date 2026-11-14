@@ -151,7 +151,7 @@
 					<template
 						v-for="(info, id) in msg.emojis as Record<
 							string,
-							number[]
+							string[]
 						>"
 						:key="'respond-' + msg.uuid + '-' + id"
 					>

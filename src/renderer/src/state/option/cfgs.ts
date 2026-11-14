@@ -22,7 +22,7 @@ export const OptionInfos = {
 		default: '',
 	},
 	pin_sessions: {
-		default: [] as number[],
+		default: [] as string[],
 		tags: ['user'],
 	},
 	auto_save_password: {
@@ -32,7 +32,7 @@ export const OptionInfos = {
 		default: '',
 	},
 	notice_group: {
-		default: [] as number[],
+		default: [] as string[],
 		tags: ['user'],
 	},
 	auto_connect: {
@@ -43,7 +43,7 @@ export const OptionInfos = {
 		tags: ['user'],
 	},
 	session_box_map: {
-		default: {} as { [sessionId: number]: string[] },
+		default: {} as { [sessionId: string]: string[] },
 		tags: ['user'],
 	}, // 存储会话被那些收纳盒收录...这俩名字起的也不行，容易混淆
 	//#endregion

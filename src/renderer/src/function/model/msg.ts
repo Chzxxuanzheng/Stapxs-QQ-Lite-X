@@ -81,7 +81,7 @@ export class Msg extends Message {
 	 * key: 表情id
 	 * value: 操作者uid列表
 	 */
-	emojis = shallowReactive<{ [emojiId: string]: number[] }>({})
+	emojis = shallowReactive<{ [emojiId: string]: string[] }>({})
 	/**
 	 * 是否为已删除消息
 	 */
@@ -273,7 +273,7 @@ export class Msg extends Message {
 	 * @param id 表情id
 	 * @param add 是否添加
 	 */
-	setEmoji(id: string, operation_id: number, add: boolean): void {
+	setEmoji(id: string, operation_id: string, add: boolean): void {
 		const emojiData = this.emojis[id] ?? []
 		if (add) {
 			if (emojiData.includes(operation_id)) return
