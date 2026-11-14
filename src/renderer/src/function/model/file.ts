@@ -14,11 +14,11 @@ import {
 } from '@renderer/function/adapter/interface'
 import { popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { getSizeFromBytes } from '@renderer/function/utils/systemUtil'
 import { Name, Time } from '@renderer/function/model/data'
 import { GroupSession } from '@renderer/function/model/session'
-import { BaseUser, IUser } from '@renderer/function/model/user'
+import { Member } from '@renderer/function/model/user'
 import { urlDownload } from '@renderer/function/utils/baseUtil'
+import { getSizeFromBytes } from '@renderer/function/utils/systemUtil'
 
 export class GroupFile {
 	type: string = 'file'
@@ -29,7 +29,7 @@ export class GroupFile {
 	size: number
 	downloadTimes: number
 	deadTime?: number
-	creator: IUser
+	creator: Member
 	createTime?: Time
 	url?: string
 	folder?: GroupFileFolder
@@ -45,10 +45,7 @@ export class GroupFile {
 		this.downloadTimes = data.download_times
 		this.folder = folder
 		if (data.dead_time) this.deadTime = data.dead_time
-		let user: IUser | undefined
-		if (data.uploader_id) user = group.getUserById(data.uploader_id)
-		user ??= new BaseUser(data.uploader_id ?? 0, data.uploader_name)
-		this.creator = user
+		this.creator = group.getUserFromData(data.uploader)
 		if (data.upload_time) this.createTime = new Time(data.upload_time)
 		this.group = group
 	}
@@ -120,7 +117,7 @@ export class GroupFileFolder {
 	_name: Name
 	count: number
 	createTime?: Time
-	creator: IUser
+	creator: Member
 
 	items: ShallowRef<(GroupFile | GroupFileFolder)[] | undefined> =
 		shallowRef(undefined)
@@ -130,10 +127,7 @@ export class GroupFileFolder {
 		this._name = new Name(data.folder_name)
 		this.count = data.count
 		if (data.create_time) this.createTime = new Time(data.create_time)
-		let user: IUser | undefined
-		if (data.creator_id) user = group.getUserById(data.creator_id)
-		user ??= new BaseUser(data.creator_id ?? 0, data.creator_name)
-		this.creator = user
+		this.creator = group.getUserFromData(data.creator)
 		this.group = group
 	}
 

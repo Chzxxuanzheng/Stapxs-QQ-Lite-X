@@ -61,7 +61,7 @@ const parsedMsg = computed(() => parseUrlFromMsg(data.content))
 		</div>
 		<button v-if="needShow && !showAll">{{ $t('点击展开') }}</button>
 		<footer>
-			<img :src="data.sender.face" :alt="data.sender.name" />
+			<img :src="data.sender.avatar" :alt="data.sender.name" />
 			<a>{{ data.sender.name }}</a>
 			<span class="space" />
 			<span v-if="data.read !== undefined" class="read-status">

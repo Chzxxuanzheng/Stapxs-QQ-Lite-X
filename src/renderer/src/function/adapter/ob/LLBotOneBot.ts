@@ -38,11 +38,11 @@ import {
 } from '@renderer/function/adapter/interface'
 import { api, OneBotAdapter } from '@renderer/function/adapter/ob/adapter'
 import {
-	createSender,
 	fileToBase64,
 	getGender,
 	ObConnector,
 } from '@renderer/function/adapter/ob/utils'
+import { Gender } from '@renderer/function/adapter/enmu'
 import type {
 	LlbotObCreateGroupFileFolder,
 	LlbotObFaceSeg,
@@ -123,13 +123,21 @@ export default class LLBTOneBot extends OneBotAdapter {
 		this.remarkCache = new Map<number, string>()
 		for (const category of data.data) {
 			for (const friend of category.buddyList) {
-				this.remarkCache.set(Number(friend.user_id), friend.remark)
+				const id = Number(friend.user_id)
+				this.remarkCache.set(id, friend.remark)
 				out.push({
-					user_id: Number(friend.user_id),
+					id,
+					avatar: this.getUserAvatar(id),
 					nickname: friend.nickname,
-					remark: friend.remark,
-					class_id: category.categoryId,
-					class_name: category.categoryName,
+					remark: friend.remark === '' ? undefined : friend.remark,
+					regTime: 0,
+					level: 0,
+					age: 0,
+					sex: Gender.Unknown,
+					class: {
+						id: category.categoryId,
+						name: category.categoryName,
+					},
 				})
 			}
 		}
@@ -147,26 +155,16 @@ export default class LLBTOneBot extends OneBotAdapter {
 		)
 		const user = data.data
 		if (!this.friendListCache) await this.getFriendList()
-		return {
-			id: userId,
-			remark: this.remarkCache!.get(userId),
-			nickname: user.nickname,
-			longNick: user.long_nick === '' ? undefined : user.long_nick,
-			qid: user.qid,
-			country: user.country === '' ? undefined : user.country,
-			province: undefined,
-			city: user.city === '' ? undefined : user.city,
-			regTime: user.reg_time,
-			qqLevel: user.level,
-			birthday_year:
-				user.birthday_year === 0 ? undefined : user.birthday_year,
-			birthday_month:
-				user.birthday_month === 0 ? undefined : user.birthday_month,
-			birthday_day:
-				user.birthday_day === 0 ? undefined : user.birthday_day,
-			age: user.age,
-			sex: getGender(user.sex),
-		}
+		const out = this.buildUnknownUser(userId, user.nickname)
+		const remark = this.remarkCache?.get(userId)
+		out.remark = remark === '' ? undefined : remark
+		out.longNick = user.long_nick === '' ? undefined : user.long_nick
+		out.qid = user.qid
+		out.regTime = user.reg_time
+		out.level = user.level
+		out.age = user.age
+		out.sex = getGender(user.sex)
+		return out
 	}
 	/**
 	 * 获取群公告信息
@@ -184,14 +182,16 @@ export default class LLBTOneBot extends OneBotAdapter {
 			},
 		)
 
-		const out = data.data.map((item) => ({
-			content: item.message.text,
-			img: item.message.images.at(0)
-				? `https://p.qlogo.cn/gdynamic/${item.message.images.at(0)!.id}/0/`
-				: undefined,
-			time: item.publish_time,
-			sender: item.sender_id,
-		}))
+		const out = await Promise.all(
+			data.data.map(async (item) => ({
+				content: item.message.text,
+				img: item.message.images.at(0)
+					? `https://p.qlogo.cn/gdynamic/${item.message.images.at(0)!.id}/0/`
+					: undefined,
+				time: item.publish_time,
+				sender: await this.getMemberFromGroup(item.sender_id, group.id),
+			})),
+		)
 		return out
 	}
 	@api
@@ -213,9 +213,12 @@ export default class LLBTOneBot extends OneBotAdapter {
 					)
 					if (!msg) throw new Error('获取精华消息内容失败')
 					return {
-						sender: createSender(item.sender_id, item.sender_nick),
+						sender: this.buildUnknownUser(
+							item.sender_id,
+							item.sender_nick,
+						),
 						sender_time: item.operator_time,
-						operator: createSender(
+						operator: this.buildUnknownUser(
 							item.operator_id,
 							item.operator_nick,
 						),
@@ -410,7 +413,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 				group_id: group.id,
 			},
 		)
-		return this.parseFileData(data)
+		return await this.parseFileData(data, group.id)
 	}
 
 	@api
@@ -425,7 +428,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 				folder_id: folderId,
 			},
 		)
-		return this.parseFileData(data)
+		return await this.parseFileData(data, group.id)
 	}
 
 	@api
@@ -621,11 +624,12 @@ export default class LLBTOneBot extends OneBotAdapter {
 		data: LlbotObForwardNode,
 		msg?: LlbotObMsg,
 	): Promise<ForwardNodeData> {
+		const sender = this.buildUnknownUser(
+			data.sender.user_id,
+			data.sender.nickname,
+		)
 		return {
-			sender: {
-				nickname: data.sender.nickname,
-				face: `https://q1.qlogo.cn/g?b=qq&s=0&nk=${data.sender.user_id}`,
-			},
+			sender,
 			content: await this.parseSeg(data.content, msg),
 		}
 	}
@@ -766,7 +770,10 @@ export default class LLBTOneBot extends OneBotAdapter {
 				id: event.group_id,
 				type: 'group',
 			},
-			operator: createSender(event.user_id),
+			operator: await this.getMemberFromGroup(
+				event.user_id,
+				event.group_id,
+			),
 			message_id: event.message_id.toString(),
 			emojiId: event.likes[0].emoji_id,
 			add: true,
@@ -841,26 +848,37 @@ export default class LLBTOneBot extends OneBotAdapter {
 		return false
 	}
 
-	private parseFileData(data: LlbotObGetGroupFiles): FilesData {
+	private async parseFileData(
+		data: LlbotObGetGroupFiles,
+		groupId: number,
+	): Promise<FilesData> {
 		return {
-			files: data.data.files.map((file) => ({
-				file_id: file.file_id,
-				file_name: file.file_name,
-				size: file.file_size,
-				download_times: file.download_times,
-				dead_time: file.dead_time,
-				upload_time: file.upload_time,
-				uploader_name: file.uploader_name,
-				uploader_id: file.uploader,
-			})),
-			folders: data.data.folders.map((folder) => ({
-				folder_id: folder.folder_id,
-				folder_name: folder.folder_name,
-				count: folder.total_file_count,
-				create_time: folder.create_time,
-				creator_name: folder.creator_name,
-				creator_id: folder.creator,
-			})),
+			files: await Promise.all(
+				data.data.files.map(async (file) => ({
+					file_id: file.file_id,
+					file_name: file.file_name,
+					size: file.file_size,
+					download_times: file.download_times,
+					dead_time: file.dead_time,
+					upload_time: file.upload_time,
+					uploader: await this.getMemberFromGroup(
+						file.uploader,
+						groupId,
+					),
+				})),
+			),
+			folders: await Promise.all(
+				data.data.folders.map(async (folder) => ({
+					folder_id: folder.folder_id,
+					folder_name: folder.folder_name,
+					count: folder.total_file_count,
+					create_time: folder.create_time,
+					creator: await this.getMemberFromGroup(
+						folder.creator,
+						groupId,
+					),
+				})),
+			),
 		}
 	}
 

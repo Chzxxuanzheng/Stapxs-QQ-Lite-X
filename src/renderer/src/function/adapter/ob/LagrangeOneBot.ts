@@ -60,11 +60,8 @@ import type {
 	ObGroupSender,
 	ObTextSeg,
 } from '@renderer/function/adapter/ob/type'
-import {
-	ObConnector,
-	getGender,
-	createSender,
-} from '@renderer/function/adapter/ob/utils'
+import { ObConnector, getGender } from '@renderer/function/adapter/ob/utils'
+import { Gender } from '@renderer/function/adapter/enmu'
 
 export default class LagrangeOneBot
 	extends OneBotAdapter
@@ -109,11 +106,18 @@ export default class LagrangeOneBot
 		for (const item of data.data) {
 			if (friendData.has(item.user_id)) continue
 			friendData.set(item.user_id, {
-				user_id: item.user_id,
+				id: item.user_id,
+				avatar: this.getUserAvatar(item.user_id),
 				nickname: item.nickname,
 				remark: item.remark === '' ? undefined : item.remark,
-				class_id: item.group.group_id,
-				class_name: item.group.group_name,
+				regTime: 0,
+				level: 0,
+				age: 0,
+				sex: Gender.Unknown,
+				class: {
+					id: item.group.group_id,
+					name: item.group.group_name,
+				},
 			})
 		}
 
@@ -137,18 +141,17 @@ export default class LagrangeOneBot
 		)
 		const user = data.data
 		if (!this.friendListCache) await this.getFriendList()
-		const baseInfo = this.friendListCache?.find((f) => f.user_id === userId)
-		return {
-			id: user.user_id,
-			remark: baseInfo?.remark,
-			nickname: user.nickname,
-			longNick: user.sign,
-			qid: user.q_id,
-			regTime: user.RegisterTime,
-			qqLevel: user.level,
-			age: user.age,
-			sex: getGender(user.sex),
-		}
+		const baseInfo = this.friendListCache?.find((f) => f.id === userId)
+		const out = this.buildUnknownUser(user.user_id, user.nickname)
+		out.avatar = user.avatar || out.avatar
+		out.remark = baseInfo?.remark
+		out.longNick = user.sign === '' ? undefined : user.sign
+		out.qid = user.q_id
+		out.regTime = user.RegisterTime
+		out.level = user.level
+		out.age = user.age
+		out.sex = getGender(user.sex)
+		return out
 	}
 	/**
 	 * 获取群公告信息
@@ -164,12 +167,14 @@ export default class LagrangeOneBot
 			{ group_id: group.id },
 		)
 
-		const out = data.data.map((item) => ({
-			content: item.message.text,
-			img: `https://p.qlogo.cn/gdynamic/${item.message.images.at(0)?.id}/0/`,
-			time: item.publish_time,
-			sender: item.sender_id,
-		}))
+		const out = await Promise.all(
+			data.data.map(async (item) => ({
+				content: item.message.text,
+				img: `https://p.qlogo.cn/gdynamic/${item.message.images.at(0)?.id}/0/`,
+				time: item.publish_time,
+				sender: await this.getMemberFromGroup(item.sender_id, group.id),
+			})),
+		)
 		return out
 	}
 
@@ -188,9 +193,12 @@ export default class LagrangeOneBot
 		for (const item of data.data) {
 			out.push(
 				(async () => ({
-					sender: createSender(item.sender_id, item.sender_nick),
+					sender: this.buildUnknownUser(
+						item.sender_id,
+						item.sender_nick,
+					),
 					sender_time: item.sender_time,
-					operator: createSender(
+					operator: this.buildUnknownUser(
 						item.operator_id,
 						item.operator_nick,
 					),
@@ -362,7 +370,7 @@ export default class LagrangeOneBot
 			'get_group_root_files',
 			{ group_id: group.id },
 		)
-		return this.parseFileData(data)
+		return await this.parseFileData(data, group.id)
 	}
 
 	@api
@@ -377,7 +385,7 @@ export default class LagrangeOneBot
 				folder_id: folderId,
 			},
 		)
-		return this.parseFileData(data)
+		return await this.parseFileData(data, group.id)
 	}
 
 	@api
@@ -528,24 +536,34 @@ export default class LagrangeOneBot
 		return implInfo.name === 'Lagrange.OneBot'
 	}
 
-	private parseFileData(data: LgrObGetGroupFile): FilesData {
+	private async parseFileData(
+		data: LgrObGetGroupFile,
+		groupId: number,
+	): Promise<FilesData> {
 		return {
-			files: data.data.files.map((file) => ({
-				file_id: file.file_id,
-				file_name: file.file_name,
-				size: file.file_size,
-				download_times: file.download_times,
-				dead_time: file.dead_time,
-				upload_time: file.upload_time,
-				uploader_name: file.uploader_name,
-			})),
-			folders: data.data.folders.map((folder) => ({
-				folder_id: folder.folder_id,
-				folder_name: folder.folder_name,
-				count: folder.total_file_count,
-				create_time: folder.create_time,
-				creator_name: folder.create_name,
-			})),
+			files: await Promise.all(
+				data.data.files.map(async (file) => ({
+					file_id: file.file_id,
+					file_name: file.file_name,
+					size: file.file_size,
+					download_times: file.download_times,
+					dead_time: file.dead_time,
+					upload_time: file.upload_time,
+					uploader: await this.getMemberFromGroup(
+						file.uploader,
+						groupId,
+					),
+				})),
+			),
+			folders: await Promise.all(
+				data.data.folders.map(async (folder) => ({
+					folder_id: folder.folder_id,
+					folder_name: folder.folder_name,
+					count: folder.total_file_count,
+					create_time: folder.create_time,
+					creator: this.buildUnknownUser(0, folder.create_name),
+				})),
+			),
 		}
 	}
 

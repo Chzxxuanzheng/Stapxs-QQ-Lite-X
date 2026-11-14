@@ -17,7 +17,11 @@ import {
 	shallowRef,
 } from 'vue'
 import { Role } from '@renderer/function/adapter/enmu'
-import { SessionData } from '@renderer/function/adapter/interface'
+import type {
+	FriendData,
+	SessionData,
+	UserData,
+} from '@renderer/function/adapter/interface'
 import { logger, popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { Notify } from '@renderer/function/notify'
@@ -31,7 +35,7 @@ import { Message } from '@renderer/function/model/message'
 import { EssenceMsg, Msg } from '@renderer/function/model/msg'
 import { SystemNotice } from '@renderer/function/model/notice'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
-import { BaseUser, IUser, Member, User } from '@renderer/function/model/user'
+import { Member, User } from '@renderer/function/model/user'
 import { autoMarkRaw } from '@renderer/function/model/utils'
 import { InputMsg } from '@renderer/function/model/inputMsg'
 
@@ -161,7 +165,7 @@ export abstract class Session {
 	 * 通过id获取用户
 	 * @param id  用户id
 	 */
-	abstract getUserById(id: number): IUser | undefined
+	abstract getUserById(id: number): User | undefined
 	//#endregion
 
 	//#region == 静态工具 ==============================================================
@@ -709,18 +713,17 @@ export abstract class Session {
 	 * 获取自身成员对象(群组未激活返回 undefined)
 	 * @returns 自身成员对象
 	 */
-	getMe(): IUser {
-		return BaseUser.createMe()
+	getMe(): User {
+		return User.createMe()
 	}
 
 	/**
-	 * 获取用户信息,拿不到拿id创建一个BaseUser保底
-	 * @param id
+	 * 通过id获取群成员
+	 * @param id 成员id
+	 * @returns 成员对象
 	 */
-	getUserByIdWithBu(id: number): IUser {
-		const user = this.getUserById(id)
-		if (user) return user
-		return BaseUser.createById(id)
+	getUserFromData(data: UserData): User {
+		return this.getUserById(data.id ?? 0) ?? new User(data)
 	}
 
 	/**
@@ -977,6 +980,15 @@ export class GroupSession extends Session {
 	}
 
 	/**
+	 * 通过id获取群成员
+	 * @param id 成员id
+	 * @returns 成员对象
+	 */
+	getUserFromData(data: UserData): Member {
+		return super.getUserFromData(data) as Member
+	}
+
+	/**
 	 * 获取自身成员对象
 	 * @returns 自身成员对象
 	 */
@@ -1195,25 +1207,16 @@ export class UserSession extends Session {
 	override type = 'user' as const
 	override sessionClass: SessionClass
 	private _remark?: Name
+	user: User
 	static readonly sessionList: UserSession[] = shallowReactive([])
-	baseUser: BaseUser = new BaseUser(
-		this.id,
-		this.name.toString(),
-		this._remark?.toString(),
-	)
-	constructor(
-		id: number,
-		name: string,
-		class_id: number,
-		class_name: string,
-		remark?: string,
-	) {
-		super(id, name)
+	constructor(data: FriendData) {
+		super(data.id, data.nickname)
 		UserSession.sessionList.push(this)
-		this._remark = remark ? new Name(remark) : undefined
+		this.user = new User(data)
+		this._remark = data.remark ? new Name(data.remark) : undefined
 		const friendClass =
-			SessionClass.getClass(class_id) ??
-			new SessionClass(class_id, class_name)
+			SessionClass.getClass(data.class.id) ??
+			new SessionClass(data.class.id, data.class.name)
 		friendClass.addSession(this)
 		this.sessionClass = friendClass
 	}
@@ -1278,26 +1281,22 @@ export class UserSession extends Session {
 		return 'send_msg'
 	}
 
-	override getUserById(id: number): BaseUser | User | undefined {
+	override getUserById(id: number): User | undefined {
 		const runtimeData = useRuntimeData()
-		if (id === runtimeData.loginInfo?.uin)
-			return new BaseUser(
-				runtimeData.loginInfo?.uin,
-				runtimeData.loginInfo?.nickname,
-			)
+		if (id === runtimeData.loginInfo?.uin) return runtimeData.selfInfo
 		if (id !== this.id) return undefined
-		if (this.userCache) return this.userCache
-		return this.baseUser
+		return this.user
 	}
 
-	private userCache?: User
+	private useInfoHasUpgraded: boolean = false
 	/**
 	 * 获取用户信息
 	 * @param useCache 使用缓存
 	 * @returns
 	 */
 	async getUserInfo(useCache: boolean = true): Promise<User | undefined> {
-		if (useCache && this.userCache) return this.userCache
+		if (this.useInfoHasUpgraded) return this.user
+		this.useInfoHasUpgraded = true
 		const runtimeData = useRuntimeData()
 		const data = await runtimeData.nowAdapter?.getUserInfo(
 			this.id,
@@ -1307,9 +1306,9 @@ export class UserSession extends Session {
 			popInfo.error(app.config.globalProperties.$t('获取用户信息失败'))
 			return
 		}
-		const user = new User(data)
-		this.userCache = user
-		return user
+		this.user.upgrade(data)
+		this.useInfoHasUpgraded = false
+		return this.user
 	}
 	/**
 	 * 获取用户信息
@@ -1331,7 +1330,6 @@ export class TempSession extends Session {
 	override sessionClass: SessionClass
 	group: GroupSession | number
 	member?: Member
-	baseUser: BaseUser = new BaseUser(this.id, this.name.toString())
 	static readonly sessionList: TempSession[] = shallowReactive([])
 	constructor(id: number, group_id: number) {
 		const group = GroupSession.getSessionById(group_id)
@@ -1411,28 +1409,22 @@ export class TempSession extends Session {
 		return this.group as number
 	}
 
-	override getUserById(id: number): BaseUser | Member | undefined {
+	override getUserById(id: number): User | undefined {
 		const runtimeData = useRuntimeData()
-		if (id === runtimeData.loginInfo?.uin) {
-			return new BaseUser(
-				runtimeData.loginInfo?.uin,
-				runtimeData.loginInfo?.nickname,
-			)
-		}
+		if (id === runtimeData.loginInfo?.uin) return runtimeData.selfInfo
 		if (id !== this.id) return undefined
-		if (this.member) return this.member
-		return this.baseUser
+		throw new Error('未实现')
 	}
 
 	/**
 	 * 获取自身成员对象
 	 * @returns 自身成员对象
 	 */
-	override getMe(): BaseUser | Member {
+	override getMe(): User {
 		const runtimeData = useRuntimeData()
 		if (!runtimeData.loginInfo?.uin) throw new Error('未登录')
 		const mem = this.getUserById(runtimeData.loginInfo?.uin)
-		return mem as BaseUser | Member
+		return mem as User
 	}
 }
 

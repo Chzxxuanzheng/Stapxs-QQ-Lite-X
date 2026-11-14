@@ -14,7 +14,7 @@ import {
 	Session,
 	UserSession,
 } from '@renderer/function/model/session'
-import { Member } from '@renderer/function/model/user'
+import { Member, User } from '@renderer/function/model/user'
 import { Gender, Role } from '@renderer/function/adapter/enmu'
 
 export interface AdapterInterface {
@@ -344,16 +344,6 @@ export interface ImplInfo {
 	version: string // 协议段版本
 }
 /**
- * 好友会话数据
- */
-export interface FriendData {
-	user_id: number // 用户ID
-	nickname: string // 昵称
-	remark?: string // 备注
-	class_id: number // 分组ID
-	class_name: string // 分组名称
-}
-/**
  * 群友会话数据
  */
 export interface GroupData {
@@ -366,37 +356,41 @@ export interface GroupData {
  * 用户信息数据
  */
 export interface UserData {
-	id: number // 用户ID
+	id?: number // 用户ID
+	avatar: string // 头像
 	remark?: string // 备注
-	nickname?: string // 昵称
+	nickname: string // 昵称
 	longNick?: string // 个性签名
 	qid?: string // qid
-	country?: string // 国家
-	province?: string // 省份
-	city?: string // 城市
+	remark?: string // 备注
+	class?: {
+		id: number
+		name: string
+	}
 	regTime: number | string // 注册时间
-	qqLevel: number // QQ等级
-	birthday_year?: number // 出生年份
-	birthday_month?: number // 出生月份
-	birthday_day?: number // 出生日期
+	level: number // QQ等级
 	age: number // 年龄
 	sex: Gender // 性别
+}
+export interface FriendData extends UserData {
+	id: number // 用户ID
+	class: {
+		id: number
+		name: string
+	}
 }
 /**
  * 群成员信息数据
  */
-export interface MemberData {
-	age: number // 年龄
+export interface MemberData extends UserData {
 	card?: string // 群内名称
 	group_id: number // 群ID
 	join_time: number // 加入时间
 	last_sent_time: number // 最后发言时间
-	level: string // 群等级
-	nickname?: string // 昵称
+	level: number // 群等级
+	nickname: string // 昵称
 	role: Role // 角色
-	sex: Gender //性别
 	title?: string // 头衔
-	user_id: number // 用户ID
 	unfriendly: boolean // 不友好记录
 	banTime?: number // 禁言时间，单位秒
 }
@@ -407,7 +401,7 @@ export interface GroupAnnouncementData {
 	content: string // 公告内容
 	img?: string // 图片url
 	time: number // 发布时间
-	sender: number // 发布者ID
+	sender: UserData // 发布者ID
 	is_read?: boolean // 是否已读
 	read_num?: number // 已读人数
 }
@@ -422,8 +416,7 @@ export interface GroupFileData {
 	download_times: number // 下载次数
 	dead_time?: number // 过期时间
 	upload_time: number // 上传时间
-	uploader_name?: string // 上传者名称
-	uploader_id?: number // 上传者ID
+	uploader: UserData // 上传者ID
 }
 
 /**
@@ -434,23 +427,11 @@ export interface GroupFolderData {
 	folder_name: string // 文件夹名称
 	count: number // 文件数量
 	create_time: number // 创建时间GroupFile
-	creator_name?: string // 创建者名称
-	creator_id?: number // 创建者ID
+	creator: UserData // 创建者ID
 }
 
 export type FilesData = { files: GroupFileData[]; folders: GroupFolderData[] }
 
-export interface SenderData {
-	id: number // 发送者用户ID
-	nickname: string // 发送者昵称
-	card?: string // 群内名称
-	sex: Gender // 性别
-	age?: number // 年龄
-	area?: string // 地区
-	level?: number // 等级
-	role?: Role // 角色
-	title?: string // 头衔
-}
 export interface SessionData {
 	id: number // 会话ID
 	group_id?: number // 临时会话群ID
@@ -493,7 +474,7 @@ export interface MessageEventData extends SessionEventData {
  */
 export interface ResponseEventData extends MessageEventData {
 	type: 'response' // 事件类型
-	operator: SenderData // 操作者
+	operator: UserData // 操作者
 	message_id: string // 被响应的消息ID
 	emojiId: string // 表情ID
 	add: boolean // 是否添加表情,如果为false则表示删除表情
@@ -513,16 +494,16 @@ export interface RecallEventData extends MessageEventData {
 	type: 'recall' // 事件类型
 	recallId: string // 被撤回的消息ID
 	suffix: string // 撤回消息后缀
-	user: SenderData // 撤回消息的用户信息
-	operator: SenderData // 撤回操作员信息
+	user: UserData // 撤回消息的用户信息
+	operator: UserData // 撤回操作员信息
 }
 /**
  * 禁言事件
  */
 export interface BanEventData extends MessageEventData {
 	type: 'ban' // 事件类型
-	user: SenderData // 被禁言的用户ID
-	operator: SenderData // 操作员信息
+	user: UserData // 被禁言的用户ID
+	operator: UserData // 操作员信息
 	duration: number // 禁言时间，单位秒
 }
 /**
@@ -530,16 +511,16 @@ export interface BanEventData extends MessageEventData {
  */
 export interface BanLiftEventData extends MessageEventData {
 	type: 'banLift' // 事件类型
-	user: SenderData // 被解禁的用户ID
-	operator: SenderData // 操作员信息
+	user: UserData // 被解禁的用户ID
+	operator: UserData // 操作员信息
 }
 /**
  * 戳一戳事件
  */
 export interface PokeEventData extends MessageEventData {
 	type: 'poke' // 事件类型
-	sender: SenderData // 发送者信息
-	target: SenderData // 被戳一戳的用户信息
+	sender: UserData // 发送者信息
+	target: UserData // 被戳一戳的用户信息
 	action: string // 戳一戳动作
 	suffix: string // 戳一戳后缀
 	ico: string // 戳一戳图片链接
@@ -549,17 +530,17 @@ export interface PokeEventData extends MessageEventData {
  */
 export interface JoinEventData extends MessageEventData {
 	type: 'join' // 事件类型
-	user: SenderData // 加入的用户信息
-	operator?: SenderData // 操作员信息
-	inviter?: SenderData // 邀请者信息
+	user: UserData // 加入的用户信息
+	operator?: UserData // 操作员信息
+	inviter?: UserData // 邀请者信息
 }
 /**
  * 群成员离开事件
  */
 export interface LeaveEventData extends MessageEventData {
 	type: 'leave' // 事件类型
-	user: SenderData // 离开的用户信息
-	operator: SenderData // 操作员信息
+	user: UserData // 离开的用户信息
+	operator: UserData // 操作员信息
 }
 /**
  * 未知事件数据
@@ -578,7 +559,7 @@ export interface UnknownEventData extends EventData {
 export interface MsgData {
 	message_id?: string // 消息ID
 	session: SessionData // 会话信息
-	sender: SenderData // 发送者信息
+	sender: UserData // 发送者信息
 	time?: number // 发送时间戳
 	message: SegData[] // 消息内容段
 	isDelete: boolean // 是否是已删除消息
@@ -592,9 +573,9 @@ export type EssenceSeg = TextSegData | ImgSegData | FaceSegData
  * 群精华消息数据
  */
 export interface EssenceData {
-	sender: SenderData // 发送者信息
+	sender: UserData // 发送者信息
 	sender_time: number // 发送时间戳
-	operator: SenderData // 操作员信息
+	operator: UserData // 操作员信息
 	operator_time: number // 操作时间戳
 	content: EssenceSeg[] // 消息内容段
 }
@@ -696,14 +677,7 @@ export interface ErrorSegData extends SegData {
  * 合并转发节点
  */
 export interface ForwardNodeData {
-	sender: ForwardSenderData // 发送者信息
+	sender: UserData // 发送者信息
 	content: SegData[] // 消息内容段
-}
-/**
- * 合并转发发送者消息
- */
-export interface ForwardSenderData {
-	nickname: string // 发送者昵称
-	face: string // 发送者头像链接
 }
 //#endregion

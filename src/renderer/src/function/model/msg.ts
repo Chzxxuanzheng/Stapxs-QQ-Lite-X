@@ -13,7 +13,6 @@ import type {
 	ForwardNodeData,
 	MsgData,
 	SegData,
-	SenderData,
 } from '@renderer/function/adapter/interface'
 import { popInfo } from '@renderer/function/base'
 import useRuntimeData from '@renderer/state/runtimeData'
@@ -33,13 +32,7 @@ import {
 	Session,
 	TempSession,
 } from '@renderer/function/model/session'
-import {
-	BaseUser,
-	ForwardSender,
-	getSender,
-	Member,
-	type IUser,
-} from '@renderer/function/model/user'
+import { Member, User } from '@renderer/function/model/user'
 import { autoMarkRaw, autoReactive } from '@renderer/function/model/utils'
 import { sendStatEvent } from '@renderer/function/utils/appUtil'
 import { Role } from '@renderer/function/adapter/enmu'
@@ -66,7 +59,7 @@ export class Msg extends Message {
 	/**
 	 * 消息发送者
 	 */
-	private readonly _sender = shallowRef<IUser>()
+	private readonly _sender = shallowRef<User>()
 	/**
 	 * 是否提及了自己
 	 */
@@ -100,15 +93,10 @@ export class Msg extends Message {
 	toMe: boolean = this.atme
 	fromMe: boolean = false
 	constructor(data: MsgData)
-	constructor(
-		segs: Seg[],
-		sender: IUser,
-		session?: Session,
-		senderTime?: Time,
-	)
+	constructor(segs: Seg[], sender: User, session?: Session, senderTime?: Time)
 	constructor(
 		arg1: Seg[] | MsgData,
-		arg2?: IUser,
+		arg2?: User,
 		arg3?: Session,
 		arg4?: Time,
 	) {
@@ -149,11 +137,11 @@ export class Msg extends Message {
 				data.session.group_id,
 			)
 
-			this.sender = new BaseUser(data.sender.id, data.sender.nickname)
+			this.sender = new User(data.sender)
 
 			void this.session.activate().then(() => {
 				// 获取发送者
-				this.sender = getSender(data.sender, this.session)
+				this.sender = this.session!.getUserFromData(data.sender)
 			})
 		}
 
@@ -223,8 +211,8 @@ export class Msg extends Message {
 	canRecall(): boolean {
 		// 无会话信息不能撤回
 		if (!this.session) return false
-		const self = this.session.getMe()
-		const sender = this.sender
+		const self = this.session.getMe() as Member
+		const sender = this.sender as Member
 		// 撤回其他人
 		if (self instanceof Member && sender.user_id !== self.user_id) {
 			if (!self.canAdmin(sender.role ?? Role.User)) return false
@@ -314,7 +302,7 @@ export class Msg extends Message {
 						: undefined,
 				type: this.session.type,
 			},
-			sender: this.sender.serializeData() as SenderData,
+			sender: this.sender.serializeData(),
 			time: this.time?.time,
 			message: this.message.map((seg) => seg.serializeData()),
 			isDelete: this.isDelete,
@@ -329,20 +317,17 @@ export class Msg extends Message {
 
 	toForwardMsgData(): ForwardMsg {
 		return new ForwardMsg({
-			sender: {
-				nickname: this.sender.name,
-				face: this.sender.face,
-			},
+			sender: this.sender.serializeData(),
 			content: this.message.map((seg) => seg.serializeData()),
 		})
 	}
 
-	get sender(): IUser {
+	get sender(): User {
 		if (!this._sender.value) throw new Error('消息发送者未初始化')
 		return this._sender.value
 	}
 
-	set sender(user: IUser) {
+	set sender(user: User) {
 		this._sender.value = user
 	}
 
@@ -533,7 +518,7 @@ export class SelfMsg extends Msg {
  */
 export class SelfPreMsg extends Msg {
 	protected constructor(segs: Seg[]) {
-		super(segs, BaseUser.createMe())
+		super(segs, User.createMe())
 	}
 
 	/**
@@ -569,13 +554,13 @@ export class SelfPreMsg extends Msg {
 @autoMarkRaw
 export class EssenceMsg extends Msg {
 	operatorTime: Time
-	operator: BaseUser | Member
+	operator: User | Member
 	constructor(data: EssenceData, session: GroupSession) {
 		// 变化为Msg用的格式
 		const segs = Msg.parseSegs(data.content)
-		const sender = getSender(data.sender, session)
+		const sender = session.getUserFromData(data.sender)
 		super(segs, sender, session, new Time(data.sender_time))
-		this.operator = getSender(data.operator, session)
+		this.operator = session.getUserFromData(data.operator)
 		this.operatorTime = new Time(data.operator_time)
 	}
 }
@@ -586,7 +571,7 @@ export class EssenceMsg extends Msg {
 @autoMarkRaw
 export class ForwardMsg extends Msg {
 	constructor(data: ForwardNodeData) {
-		const sender = new ForwardSender(data.sender)
+		const sender = new User(data.sender)
 		const message = Msg.parseSegs(data.content)
 		super(message, sender)
 	}
@@ -598,10 +583,10 @@ export class ForwardMsg extends Msg {
 		}
 	}
 
-	get sender(): ForwardSender {
-		return super.sender as ForwardSender
+	get sender(): User {
+		return super.sender
 	}
-	set sender(user: ForwardSender) {
+	set sender(user: User) {
 		super.sender = user
 	}
 

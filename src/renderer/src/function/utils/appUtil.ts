@@ -116,14 +116,8 @@ export async function reloadUsers(useCache: boolean = true) {
 		}
 	}
 	for (const item of friendData) {
-		if (!UserSession.getSessionById(item.user_id)) {
-			new UserSession(
-				item.user_id,
-				item.nickname,
-				item.class_id,
-				item.class_name,
-				item.remark,
-			)
+		if (!UserSession.getSessionById(item.id)) {
+			new UserSession(item)
 		}
 	}
 

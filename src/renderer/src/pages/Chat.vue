@@ -174,7 +174,7 @@ import {
 	Session,
 	UserSession,
 } from '@renderer/function/model/session'
-import { IUser, Member } from '@renderer/function/model/user'
+import { User, Member } from '@renderer/function/model/user'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { shouldAutoFocus } from '@renderer/function/utils/appUtil'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
@@ -377,7 +377,7 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> {
  * @param msg 用户
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
-function showUserMenu(data: MenuEventData, user: IUser) {
+function showUserMenu(data: MenuEventData, user: User) {
 	const setAtFunc = (member: Member) => {
 		chat.inputMsg.addSq(new AtSeg(member.user_id))
 	}
@@ -390,7 +390,7 @@ function showUserMenu(data: MenuEventData, user: IUser) {
 				session: chat,
 				user: user,
 				sendPokeFunc: sendPoke,
-				setAtFunc: setAtFunc as (user: IUser) => void,
+				setAtFunc: setAtFunc as (user: User) => void,
 			},
 		},
 	)
@@ -448,14 +448,14 @@ async function changeRespond(id: string, msg: Msg) {
 /**
  * 发送戳一戳
  */
-async function sendPoke(user: IUser) {
+async function sendPoke(user: User) {
 	if (chat instanceof GroupSession) {
 		await sendGroupPoke(user)
 	} else if (chat instanceof UserSession) {
 		await sendPrivatePoke()
 	}
 }
-async function sendGroupPoke(target: IUser) {
+async function sendGroupPoke(target: User) {
 	if (!(target instanceof Member)) {
 		popInfo.error($t('无法戳一戳该用户'))
 		return

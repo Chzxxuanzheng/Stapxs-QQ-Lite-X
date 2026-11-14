@@ -2,11 +2,11 @@ import { shallowReactive } from 'vue'
 import { defineScopedState } from '@renderer/function/utils/vueUtil'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { Msg } from '@renderer/function/model/msg'
-import { IUser } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 
 type BaseMsgsConfig = {
 	msgMenu: (eventData: MenuEventData, msg: Msg) => Promise<void>
-	userMenu: (eventData: MenuEventData, user: IUser) => Promise<void>
+	userMenu: (eventData: MenuEventData, user: User) => Promise<void>
 
 	/**
 	 * 消息对齐方向

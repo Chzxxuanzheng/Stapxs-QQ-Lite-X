@@ -19,7 +19,7 @@
 		<!-- 群成员 -->
 		<template v-if="userInfo instanceof Member">
 			<div>
-				<img :src="userInfo.face" :alt="userInfo.name" />
+				<img :src="userInfo.avatar" :alt="userInfo.name" />
 				<div>
 					<span name="id">{{ userInfo.user_id }}</span>
 					<div>
@@ -80,9 +80,9 @@
 			</div>
 		</template>
 		<!-- 好友 -->
-		<template v-else-if="userInfo instanceof User">
+		<template v-else>
 			<div>
-				<img :src="userInfo.face" :alt="userInfo.name" />
+				<img :src="userInfo.avatar" :alt="userInfo.name" />
 				<div>
 					<span name="id">{{ userInfo.user_id }}</span>
 					<div>
@@ -97,45 +97,19 @@
 				{{ userInfo.longNick }}
 			</div>
 		</template>
-		<!-- 保底的 -->
-		<template v-else>
-			<div>
-				<img :src="userInfo.face" :alt="userInfo.name" />
-				<div>
-					<span name="id">{{ userInfo.user_id }}</span>
-					<div>
-						<a>{{ userInfo.name }}</a>
-						<div>
-							<span v-if="userInfo.role === Role.Owner">
-								{{ $t('群主') }}
-							</span>
-							<span v-else-if="userInfo.role === Role.Admin">
-								{{ $t('管理员') }}
-							</span>
-							<span v-else-if="userInfo.role === Role.Bot">
-								{{ $t('机器人') }}
-							</span>
-							<span v-if="userInfo.level"
-								>Lv {{ userInfo.level }}</span
-							>
-						</div>
-					</div>
-				</div>
-			</div>
-		</template>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { Role } from '@renderer/function/adapter/enmu'
-import { IUser, Member, User } from '@renderer/function/model/user'
+import { User, Member } from '@renderer/function/model/user'
 import { vUserRole } from '@renderer/function/utils/vcmd'
 
 const { user: userProp } = defineProps<{
-	user: IUser | number | (() => IUser | number)
+	user: User | number | (() => User | number)
 }>()
 
-let userInfo: IUser | number
+let userInfo: User | number
 if (typeof userProp === 'function') {
 	userInfo = userProp()
 } else {

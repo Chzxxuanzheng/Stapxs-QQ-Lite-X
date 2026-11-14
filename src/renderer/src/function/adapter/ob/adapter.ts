@@ -50,7 +50,6 @@ import type {
 	RecallEventData,
 	ReplySegData,
 	SegData,
-	SenderData,
 	SessionData,
 	SuperFaceSegData,
 	TextSegData,
@@ -59,6 +58,7 @@ import type {
 	VideoSegData,
 	XmlSegData,
 } from '@renderer/function/adapter/interface'
+import { Gender, Role } from '@renderer/function/adapter/enmu'
 import { LoginInfo } from '@renderer/function/adapter/interface'
 import ObInfo from '@renderer/function/adapter/ob/ObInfo.vue'
 import type {
@@ -71,6 +71,7 @@ import type {
 	ObGetForwardMsg,
 	ObGetFriendList,
 	ObGetGroupList,
+	ObGetGroupMemberInfo,
 	ObGetGroupMemberList,
 	ObGetLoginInfo,
 	ObGetMsg,
@@ -99,7 +100,6 @@ import type {
 } from '@renderer/function/adapter/ob/type'
 import {
 	$t,
-	createSender,
 	getGender,
 	getRole,
 	ObConnector,
@@ -284,11 +284,18 @@ export class OneBotAdapter implements AdapterInterface {
 		for (const item of data.data) {
 			if (friendData.has(item.user_id)) continue
 			friendData.set(item.user_id, {
-				user_id: item.user_id,
+				id: item.user_id,
+				avatar: this.getUserAvatar(item.user_id),
 				nickname: item.nickname,
 				remark: item.remark === '' ? undefined : item.remark,
-				class_id: 0, // 默认分类ID为0
-				class_name: $t('好友'), // 默认分类名称
+				regTime: 0,
+				level: 0,
+				age: 0,
+				sex: Gender.Unknown,
+				class: {
+					id: 0, // 默认分类ID为0
+					name: $t('好友'), // 默认分类名称
+				},
 			})
 		}
 
@@ -332,17 +339,16 @@ export class OneBotAdapter implements AdapterInterface {
 			},
 		)
 		if (!this.friendListCache) await this.getFriendList()
-		const baseInfo = this.friendListCache?.find((f) => f.user_id === userId)
-		return {
-			id: userId,
-			remark: baseInfo?.remark,
-			nickname: baseInfo?.nickname || data.data.nickname,
-			qid: $t('不支持'),
-			regTime: Date.now(),
-			qqLevel: 0,
-			age: data.data.age,
-			sex: getGender(data.data.sex),
-		}
+		const baseInfo = this.friendListCache?.find((f) => f.id === userId)
+		const user = this.buildUnknownUser(userId)
+		user.remark = baseInfo?.remark
+		user.nickname = baseInfo?.nickname || data.data.nickname
+		user.qid = $t('不支持')
+		user.regTime = Date.now()
+		user.level = 0
+		user.age = data.data.age
+		user.sex = getGender(data.data.sex)
+		return user
 	}
 
 	@api
@@ -354,20 +360,7 @@ export class OneBotAdapter implements AdapterInterface {
 			'get_group_member_list',
 			{ group_id: group.id },
 		)
-		return data.data.map((item) => ({
-			age: item.age,
-			card: item.card,
-			group_id: item.group_id,
-			join_time: item.join_time,
-			last_sent_time: item.last_sent_time,
-			level: item.level,
-			nickname: item.nickname,
-			role: getRole(item.role),
-			sex: getGender(item.sex),
-			title: item.title,
-			user_id: item.user_id,
-			unfriendly: item.unfriendly,
-		}))
+		return data.data.map((item) => this.parseMember(item, group.id))
 	}
 	//#endregion
 
@@ -484,13 +477,16 @@ export class OneBotAdapter implements AdapterInterface {
 		const message = await this.parseSeg(data.message, data)
 
 		// 组装发送者信息
-		let sender: SenderData
+		let sender: UserData
 		if (data.message_type === 'group' && data.sub_type === 'anonymous') {
 			const msgSender = data.sender as ObAnonymousSender
-			sender = createSender(Number(msgSender.id), msgSender.id)
+			sender = this.buildUnknownUser(Number(msgSender.id), msgSender.id)
 		} else {
 			const msgSender = data.sender as ObPrivateSender | ObGroupSender
-			sender = createSender(Number(msgSender.user_id), msgSender.nickname)
+			const id = Number(msgSender.user_id)
+			sender = this.buildUnknownUser(id, msgSender.nickname)
+			sender.sex = getGender(msgSender.sex)
+			if (msgSender.age) sender.age = msgSender.age
 		}
 		return {
 			message_id: data.message_id.toString(),
@@ -653,11 +649,10 @@ export class OneBotAdapter implements AdapterInterface {
 		data: ObForwardNodeSeg,
 		msg?: ObMsg,
 	): Promise<ForwardNodeData> {
+		const sender = this.buildUnknownUser(Number(data.data.user_id))
+		sender.nickname = data.data.nickname
 		return {
-			sender: {
-				nickname: data.data.nickname,
-				face: `https://q1.qlogo.cn/g?b=qq&s=0&nk=${data.data.user_id}`,
-			},
+			sender,
 			content: await this.parseSeg(data.data.content, msg),
 		}
 	}
@@ -879,41 +874,66 @@ export class OneBotAdapter implements AdapterInterface {
 	async groupIncreaseEvent(
 		event: ObGroupIncreaseEvent,
 	): Promise<JoinEventData> {
-		const user = event.user_id
+		const user = await this.getMemberFromGroup(
+			event.user_id,
+			event.group_id,
+		)
 		const eventOperator =
 			event.operator_id === event.user_id ? undefined : event.operator_id
-		const operator =
+		const approveOperator =
 			event.sub_type === 'approve' ? eventOperator : undefined
-		const inviter = event.sub_type === 'invite' ? eventOperator : undefined
+		const inviteOperator =
+			event.sub_type === 'invite' ? eventOperator : undefined
+		const operator = approveOperator
+			? await this.getMemberFromGroup(approveOperator, event.group_id)
+			: undefined
+		const inviter = inviteOperator
+			? await this.getMemberFromGroup(inviteOperator, event.group_id)
+			: undefined
 		return {
 			type: 'join',
 			session: {
 				id: event.group_id,
 				type: 'group',
 			},
-			user: createSender(user),
-			operator: operator ? createSender(operator) : undefined,
-			inviter: inviter ? createSender(inviter) : undefined,
+			user,
+			operator,
+			inviter,
 			time: event.time,
 		}
 	}
 	async groupDecreaseEvent(
 		event: ObGroupDecreaseEvent,
 	): Promise<LeaveEventData> {
+		const user = await this.getMemberFromGroup(
+			event.user_id,
+			event.group_id,
+		)
+		const operator = event.operator_id
+			? await this.getMemberFromGroup(event.operator_id, event.group_id)
+			: user
 		return {
 			type: 'leave',
 			session: {
 				id: event.group_id,
 				type: 'group',
 			},
-			user: createSender(event.user_id),
-			operator: createSender(event.operator_id),
+			user,
+			operator,
 			time: event.time,
 		}
 	}
 	async groupBanEvent(
 		event: ObGroupBanEvent,
 	): Promise<BanEventData | BanLiftEventData> {
+		const user = await this.getMemberFromGroup(
+			event.user_id,
+			event.group_id,
+		)
+		const operator = await this.getMemberFromGroup(
+			event.operator_id,
+			event.group_id,
+		)
 		if (event.sub_type === 'ban') {
 			return {
 				type: 'ban',
@@ -921,8 +941,8 @@ export class OneBotAdapter implements AdapterInterface {
 					id: event.group_id,
 					type: 'group',
 				},
-				user: createSender(event.user_id),
-				operator: createSender(event.operator_id),
+				user,
+				operator,
 				time: event.time,
 				duration: event.duration,
 			}
@@ -933,8 +953,8 @@ export class OneBotAdapter implements AdapterInterface {
 					id: event.group_id,
 					type: 'group',
 				},
-				user: createSender(event.user_id),
-				operator: createSender(event.operator_id),
+				user,
+				operator,
 				time: event.time,
 			}
 		}
@@ -948,8 +968,8 @@ export class OneBotAdapter implements AdapterInterface {
 				id: event.group_id,
 				type: 'group',
 			},
-			user: createSender(event.user_id),
-			operator: createSender(event.operator_id),
+			user: this.buildUnknownUser(event.user_id),
+			operator: this.buildUnknownUser(event.operator_id),
 			time: event.time,
 			recallId: event.message_id.toString(),
 			suffix: '',
@@ -964,8 +984,8 @@ export class OneBotAdapter implements AdapterInterface {
 				id: event.user_id,
 				type: 'user',
 			},
-			user: createSender(event.user_id),
-			operator: createSender(event.user_id),
+			user: this.buildUnknownUser(event.user_id),
+			operator: this.buildUnknownUser(event.user_id),
 			time: event.time,
 			recallId: event.message_id.toString(),
 			suffix: '',
@@ -984,11 +1004,13 @@ export class OneBotAdapter implements AdapterInterface {
 				type: 'user',
 			}
 		}
+		const sender = this.buildUnknownUser(event.user_id)
+		const target = this.buildUnknownUser(event.target_id)
 		return {
 			type: 'poke',
 			session,
-			sender: createSender(event.user_id),
-			target: createSender(event.target_id),
+			sender,
+			target,
 			action: '戳了戳',
 			suffix: '',
 			ico: 'https://tianquan.gtimg.cn/nudgeaction/item/0/expression.jpg',
@@ -1026,6 +1048,91 @@ export class OneBotAdapter implements AdapterInterface {
 		// 重置缓存
 		this.friendListCache = null
 	}
+
+	//#region == 用户相关 =======================
+	/**
+	 * 构建一个信息不全的用户
+	 * @param id 用户ID
+	 * @param nickname 昵称
+	 */
+	protected buildUnknownUser(id: number, nickname?: string): UserData {
+		return {
+			id,
+			regTime: 0,
+			avatar: this.getUserAvatar(id),
+			nickname: nickname ?? id.toString(),
+			level: 1,
+			age: 0,
+			sex: Gender.Unknown,
+		}
+	}
+	/**
+	 * 解析群成员信息
+	 * @param member 群成员信息
+	 * @param groupId 群ID
+	 */
+	protected parseMember(
+		member: ObGetGroupMemberInfo['data'],
+		groupId: number,
+	): MemberData {
+		const data = this.buildUnknownUser(
+			member.user_id,
+			member.nickname,
+		) as MemberData
+		data.card = member.card === '' ? undefined : member.card
+		data.group_id = groupId
+		data.join_time = member.join_time
+		data.last_sent_time = member.last_sent_time
+		data.level = Number(member.level) || 0
+		data.role = getRole(member.role)
+		data.sex = getGender(member.sex)
+		data.age = member.age
+		data.title = member.title === '' ? undefined : member.title
+		data.unfriendly = member.unfriendly
+
+		return data
+	}
+	/**
+	 * 从群组中获取成员信息，获取失败时返回保底数据
+	 * @param memberId 成员ID
+	 * @param groupId 群ID
+	 */
+	protected async getMemberFromGroup(
+		memberId: number,
+		groupId: number,
+	): Promise<MemberData> {
+		try {
+			const data: ObGetGroupMemberInfo = await this.connector.send(
+				'get_group_member_info',
+				{
+					group_id: groupId,
+					user_id: memberId,
+				},
+			)
+			if (data?.data) return this.parseMember(data.data, groupId)
+		} catch (err) {
+			logger.error(err as Error, `获取群成员信息失败: ${memberId}`)
+		}
+		return {
+			...this.buildUnknownUser(memberId),
+			group_id: groupId,
+			join_time: 0,
+			last_sent_time: 0,
+			level: 0,
+			role: Role.User,
+			unfriendly: false,
+		}
+	}
+	//#endregion
+	//#region == 头像相关 =======================
+	/**
+	 * 获取用户头像链接
+	 * @param id 用户ID
+	 */
+	protected getUserAvatar(id: number): string {
+		return `https://q1.qlogo.cn/g?b=qq&s=0&nk=${id}`
+	}
+	//#endregion
 
 	protected isDelete(_: ObMsg): boolean {
 		return false

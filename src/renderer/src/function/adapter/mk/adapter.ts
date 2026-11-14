@@ -21,7 +21,6 @@ import {
 	FileSegData,
 	ForwardNodeData,
 	ForwardSegData,
-	FriendData,
 	GroupAnnouncementData,
 	GroupData,
 	ImgSegData,
@@ -40,7 +39,6 @@ import {
 	ReplySegData,
 	ResponseEventData,
 	SegData,
-	SenderData,
 	SessionData,
 	TextSegData,
 	UnknownSegData,
@@ -48,6 +46,7 @@ import {
 	VideoSegData,
 	XmlSegData,
 	SuperFaceSegData,
+	FriendData,
 } from '@renderer/function/adapter/interface'
 
 import { handleEvent } from '@renderer/function/event'
@@ -73,12 +72,14 @@ import useRuntimeData from '@renderer/state/runtimeData'
 import type {
 	ApiInput,
 	ApiOutput,
+	FriendEntity,
 	FriendNudgeEventData,
 	GetGroupFilesOutput,
 	GetHistoryMessagesOutput,
 	GroupDisbandEventData,
 	GroupEssenceMessage,
 	GroupMemberDecreaseEventData,
+	GroupMemberEntity,
 	GroupMemberIncreaseEventData,
 	GroupMessageReactionEventData,
 	GroupMuteEventData,
@@ -109,7 +110,6 @@ import {
 	$t,
 	camelCaseToUnderline,
 	checkMilkyVersion,
-	createSender,
 	fileToBase64,
 	getGender,
 	getRole,
@@ -292,14 +292,7 @@ export class MilkyAdapter implements AdapterInterface {
 		const data = await this.callApi('GetFriendList', {
 			no_cache: !useCache,
 		})
-		return data.friends.map((friend) => ({
-			user_id: friend.user_id,
-			nickname: friend.nickname,
-			remark:
-				friend.remark === friend.nickname ? undefined : friend.remark,
-			class_id: friend.category?.category_id ?? 495,
-			class_name: friend.category?.category_name ?? '未分组的好友',
-		}))
+		return data.friends.map(this.parseFriend.bind(this)) as FriendData[]
 	}
 	/**
 	 * 获取群组列表
@@ -330,14 +323,13 @@ export class MilkyAdapter implements AdapterInterface {
 		const data = await this.callApi('GetUserProfile', { user_id: userId })
 		return {
 			id: userId,
+			avatar: this.getUserAvatar(userId),
 			remark: data.remark,
 			nickname: data.nickname,
 			longNick: data.bio,
 			qid: data.qid,
-			country: data.country,
-			city: data.city,
 			regTime: Date.now(),
-			qqLevel: data.level ?? 0,
+			level: data.level ?? 0,
 			age: data.age,
 			sex: getGender(data.sex),
 		}
@@ -356,21 +348,7 @@ export class MilkyAdapter implements AdapterInterface {
 			group_id: group.id,
 			no_cache: !useCache,
 		})
-		return data.members.map((member) => ({
-			age: 0,
-			card: member.card === '' ? undefined : member.card,
-			group_id: group.id,
-			join_time: member.join_time,
-			last_sent_time: member.last_sent_time,
-			level: String(member.level),
-			nickname: member.nickname,
-			role: getRole(member.role),
-			sex: getGender(member.sex),
-			title: member.title,
-			user_id: member.user_id,
-			unfriendly: false,
-			banTime: member.shut_up_end_time ?? undefined,
-		}))
+		return data.members.map((member) => this.parseMember(member, group.id))
 	}
 	/**
 	 * 获取群公告信息
@@ -383,12 +361,14 @@ export class MilkyAdapter implements AdapterInterface {
 		const data = await this.callApi('GetGroupAnnouncements', {
 			group_id: group.id,
 		})
-		return data.announcements.map((item) => ({
-			content: item.content ?? undefined,
-			img: item.image_url ?? undefined,
-			time: item.time,
-			sender: item.user_id,
-		}))
+		return await Promise.all(
+			data.announcements.map(async (item) => ({
+				content: item.content ?? undefined,
+				img: item.image_url ?? undefined,
+				time: item.time,
+				sender: await this.getMemberFromGroup(item.user_id, group.id),
+			})),
+		)
 	}
 	/**
 	 * 获取群精华消息
@@ -409,9 +389,12 @@ export class MilkyAdapter implements AdapterInterface {
 		}
 
 		const buildEssenceSeg = async (item: GroupEssenceMessage) => ({
-			sender: createSender(item.sender_id, item.sender_name),
+			sender: this.buildUnknownUser(item.sender_id, item.sender_name),
 			sender_time: item.message_time,
-			operator: createSender(item.operator_id, item.operator_name),
+			operator: this.buildUnknownUser(
+				item.operator_id,
+				item.operator_name,
+			),
 			operator_time: item.operation_time,
 			content: (await this.parseSeg(item.segments)) as EssenceSeg[],
 		})
@@ -728,7 +711,7 @@ export class MilkyAdapter implements AdapterInterface {
 	@api
 	async getGroupFile(group: GroupSession): Promise<FilesData> {
 		const data = await this.callApi('GetGroupFiles', { group_id: group.id })
-		return this.parseFiles(data)
+		return await this.parseFiles(data, group.id)
 	}
 	/**
 	 * 获取群文件夹内容
@@ -745,7 +728,7 @@ export class MilkyAdapter implements AdapterInterface {
 			group_id: group.id,
 			parent_folder_id: folderId,
 		})
-		return this.parseFiles(data)
+		return await this.parseFiles(data, group.id)
 	}
 	/**
 	 * 获取文件下载连接
@@ -920,24 +903,19 @@ export class MilkyAdapter implements AdapterInterface {
 		const message = await this.parseSeg(data.segments, data)
 
 		// 组装发送者信息
-		let sender: SenderData
+		let sender: UserData
 		switch (data.message_scene) {
 			case 'friend':
-				sender = {
-					id: data.sender_id,
-					nickname: data.friend.nickname,
-					sex: getGender(data.friend.sex),
-				}
+				sender = this.parseFriend(data.friend)
 				break
 			case 'group':
-				sender = {
-					id: data.sender_id,
-					nickname: data.group_member.nickname,
-					sex: getGender(data.group_member.sex),
-				}
+				sender = this.parseMember(
+					data.group_member,
+					data.group.group_id,
+				)
 				break
 			case 'temp':
-				sender = createSender(data.sender_id)
+				sender = this.buildUnknownUser(data.sender_id)
 				break
 		}
 
@@ -1235,11 +1213,12 @@ export class MilkyAdapter implements AdapterInterface {
 		data: IncomingForwardedMessage,
 		_?: IncomingMessage,
 	): Promise<ForwardNodeData> {
+		const sender = this.buildUnknownUser(0)
+		sender.id = undefined
+		sender.avatar = data.avatar_url
+		sender.nickname = data.sender_name
 		return {
-			sender: {
-				nickname: data.sender_name,
-				face: data.avatar_url,
-			},
+			sender,
 			content: await this.parseSeg(data.segments),
 		}
 	}
@@ -1461,12 +1440,12 @@ export class MilkyAdapter implements AdapterInterface {
 				id: data.group_id,
 				type: 'group',
 			},
-			user: createSender(data.user_id),
+			user: await this.getMemberFromGroup(data.user_id, data.group_id),
 			operator: data.operator_id
-				? createSender(data.operator_id)
+				? await this.getMemberFromGroup(data.user_id, data.group_id)
 				: undefined,
 			inviter: data.invitor_id
-				? createSender(data.invitor_id)
+				? await this.getMemberFromGroup(data.invitor_id, data.group_id)
 				: undefined,
 			time: event.time,
 		}
@@ -1475,14 +1454,33 @@ export class MilkyAdapter implements AdapterInterface {
 		event: MilkyEvent,
 		data: GroupMemberDecreaseEventData,
 	): Promise<LeaveEventData> {
+		const user = await this.getMemberFromGroup(data.user_id, data.group_id)
+		let operator: UserData = user
+		if (data.operator_id)
+			operator = await this.getMemberFromGroup(
+				data.operator_id,
+				data.group_id,
+			)
+		else {
+			const operatorData = data.operator_id
+				? await this.callApi('GetGroupMemberInfo', {
+						group_id: data.group_id,
+						user_id: data.operator_id,
+					})
+				: undefined
+			operator = operatorData
+				? this.parseMember(operatorData.member, data.group_id)
+				: this.buildUnknownUser(data.user_id)
+		}
+
 		return {
 			type: 'leave',
 			session: {
 				id: data.group_id,
 				type: 'group',
 			},
-			user: createSender(data.user_id),
-			operator: createSender(data.operator_id ?? data.user_id),
+			user,
+			operator,
 			time: event.time,
 		}
 	}
@@ -1497,8 +1495,14 @@ export class MilkyAdapter implements AdapterInterface {
 					id: data.group_id,
 					type: 'group',
 				},
-				user: createSender(data.user_id),
-				operator: createSender(data.operator_id),
+				user: await this.getMemberFromGroup(
+					data.user_id,
+					data.group_id,
+				),
+				operator: await this.getMemberFromGroup(
+					data.operator_id,
+					data.group_id,
+				),
 				duration: data.duration,
 				time: event.time,
 			}
@@ -1509,8 +1513,14 @@ export class MilkyAdapter implements AdapterInterface {
 					id: data.group_id,
 					type: 'group',
 				},
-				user: createSender(data.user_id),
-				operator: createSender(data.operator_id),
+				user: await this.getMemberFromGroup(
+					data.user_id,
+					data.group_id,
+				),
+				operator: await this.getMemberFromGroup(
+					data.operator_id,
+					data.group_id,
+				),
 				time: event.time,
 			}
 		}
@@ -1525,8 +1535,8 @@ export class MilkyAdapter implements AdapterInterface {
 				id: data.peer_id,
 				type: this.parseScene(data.message_scene),
 			},
-			user: createSender(data.sender_id),
-			operator: createSender(data.operator_id),
+			user: this.buildUnknownUser(data.sender_id),
+			operator: this.buildUnknownUser(data.operator_id),
 			recallId: data.message_seq.toString(),
 			time: event.time,
 			suffix: data.display_suffix ?? '',
@@ -1542,8 +1552,8 @@ export class MilkyAdapter implements AdapterInterface {
 				id: data.group_id,
 				type: 'group',
 			},
-			sender: createSender(data.sender_id),
-			target: createSender(data.receiver_id),
+			sender: this.buildUnknownUser(data.sender_id),
+			target: this.buildUnknownUser(data.receiver_id),
 			action: data.display_action ?? '戳了戳',
 			suffix: data.display_suffix ?? '',
 			ico:
@@ -1562,7 +1572,10 @@ export class MilkyAdapter implements AdapterInterface {
 				id: data.group_id,
 				type: 'group',
 			},
-			operator: createSender(data.user_id),
+			operator: await this.getMemberFromGroup(
+				data.user_id,
+				data.group_id,
+			),
 			message_id: data.message_seq.toString(),
 			emojiId: data.face_id,
 			add: data.is_add,
@@ -1581,8 +1594,12 @@ export class MilkyAdapter implements AdapterInterface {
 				id: data.user_id,
 				type: 'user',
 			},
-			sender: createSender(data.is_self_send ? selfId : data.user_id),
-			target: createSender(data.is_self_receive ? selfId : data.user_id),
+			sender: this.buildUnknownUser(
+				data.is_self_send ? selfId : data.user_id,
+			),
+			target: this.buildUnknownUser(
+				data.is_self_receive ? selfId : data.user_id,
+			),
 			action: data.display_action ?? '戳了戳',
 			suffix: data.display_suffix ?? '',
 			ico:
@@ -1604,8 +1621,11 @@ export class MilkyAdapter implements AdapterInterface {
 				type: 'group',
 			},
 			// 群解散视同自身被移出群聊
-			user: createSender(selfId),
-			operator: createSender(data.operator_id),
+			user: await this.getMemberFromGroup(selfId, data.group_id),
+			operator: await this.getMemberFromGroup(
+				data.operator_id,
+				data.group_id,
+			),
 			time: event.time,
 		}
 	}
@@ -1689,29 +1709,104 @@ export class MilkyAdapter implements AdapterInterface {
 				return 'temp'
 		}
 	}
-	protected parseFiles(data: GetGroupFilesOutput): FilesData {
+	protected async parseFiles(
+		data: GetGroupFilesOutput,
+		groupId: number,
+	): Promise<FilesData> {
 		return {
-			files: data.files.map((file) => ({
-				file_id: file.file_id,
-				file_name: file.file_name,
-				size: file.file_size,
-				download_times: file.downloaded_times,
-				dead_time: file.expire_time ?? undefined,
-				upload_time: file.uploaded_time,
-				uploader_id: file.uploader_id,
-			})),
-			folders: data.folders.map((folder) => ({
-				folder_id: folder.folder_id,
-				folder_name: folder.folder_name,
-				count: folder.file_count,
-				create_time: folder.created_time,
-				creator_id: folder.creator_id,
-			})),
+			files: await Promise.all(
+				data.files.map(async (file) => ({
+					file_id: file.file_id,
+					file_name: file.file_name,
+					size: file.file_size,
+					download_times: file.downloaded_times,
+					dead_time: file.expire_time ?? undefined,
+					upload_time: file.uploaded_time,
+					uploader: await this.getMemberFromGroup(
+						file.uploader_id,
+						groupId,
+					),
+				})),
+			),
+			folders: await Promise.all(
+				data.folders.map(async (folder) => ({
+					folder_id: folder.folder_id,
+					folder_name: folder.folder_name,
+					count: folder.file_count,
+					create_time: folder.created_time,
+					creator: await this.getMemberFromGroup(
+						folder.creator_id,
+						groupId,
+					),
+				})),
+			),
 		}
 	}
 	protected isDelete(msg: IncomingMessage): boolean {
 		return msg.sender_id === 0
 	}
+	protected async getMemberFromGroup(
+		memberId: number,
+		groupId: number,
+	): Promise<UserData> {
+		const member = await this.callApi('GetGroupMemberInfo', {
+			group_id: groupId,
+			user_id: memberId,
+		})
+
+		return member
+			? this.parseMember(member.member, groupId)
+			: this.buildUnknownUser(memberId)
+	}
+	//#region == 用户相关 =======================
+	protected buildUnknownUser(id: number, nickname?: string): UserData {
+		return {
+			id,
+			regTime: 0,
+			avatar: this.getUserAvatar(id),
+			nickname: nickname ?? id.toString(),
+			level: 1,
+			age: 0,
+			sex: getGender('unknown'),
+		}
+	}
+	protected parseFriend(friend: FriendEntity): UserData {
+		const data = this.buildUnknownUser(friend.user_id)
+		data.nickname = friend.nickname
+		data.remark =
+			friend.remark === friend.nickname ? undefined : friend.remark
+		data.class = {
+			id: friend.category?.category_id ?? 495,
+			name: friend.category?.category_name ?? '未分组的好友',
+		}
+		return data
+	}
+	protected parseMember(
+		member: GroupMemberEntity,
+		groupId: number,
+	): MemberData {
+		const data = this.buildUnknownUser(member.user_id) as MemberData
+
+		data.card = member.card === '' ? undefined : member.card
+		data.group_id = groupId
+		data.join_time = member.join_time
+		data.last_sent_time = member.last_sent_time
+		data.level = member.level
+		data.nickname = member.nickname
+		data.role = getRole(member.role)
+		data.sex = getGender(member.sex)
+		data.title = member.title
+		data.unfriendly = false
+		data.banTime = member.shut_up_end_time ?? undefined
+
+		return data
+	}
+	//#endregion
+	//#region == 头像相关 =======================
+	protected getUserAvatar(id: number): string {
+		return `https://q1.qlogo.cn/g?b=qq&s=0&nk=${id}`
+	}
+	//#endregion
 	//#endregion
 }
 

@@ -38,7 +38,10 @@
 					:key="'jin-' + index"
 				>
 					<div>
-						<img :src="item.sender.face" :alt="item.sender.name" />
+						<img
+							:src="item.sender.avatar"
+							:alt="item.sender.name"
+						/>
 						<div>
 							<a>{{ item.sender.name }}</a>
 							<span

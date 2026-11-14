@@ -8,7 +8,7 @@ import {
 import { VueCompData } from '@renderer/function/elements/vueComp'
 import { vTooltip } from '@renderer/function/utils/vcmd'
 import UserInfoTooltip from '@renderer/components/tooltip/UserInfoTooltip.vue'
-import { IUser } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 
 export const tooltipList: TooltipInfo<Component>[] = shallowReactive([])
 
@@ -42,7 +42,7 @@ export function closeTooltip(id: string) {
 	}
 }
 
-type VUserTooltipBinding = IUser | number | (() => IUser | number)
+type VUserTooltipBinding = User | number | (() => User | number)
 
 export const vUserTooltip: ObjectDirective<HTMLElement, VUserTooltipBinding> = {
 	mounted(el: HTMLElement, binding: DirectiveBinding<VUserTooltipBinding>) {

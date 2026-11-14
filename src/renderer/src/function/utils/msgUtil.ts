@@ -8,7 +8,7 @@ import {
 	Session,
 	UserSession,
 } from '@renderer/function/model/session'
-import { IUser } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
 import { popBox } from '@renderer/function/utils/popBox'
 import app from '@renderer/main'
@@ -169,7 +169,7 @@ export function closeSession() {
  * 判断是否是特别关心
  * @param user 用户/用户id
  */
-export function isImportant(user: IUser | number): boolean {
+export function isImportant(user: User | number): boolean {
 	if (typeof user !== 'number') user = user.user_id
 	const userSession = UserSession.getSessionById(user)
 	if (!userSession) return false

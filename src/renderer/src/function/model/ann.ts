@@ -10,13 +10,13 @@ import { GroupAnnouncementData } from '@renderer/function/adapter/interface'
 import { Time } from '@renderer/function/model/data'
 import { Img } from '@renderer/function/model/img'
 import { GroupSession } from '@renderer/function/model/session'
-import { BaseUser, IUser } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 
 export class Ann {
 	content: string
 	img?: string
 	time: Time
-	sender: IUser
+	sender: User
 	session: GroupSession
 	read?: boolean
 	readNum?: number
@@ -29,8 +29,7 @@ export class Ann {
 		this.read = data.is_read
 		this.readNum = data.read_num
 		this.session = session
-		this.sender =
-			this.session.getUserById(data.sender) ?? new BaseUser(data.sender)
+		this.sender = this.session.getUserFromData(data.sender)
 		if (this.img) this.imgData = new Img(this.img)
 	}
 

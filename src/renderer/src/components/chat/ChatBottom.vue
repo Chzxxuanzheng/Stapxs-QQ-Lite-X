@@ -106,7 +106,7 @@
 				<div
 					v-if="session instanceof UserSession"
 					:title="$t('戳一戳')"
-					@click="emit('sendPoke', session.baseUser)"
+					@click="emit('sendPoke', session.user)"
 				>
 					<font-awesome-icon :icon="['fas', 'fa-hand-point-up']" />
 				</div>
@@ -160,7 +160,7 @@
 					:class="{ selected: atSelected === id }"
 					@click="choiceAt(id)"
 				>
-					<img :src="item.face" :alt="item.name" />
+					<img :src="item.avatar" :alt="item.name" />
 					<div>
 						<span>{{ item.name }}</span>
 						<span
@@ -242,7 +242,7 @@
 import EssenceMsgsPan from '@renderer/components/EssenceMsgsPan.vue'
 import FacePan from '@renderer/components/FacePan.vue'
 
-import { IUser, Member } from '@renderer/function/model/user'
+import { User, Member } from '@renderer/function/model/user'
 import {
 	GroupSession,
 	Session,
@@ -286,7 +286,7 @@ const inputMsg = defineModel<InputMsg>({ required: true })
 const runtimeData = useRuntimeData()
 
 const emit = defineEmits<{
-	sendPoke: [user: IUser]
+	sendPoke: [user: User]
 	scrollBottom: [smooth: boolean]
 }>()
 

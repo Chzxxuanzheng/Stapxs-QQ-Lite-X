@@ -12,7 +12,7 @@
 		<template v-if="runtimeData.selfInfo">
 			<div class="ss-card account-info">
 				<img
-					:src="runtimeData.selfInfo.face"
+					:src="runtimeData.selfInfo.avatar"
 					:alt="'[' + $t('头像') + ']'"
 				/>
 				<div>
@@ -88,11 +88,11 @@
 <script setup lang="ts">
 import { AdapterInterface } from '@renderer/function/adapter/interface'
 import { popInfo } from '@renderer/function/base'
-import { User } from '@renderer/function/model/user'
 import { openLoginPan } from '@renderer/function/utils/systemUtil'
 import { i18n } from '@renderer/main'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { computed, markRaw, shallowRef, watch } from 'vue'
+import { User } from '@renderer/function/model/user'
 
 const runtimeData = useRuntimeData()
 

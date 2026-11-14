@@ -16,8 +16,8 @@ import type {
 	PokeEventData,
 	RecallEventData,
 	ResponseEventData,
-	SenderData,
 	SessionData,
+	UserData,
 } from '@renderer/function/adapter/interface'
 import useRuntimeData from '@renderer/state/runtimeData'
 import Emoji from '@renderer/function/model/emoji'
@@ -25,7 +25,7 @@ import { Message } from '@renderer/function/model/message'
 import { Msg } from '@renderer/function/model/msg'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { getSender, IUser } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 import { autoReactive, formatTime } from '@renderer/function/model/utils'
 
 export abstract class Notice extends Message {
@@ -46,23 +46,23 @@ export abstract class Notice extends Message {
 export abstract class ReceivedNotice extends Notice {
 	abstract readonly type: MessageEventType
 	override session: Session
-	users: IUser[] = []
+	users: User[] = []
 
 	constructor(data: { session: SessionData; time: number }) {
 		super(data)
 		this.session = Session.getSession(data.session)
 	}
 
-	protected getUser(user: SenderData): IUser {
-		return getSender(user, this.session)
+	protected getUser(user: UserData): User {
+		return this.session.getUserFromData(user)
 	}
 }
 
 @autoReactive
 export class RecallNotice extends ReceivedNotice {
 	override readonly type = 'recall'
-	user: IUser
-	operator: IUser
+	user: User
+	operator: User
 	suffix: string
 	/**
 	 * 被撤回的消息，用于重新编辑
@@ -107,8 +107,8 @@ export class BanNotice extends ReceivedNotice {
 	 * 禁言时长，单位秒
 	 */
 	duration: number
-	user: IUser
-	operator: IUser
+	user: User
+	operator: User
 	constructor(data: BanEventData) {
 		super(data)
 		this.duration = data.duration
@@ -161,8 +161,8 @@ export class BanNotice extends ReceivedNotice {
 export class BanLiftNotice extends ReceivedNotice {
 	override readonly type = 'banLift'
 	declare session: GroupSession
-	user: IUser
-	operator: IUser
+	user: User
+	operator: User
 	constructor(data: BanLiftEventData) {
 		super(data)
 		this.user = this.getUser(data.user)
@@ -194,8 +194,8 @@ export class PokeNotice extends ReceivedNotice {
 	action!: string
 	suffix!: string
 	_ico: ProxyUrl
-	user: IUser
-	target: IUser
+	user: User
+	target: User
 	constructor(data: PokeEventData) {
 		super(data)
 		this.user = this.getUser(data.sender)
@@ -231,17 +231,17 @@ export class PokeNotice extends ReceivedNotice {
 export class JoinNotice extends ReceivedNotice {
 	override readonly type = 'join'
 	declare session: GroupSession
-	user!: IUser
-	operator?: IUser
-	inviter?: IUser
-	private readonly user_info: SenderData
-	private readonly operator_info?: SenderData
-	private readonly inviter_info?: SenderData
+	user!: User
+	operator?: User
+	inviter?: User
+	private readonly user_info: UserData
+	private readonly operator_info?: UserData
+	private readonly inviter_info?: UserData
 	constructor(data: JoinEventData) {
 		super(data)
 		this.user_info = data.user
 
-		this.user = getSender(this.user_info)
+		this.user = new User(this.user_info)
 
 		if (data.operator) {
 			this.operator_info = data.operator
@@ -282,8 +282,8 @@ export class JoinNotice extends ReceivedNotice {
 export class LeaveNotice extends ReceivedNotice {
 	override readonly type = 'leave'
 	declare session: GroupSession
-	user: IUser
-	operator: IUser
+	user: User
+	operator: User
 	constructor(data: LeaveEventData) {
 		super(data)
 		this.user = this.getUser(data.user)
@@ -318,8 +318,8 @@ export class LeaveNotice extends ReceivedNotice {
 
 export class ResponseNotice extends ReceivedNotice {
 	override readonly type = 'response'
-	user: IUser
-	operator: IUser
+	user: User
+	operator: User
 	emojiId: number
 	msg: Msg
 	constructor(data: ResponseEventData) {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCurrentMsg } from '@renderer/function/composable/inject/useCurrentMsg'
 import { AtSeg } from '@renderer/function/model/seg'
-import { IUser } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 import { vUserTooltip } from '@renderer/function/tooltip'
 import useRuntimeData from '@renderer/state/runtimeData'
 
@@ -14,7 +14,7 @@ const runtimeData = useRuntimeData()
 
 const msg = useCurrentMsg()
 
-function getAtMember(): IUser | number {
+function getAtMember(): User | number {
 	if (!msg) return seg.user_id
 	const user = msg.session?.getUserById(seg.user_id)
 	if (user) return user

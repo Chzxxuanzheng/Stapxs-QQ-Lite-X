@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { popInfo } from '@renderer/function/base'
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { IUser, Member } from '@renderer/function/model/user'
+import { Member, User } from '@renderer/function/model/user'
 import { ensurePopBox } from '@renderer/function/utils/popBox'
 import app from '@renderer/main'
 import { shallowReactive } from 'vue'
@@ -44,9 +44,9 @@ const menuDisplay = shallowReactive({
 const $t = app.config.globalProperties.$t
 const { user, session, sendPokeFunc, setAtFunc } = defineProps<{
 	session: Session
-	user: IUser
+	user: User
 	sendPokeFunc: (member: Member) => void
-	setAtFunc: (user: IUser) => void
+	setAtFunc: (user: User) => void
 }>()
 const emit = defineEmits<{
 	close: [arg?: any]

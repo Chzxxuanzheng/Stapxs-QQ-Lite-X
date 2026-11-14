@@ -8,13 +8,13 @@
 </template>
 
 <script setup lang="ts">
-import { IUser } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 import { vUserTooltip } from '@renderer/function/tooltip'
 import useRuntimeData from '@renderer/state/runtimeData'
 
 const runtimeData = useRuntimeData()
 
 const { user } = defineProps<{
-	user: IUser
+	user: User
 }>()
 </script>

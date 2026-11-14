@@ -27,7 +27,7 @@
 			v-user-tooltip="() => msg.sender"
 			v-menu.prevent="(event) => config.userMenu(event, msg.sender)"
 			class="avatar"
-			:src="msg.sender.face"
+			:src="msg.sender.avatar"
 			:alt="msg.sender.name"
 			@dblclick="emit('senderDoubleClick', msg.sender)"
 		/>
@@ -137,7 +137,7 @@
 			v-menu.prevent="(event) => config.userMenu(event, msg.sender)"
 			v-user-tooltip="() => msg.sender"
 			class="avatar"
-			:src="msg.sender.face"
+			:src="msg.sender.avatar"
 			:alt="msg.sender.name"
 			@dblclick="emit('senderDoubleClick', msg.sender)"
 		/>
@@ -194,7 +194,7 @@ import { Role } from '@renderer/function/adapter/enmu'
 import { MenuEventData } from '@renderer/function/elements/information'
 import Emoji from '@renderer/function/model/emoji'
 import { Msg, SelfMsg } from '@renderer/function/model/msg'
-import { IUser, Member } from '@renderer/function/model/user'
+import { User, Member } from '@renderer/function/model/user'
 import {
 	vHide,
 	vMenu,
@@ -228,7 +228,7 @@ const {
 const emit = defineEmits<{
 	leftMove: [msg: Msg]
 	rightMove: [msg: Msg]
-	senderDoubleClick: [user: IUser]
+	senderDoubleClick: [user: User]
 	emojiClick: [id: string, msg: Msg]
 	imageLoaded: [height: number]
 }>()

@@ -63,7 +63,7 @@ import NoticeBody from '@renderer/components/NoticeBody.vue'
 import { Message } from '@renderer/function/model/message'
 import { Msg } from '@renderer/function/model/msg'
 import { Notice, SystemNotice } from '@renderer/function/model/notice'
-import { IUser } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 import { isShowTime } from '@renderer/function/utils/msgUtil'
 import useRuntimeData from '@renderer/state/runtimeData'
 import useMsgsConfigState, {
@@ -85,7 +85,7 @@ const emit = defineEmits<{
 	imageLoaded: [height: number]
 	leftMove: [msg: Msg]
 	rightMove: [msg: Msg]
-	senderDoubleClick: [user: IUser]
+	senderDoubleClick: [user: User]
 	emojiClick: [id: string, msg: Msg]
 }>()
 

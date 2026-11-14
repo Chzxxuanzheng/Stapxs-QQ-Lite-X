@@ -59,41 +59,6 @@
 						? userInfo.longNick
 						: $t('这个人很懒什么都没有写～')
 				}}</span>
-				<header>
-					<span>{{ $t('其他信息') }}</span>
-				</header>
-				<div class="outher">
-					<span v-if="userInfo.birthday_year"
-						>{{ $t('生日') }}:
-						<span>
-							{{
-								Intl.DateTimeFormat(getTrueLang(), {
-									year: 'numeric',
-									month: 'short',
-									day: 'numeric',
-								}).format(
-									new Date(
-										`${userInfo.birthday_year}-${
-											userInfo.birthday_month
-										}-${userInfo.birthday_day}`,
-									),
-								)
-							}}
-						</span>
-					</span>
-					<span v-if="userInfo.country"
-						>{{ $t('地区') }}:
-						<span>
-							<template v-if="userInfo.country">
-								{{ userInfo.country }}
-							</template>
-							<template v-if="userInfo.province">
-								{{ userInfo.province }}
-							</template>
-							- {{ userInfo.city }}
-						</span>
-					</span>
-				</div>
 				<!-- <template v-if="!chat.show.temp">
                     <header>
                         <span>{{ $t('设置') }}</span>
@@ -138,7 +103,7 @@
 								<img
 									alt="nk"
 									loading="lazy"
-									:src="member.face"
+									:src="member.avatar"
 								/>
 								<div>
 									<a @click="startChat(member)">{{
@@ -240,7 +205,7 @@
 			class="ss-card user-config show"
 		>
 			<div>
-				<img alt="nk" :src="configMember.face" />
+				<img alt="nk" :src="configMember.avatar" />
 				<div>
 					<a>{{ configMember.name }}</a>
 					<span>{{ configMember.user_id }}</span>
@@ -342,11 +307,7 @@ import { Member, User } from '@renderer/function/model/user'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { changeSession, qqLevelToEmoji } from '@renderer/function/utils/msgUtil'
 import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
-import {
-	copyToClipboard,
-	delay,
-	getTrueLang,
-} from '@renderer/function/utils/systemUtil'
+import { copyToClipboard, delay } from '@renderer/function/utils/systemUtil'
 import { vSearch } from '@renderer/function/utils/vcmd'
 import {
 	nextTick,

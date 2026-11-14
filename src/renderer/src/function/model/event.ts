@@ -32,7 +32,7 @@ import {
 	ResponseNotice,
 } from '@renderer/function/model/notice'
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { BaseUser, getSender, Member } from '@renderer/function/model/user'
+import { User, Member } from '@renderer/function/model/user'
 
 type EventConstructor = { new (...args: any[]): Event }
 const eventType: Map<string, EventConstructor> = new Map()
@@ -198,7 +198,7 @@ export class ResponseEvent extends MessageEvent {
 	declare message: ResponseNotice
 	declare session: GroupSession
 	msg: Msg
-	operator: Member | BaseUser
+	operator: User
 	emojiId: string
 	add: boolean
 	constructor(data: ResponseEventData) {
@@ -208,7 +208,7 @@ export class ResponseEvent extends MessageEvent {
 		const notice = new ResponseNotice(data)
 		super(session, notice)
 		this.msg = msg
-		this.operator = getSender(data.operator, this.session)
+		this.operator = this.session.getUserFromData(data.operator)
 		this.emojiId = data.emojiId
 		this.add = data.add
 	}

@@ -1,6 +1,5 @@
 import app from '@renderer/main'
 import { Gender, Role } from '@renderer/function/adapter/enmu'
-import { SenderData } from '@renderer/function/adapter/interface'
 
 export function $t(value: string, args: Record<string, any> = {}): string {
 	return app.config.globalProperties.$t(value, args)
@@ -34,20 +33,6 @@ export function getRole(role: 'owner' | 'admin' | 'member'): Role {
 			return Role.Admin
 		case 'member':
 			return Role.User
-	}
-}
-
-/**
- * 创建SenderData
- * @param user_id 用户ID
- * @param nickname 昵称
- */
-export function createSender(user_id: number, nickname?: string): SenderData {
-	if (!nickname) nickname = user_id.toString()
-	return {
-		id: user_id,
-		nickname,
-		sex: Gender.Unknown,
 	}
 }
 
