@@ -145,95 +145,13 @@ export class Channel<T> {
 	}
 }
 
-export class URL {
-	// SSL白名单,这些协议一定不是SSL协议,其他的看是不是s结尾,是的话就是采用ssl
-	private static readonly SSL_WHITE_LIST = new Set<string>(['ws'])
-	private _protocol: string = ''
-	private _host: string = ''
-	private _port: number | null = null
-	private _path: string = ''
-	private _query: Record<string, string> = {}
-	private _hash: string = ''
-	private _ssl: boolean = false
+const SSL_WHITE_LIST = new Set<string>(['ws'])
 
-	constructor(url: string) {
-		this.parse(url)
-	}
+export function parseProtocol(protocol: string): [string, boolean] {
+	if (SSL_WHITE_LIST.has(protocol)) return [protocol, false]
 
-	private parse(url: string): void {
-		// 兼容所有环境的自定义 URL 解析
-		// 正则解析协议
-		const urlPattern =
-			/^(\w+):\/\/([^/?#:]*)(?::(\d+))?([^?#]*)?(?:\?([^#]*))?(?:#(.*))?/
-		const match = url.match(urlPattern)
-		if (!match) {
-			throw new Error(`无效的URL  ${url}`)
-		}
-		// match[1]: protocol, match[2]: host, match[3]: port, match[4]: path, match[5]: query, match[6]: hash
-		this.parseProtocol(match[1] || '')
-		this._host = match[2] || ''
-		this._port = match[3] ? Number.parseInt(match[3]) : null
-		this._path = match[4] || ''
-		this._hash = match[6] || ''
-		this._query = {}
-		if (match[5]) {
-			match[5].split('&').forEach((pair) => {
-				const [key, value] = pair.split('=')
-				if (key)
-					this._query[decodeURIComponent(key)] = value
-						? decodeURIComponent(value)
-						: ''
-			})
-		}
-	}
-
-	private parseProtocol(originProtocol: string): void {
-		const protocol = originProtocol.replace(':', '')
-		if (URL.SSL_WHITE_LIST.has(protocol)) {
-			this._ssl = false
-			this._protocol = protocol
-			return
-		}
-
-		if (protocol.endsWith('s')) {
-			this._ssl = true
-			this._protocol = protocol.slice(0, -1)
-		} else {
-			this._ssl = false
-			this._protocol = protocol
-		}
-	}
-
-	get protocol(): string {
-		return this._protocol
-	}
-
-	get host(): string {
-		return this._host
-	}
-
-	get port(): number | null {
-		return this._port
-	}
-
-	get path(): string {
-		return this._path
-	}
-
-	get hash(): string {
-		return this._hash
-	}
-
-	get ssl(): boolean {
-		return this._ssl
-	}
-
-	get fullUrl(): string {
-		let url = `${this._host}`
-		if (this._port) url += `:${this._port}`
-		url += this._path
-		return url
-	}
+	if (protocol.endsWith('s')) return [protocol.slice(0, -1), true]
+	else return [protocol, false]
 }
 
 const topLevelDomains = new Set(

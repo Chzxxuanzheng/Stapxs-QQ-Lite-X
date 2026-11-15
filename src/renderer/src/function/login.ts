@@ -8,6 +8,11 @@ import {
 	sendIdentifyData,
 	sendStatEvent,
 } from '@renderer/function/utils/appUtil'
+import { popBox } from '@renderer/function/utils/popBox'
+import { dns } from '@renderer/function/utils/systemUtil'
+import WhyNeedToken from '@renderer/components/popBox/doc/WhyNeedToken.vue'
+import useRuntimeData from '@renderer/state/runtimeData'
+import { parseProtocol } from '@renderer/function/utils/baseUtil'
 
 const SSL_WHITE_LIST = new Set<string>(['localhost', '127.0.0.1'])
 
@@ -41,9 +46,6 @@ async function tryLogin(
 	const checkRe = await preCheck(originUrl, token_)
 	if (typeof checkRe === 'string') return checkRe
 	const { protocol, ssl, url, token } = checkRe
-
-	// 查询适配器
-	if (!adapterMap.has(protocol)) return $t('不支持的协议: ') + protocol
 
 	let adapter = adapterMap.get(protocol) as AdapterInterface
 	runtimeData.nowAdapter = markRaw(adapter)
@@ -136,15 +138,10 @@ async function preCheck(
 > {
 	// 分析地址
 	if (originUrl.trim() === '') return $t('请输入链接地址,参考如何连接')
-	let parseUrl: URL
-	try {
-		parseUrl = new URL(originUrl)
-	} catch {
-		return $t('连接地址格式错误，请参考如何连接')
-	}
-	let protocol: string = parseUrl.protocol
-	const ssl: boolean = parseUrl.ssl
-	const url: string = parseUrl.fullUrl
+	let parseUrl = originUrl.split('://')
+	if (parseUrl.length !== 2) return $t('连接地址格式错误，请参考如何连接')
+	let [protocol, ssl] = parseProtocol(parseUrl.at(0)!)
+	const url: string = parseUrl.at(1)!
 	if (!protocol) return $t('连接地址格式错误，请参考如何连接')
 	if (!url) return $t('连接地址格式错误，请参考如何连接')
 	if (protocol === 'ws') {
@@ -152,8 +149,15 @@ async function preCheck(
 		protocol = 'ob'
 	}
 
+	const adapter = adapterMap.get(protocol)
+
+	// 查询适配器
+	if (!adapter) return $t('不支持的协议: ') + protocol
+
+	const host = adapter.getHost(url)
+
 	// 公网检测
-	const publicCheck = await isPublicHost(parseUrl.host)
+	const publicCheck = await isPublicHost(host)
 	if (token === '' && publicCheck) {
 		popBox({
 			title: $t('谨慎地拒绝公网无token登陆'),
@@ -175,7 +179,7 @@ async function preCheck(
 	if (
 		globalThis.location.protocol === 'https:' &&
 		!ssl &&
-		!SSL_WHITE_LIST.has(parseUrl.host)
+		!SSL_WHITE_LIST.has(url.split('@').at(0)!)
 	) {
 		return $t(
 			'https页面不支持非ssl连接，请配备证书或者更换至非http版本的页面',
@@ -184,13 +188,6 @@ async function preCheck(
 
 	return { protocol, ssl, url, token }
 }
-
-import { popBox } from '@renderer/function/utils/popBox'
-import { dns } from '@renderer/function/utils/systemUtil'
-import WhyNeedToken from '@renderer/components/popBox/doc/WhyNeedToken.vue'
-import useRuntimeData from '@renderer/state/runtimeData'
-import { URL } from '@renderer/function/utils/baseUtil'
-
 /**
  * 判断传入的 host 是否为公网 IP。
  * 如果是域名，会解析其 IPv4/IPv6 地址并判断是否为公网 IP。

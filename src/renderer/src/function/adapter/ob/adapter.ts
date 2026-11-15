@@ -196,6 +196,10 @@ export class OneBotAdapter implements AdapterInterface {
 		return await this.connector.open(url, ssl, token)
 	}
 
+	getHost(url: string): string {
+		return url
+	}
+
 	async close(): Promise<true> {
 		// 关闭连接
 		await this.connector.close()

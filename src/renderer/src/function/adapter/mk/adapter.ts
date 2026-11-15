@@ -195,6 +195,10 @@ export class MilkyAdapter implements AdapterInterface {
 		return MkInfo
 	}
 
+	getHost(url: string): string {
+		return url
+	}
+
 	/**
 	 * 连接到协议段
 	 * @param url 协议层路径

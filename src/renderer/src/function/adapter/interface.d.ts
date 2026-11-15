@@ -26,15 +26,20 @@ export interface AdapterInterface {
 	/**
 	 * 适配器版本
 	 */
-	version: string //
+	version: string
 	/**
 	 * 协议类型简称，如 ob（onebot），mk（milky）
 	 */
-	protocol: string //
+	protocol: string
 	/**
 	 * 返回自身适配器的信息页面
 	 */
 	optInfo?(): Component
+	/**
+	 * 从 URL 里获取 host
+	 * @param url
+	 */
+	getHost(url: string): string
 	/**
 	 * 连接到协议段
 	 * @param url 协议层路径
