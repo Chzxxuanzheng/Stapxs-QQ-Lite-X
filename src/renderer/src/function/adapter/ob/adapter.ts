@@ -217,6 +217,8 @@ export class OneBotAdapter implements AdapterInterface {
 				if (currentSegs.length) result.push(currentSegs)
 				currentSegs = []
 				result.push([seg])
+			} else {
+				currentSegs.push(seg)
 			}
 		}
 		result.push(currentSegs)

@@ -221,6 +221,8 @@ export class MilkyAdapter implements AdapterInterface {
 				if (currentSegs.length) result.push(currentSegs)
 				currentSegs = []
 				result.push([seg])
+			} else {
+				currentSegs.push(seg)
 			}
 		}
 		result.push(currentSegs)
