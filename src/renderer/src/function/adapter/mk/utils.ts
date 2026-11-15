@@ -1,5 +1,14 @@
 import app from '@renderer/main'
 import { Gender, Role } from '@renderer/function/adapter/enmu'
+import {
+	FileSeg,
+	ForwardSeg,
+	JsonSeg,
+	PokeSeg,
+	Seg,
+	VideoSeg,
+	XmlSeg,
+} from '@renderer/function/model/seg'
 
 export function $t(value: string, args: Record<string, any> = {}): string {
 	return app.config.globalProperties.$t(value, args)
@@ -167,4 +176,18 @@ export function camelCaseToUnderline<T extends string>(
  */
 export function getProp(obj: any, key: string): unknown {
 	return obj[key]
+}
+
+const SingleSeg = [FileSeg, VideoSeg, ForwardSeg, PokeSeg, XmlSeg, JsonSeg]
+
+/**
+ * 判断是不是单个消息段
+ * @param seg
+ * @returns
+ */
+export function isSingleSeg(seg: Seg) {
+	for (const segType of SingleSeg) {
+		if (seg instanceof segType) return true
+	}
+	return false
 }

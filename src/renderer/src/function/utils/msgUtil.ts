@@ -20,13 +20,18 @@ import { Notify } from '@renderer/function/notify'
  * @param session 目标会话
  * @param msg 消息体
  */
-export function sendMsgRaw(session: Session, msg: Seg[]): SelfMsg {
+export function sendMsgRaw(session: Session, msg: Seg[]): SelfMsg[] {
 	// 预览消息 =======================================================
 	const preMsg = SelfMsg.create(msg, session)
 	// 添加进会话
-	session.addMessage(preMsg)
+	preMsg.map((m) => session.addMessage(m))
 	// 发送消息
-	preMsg.send()
+	async function send() {
+		for (const m of preMsg) {
+			await m.send()
+		}
+	}
+	void send()
 	return preMsg
 }
 

@@ -114,6 +114,7 @@ import {
 	fileToBase64,
 	getGender,
 	getRole,
+	isSingleSeg,
 	versionCompare,
 } from '@renderer/function/adapter/mk/utils'
 import type { MilkyVersion } from '@renderer/function/adapter/mk/utils'
@@ -210,6 +211,20 @@ export class MilkyAdapter implements AdapterInterface {
 
 	getHost(url: string): string {
 		return url
+	}
+
+	splitMsg(segs: Seg[]): Seg[][] {
+		const result: Seg[][] = []
+		let currentSegs: Seg[] = []
+		for (const seg of segs) {
+			if (isSingleSeg(seg)) {
+				if (currentSegs.length) result.push(currentSegs)
+				currentSegs = []
+				result.push([seg])
+			}
+		}
+		result.push(currentSegs)
+		return result
 	}
 
 	/**

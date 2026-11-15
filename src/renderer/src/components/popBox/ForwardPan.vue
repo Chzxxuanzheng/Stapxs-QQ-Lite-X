@@ -224,7 +224,7 @@ async function createSingleSendMsgs(msgs: Msg[]): Promise<MsgWhileSend> {
 		await session.activate()
 		for (const msg of msgs) {
 			sessionMsg.push(
-				SelfMsg.create(
+				...SelfMsg.create(
 					msg.message.map((item) => item.copy()),
 					session,
 				),

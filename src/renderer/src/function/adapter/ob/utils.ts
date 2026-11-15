@@ -4,6 +4,15 @@ import { ObRequest, ObResponse } from '@renderer/function/adapter/ob/type'
 import { ObWsConnection } from '@renderer/function/adapter/ob/connection'
 import type { ConnectionState } from '@renderer/function/adapter/ob/connection'
 import { logger, popInfo } from '@renderer/function/base'
+import {
+	FileSeg,
+	ForwardSeg,
+	JsonSeg,
+	PokeSeg,
+	Seg,
+	VideoSeg,
+	XmlSeg,
+} from '@renderer/function/model/seg'
 
 class WsError extends Error {
 	params: any
@@ -311,4 +320,18 @@ export async function fileToBase64(file: File): Promise<string> {
 		'',
 	)
 	return btoa(binary)
+}
+
+const SingleSeg = [FileSeg, VideoSeg, ForwardSeg, PokeSeg, XmlSeg, JsonSeg]
+
+/**
+ * 判断是不是单个消息段
+ * @param seg
+ * @returns
+ */
+export function isSingleSeg(seg: Seg) {
+	for (const segType of SingleSeg) {
+		if (seg instanceof segType) return true
+	}
+	return false
 }

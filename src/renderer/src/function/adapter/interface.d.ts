@@ -16,6 +16,7 @@ import {
 } from '@renderer/function/model/session'
 import { Member, User } from '@renderer/function/model/user'
 import { Gender, Role } from '@renderer/function/adapter/enmu'
+import { Seg } from '@renderer/function/model/seg'
 
 export interface AdapterInterface {
 	// 基础信息
@@ -36,11 +37,6 @@ export interface AdapterInterface {
 	 */
 	optInfo?(): Component
 	/**
-	 * 从 URL 里获取 host
-	 * @param url
-	 */
-	getHost(url: string): string
-	/**
 	 * 连接到协议段
 	 * @param url 协议层路径
 	 * @param ssl 是否使用 SSL
@@ -57,6 +53,19 @@ export interface AdapterInterface {
 	 * 获取当前适配器信息
 	 */
 	getAdapterInfo(): Promise<{ [key: string]: string } | undefined>
+
+	//#region == 归一化工具 ==========================================
+	/**
+	 * 从 URL 里获取 host
+	 * @param url
+	 */
+	getHost(url: string): string
+	/**
+	 * 把一个消息分为若干个符合该适配器要求的消息
+	 * @param url
+	 */
+	splitMsg(segs: Seg[]): Seg[][]
+	//#endregion
 
 	//#region == API ===============================================
 	//#region  == 基础信息 =====================

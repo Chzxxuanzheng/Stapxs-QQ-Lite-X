@@ -102,6 +102,7 @@ import {
 	$t,
 	getGender,
 	getRole,
+	isSingleSeg,
 	ObConnector,
 } from '@renderer/function/adapter/ob/utils'
 import { logger } from '@renderer/function/base'
@@ -206,6 +207,20 @@ export class OneBotAdapter implements AdapterInterface {
 
 	getHost(url: string): string {
 		return url
+	}
+
+	splitMsg(segs: Seg[]): Seg[][] {
+		const result: Seg[][] = []
+		let currentSegs: Seg[] = []
+		for (const seg of segs) {
+			if (isSingleSeg(seg)) {
+				if (currentSegs.length) result.push(currentSegs)
+				currentSegs = []
+				result.push([seg])
+			}
+		}
+		result.push(currentSegs)
+		return result
 	}
 
 	async close(): Promise<true> {

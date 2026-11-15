@@ -354,8 +354,13 @@ export class SelfMsg extends Msg {
 		super(segs, sender, session)
 	}
 
-	static create(segs: Seg[], session: Session): SelfMsg {
-		return markRaw(shallowReactive(new this(segs, session)))
+	static create(segs: Seg[], session: Session): SelfMsg[] {
+		const runtimeData = useRuntimeData()
+		if (!runtimeData.nowAdapter) return []
+		const segsList = runtimeData.nowAdapter?.splitMsg(segs)
+		return segsList.map((s) =>
+			markRaw(shallowReactive(new this(s, session))),
+		)
 	}
 
 	static createMerge(messages: Msg[], session: Session): SelfMsg {
