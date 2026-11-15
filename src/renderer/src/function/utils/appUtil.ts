@@ -73,7 +73,7 @@ export function openLink(url: string, _external = false) {
 export async function reloadUsers(useCache: boolean = true) {
 	const runtimeData = useRuntimeData()
 	// 加载用户列表
-	if (!driver.isConnected()) return
+	if (runtimeData.connectionStatus !== 'connected') return
 	if (!runtimeData.nowAdapter) return
 
 	// 保存当前会话信息
@@ -202,7 +202,6 @@ export function downloadFile(
 }
 
 import { FriendData, GroupData } from '@renderer/function/adapter/interface'
-import driver from '@renderer/function/driver'
 import { NoticeBodyV3 } from '@renderer/function/elements/system'
 import { SessionBox } from '@renderer/function/model/box'
 import { Message } from '@renderer/function/model/message'

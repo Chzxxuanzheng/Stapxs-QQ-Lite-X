@@ -6,7 +6,7 @@ import { computed, shallowReactive, shallowRef, ref, watchEffect } from 'vue'
 import useOptionStore from '@renderer/state/option'
 import type { User } from '@renderer/function/model/user'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
-import { AdapterInterface } from '@renderer/function/adapter/interface'
+import type { AdapterInterface } from '@renderer/function/adapter/interface'
 
 const useRuntimeData = defineStore('runtimeData', () => {
 	const option = useOptionStore()
@@ -29,6 +29,9 @@ const useRuntimeData = defineStore('runtimeData', () => {
 	})
 	const defaultColorMode = shallowRef<'light' | 'dark'>('light')
 	const nowAdapter = shallowRef<AdapterInterface | undefined>()
+	const connectionStatus = shallowRef<
+		'disconnected' | 'connecting' | 'connected'
+	>('disconnected')
 	const nowChat = shallowRef<Session | undefined>()
 	const nowBox = shallowRef<SessionBox | undefined>()
 	const repoName = import.meta.env.VITE_APP_REPO_NAME
@@ -67,9 +70,19 @@ const useRuntimeData = defineStore('runtimeData', () => {
 		watchEffect(checkDevMode)
 	}, 100)
 
+	/**
+	 * 清空当前适配器并同步重置连接状态
+	 */
+	function clearAdapter() {
+		nowAdapter.value = undefined
+		connectionStatus.value = 'disconnected'
+	}
+
 	function reset() {
 		selfInfo.value = undefined
 		loginInfo.value = undefined
+		// 没有适配器时视为登出；登录过程中（适配器已就位）不能覆盖实时状态
+		if (!nowAdapter.value) connectionStatus.value = 'disconnected'
 	}
 	return {
 		connectInfo,
@@ -80,8 +93,10 @@ const useRuntimeData = defineStore('runtimeData', () => {
 		nowChat,
 		nowBox,
 		nowAdapter,
+		connectionStatus,
 		repoName,
 		sysConfig: computed(() => option.options),
+		clearAdapter,
 		reset,
 	}
 })

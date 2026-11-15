@@ -9,7 +9,10 @@
 			<SideBar />
 			<div class="main-box">
 				<Chat
-					v-if="driver.isConnected() && runtimeData.nowChat"
+					v-if="
+						runtimeData.connectionStatus !== 'disconnected' &&
+						runtimeData.nowChat
+					"
 					ref="chat"
 					v-model="runtimeData.nowChat.inputMsg"
 					:chat="runtimeData.nowChat"
@@ -75,7 +78,6 @@ import * as App from '@renderer/function/utils/appUtil'
 import { logger, popInfo, popList } from '@renderer/function/base'
 import { i18n, uptime } from '@renderer/main'
 import { onMounted, provide, shallowReactive, useTemplateRef } from 'vue'
-import driver from '@renderer/function/driver'
 import { Notify } from '@renderer/function/notify'
 import { ensurePopBox } from '@renderer/function/utils/popBox'
 import { getVersion, openLoginPan } from '@renderer/function/utils/systemUtil'
@@ -137,7 +139,7 @@ window.onbeforeunload = () => {
 	)
 	new Notify().clear()
 	runtimeData.nowAdapter?.close()
-	runtimeData.nowAdapter = undefined
+	runtimeData.clearAdapter()
 }
 
 useFrame(() => {

@@ -133,11 +133,15 @@ function updateSelfInfo() {
 /**
  * 断开连接
  */
-function exitConnect() {
+async function exitConnect() {
 	runtimeData.sysConfig.auto_connect = false
-	runtimeData.nowAdapter?.close()
-	runtimeData.reset()
-	goLogin()
+	try {
+		await runtimeData.nowAdapter?.close()
+	} finally {
+		runtimeData.clearAdapter()
+		runtimeData.reset()
+		goLogin()
+	}
 }
 
 function goLogin() {

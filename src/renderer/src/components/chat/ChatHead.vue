@@ -15,11 +15,7 @@
 		@mouseleave="hoverEnd()"
 	>
 		<div class="info">
-			<img
-				v-avatar-fallback
-				:src="session.avatar"
-				:alt="session.showName"
-			/>
+			<img :src="session.avatar" :alt="session.showName" />
 			<div class="info">
 				<p>
 					{{ session.showName }}
@@ -60,7 +56,6 @@
 
 <script setup lang="ts">
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { vAvatarFallback } from '@renderer/function/utils/vcmd'
 import { popBox } from '@renderer/function/utils/popBox'
 import app from '@renderer/main'
 import Info from '@renderer/pages/info/Info.vue'

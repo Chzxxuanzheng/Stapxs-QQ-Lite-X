@@ -295,7 +295,6 @@ import useRuntimeData from '@renderer/state/runtimeData'
 import { BrowserInfo, detect } from 'detect-browser'
 import app, { uptime } from '@renderer/main'
 import { computed, shallowRef } from 'vue'
-import driver from '@renderer/function/driver'
 import {
 	ensurePopBox,
 	htmlPopBox,
@@ -373,9 +372,9 @@ async function printVersionInfo() {
 	const adapeterInfo = [
 		[
 			'status',
-			!runtimeData.nowAdapter || driver.isConnected()
-				? 'connected'
-				: 'not connected',
+			runtimeData.connectionStatus === 'disconnected'
+				? 'not connected'
+				: 'connected',
 		],
 	] as [key: string, value: any][]
 

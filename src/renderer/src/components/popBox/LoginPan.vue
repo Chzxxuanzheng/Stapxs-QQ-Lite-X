@@ -69,7 +69,6 @@
 </template>
 
 <script setup lang="ts">
-import driver from '@renderer/function/driver'
 import { login } from '@renderer/function/login'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { noticePopBox, popBox } from '@renderer/function/utils/popBox'
@@ -83,16 +82,16 @@ const loginInfo = shallowReactive({
 	token: '',
 })
 const runLoginFunc = shallowRef(false)
+const runtimeData = useRuntimeData()
 const isLogging = computed(() => {
 	if (runLoginFunc.value) return true
-	return driver.isConnecting()
+	return runtimeData.connectionStatus === 'connecting'
 })
 
 const emit = defineEmits<{
 	closePopBox: []
 }>()
 
-const runtimeData = useRuntimeData()
 const $t = i18n.global.t
 
 // 加载密码保存和自动连接

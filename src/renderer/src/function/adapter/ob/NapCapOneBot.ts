@@ -81,7 +81,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 	override version = '0.0.1'
 	constructor(connector: ObConnector, botInfo?: ObGetVersionInfo) {
 		super()
-		this.connector = connector
+		this.bindConnector(connector)
 		this.botInfo.value = botInfo
 		connector.setOnMessageHook(this.onmessage.bind(this))
 

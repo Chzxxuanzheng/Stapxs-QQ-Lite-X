@@ -9,7 +9,11 @@ import {
 	sendStatEvent,
 } from '@renderer/function/utils/appUtil'
 import { popBox } from '@renderer/function/utils/popBox'
-import { dns } from '@renderer/function/utils/systemUtil'
+import { dns, openLoginPan } from '@renderer/function/utils/systemUtil'
+import {
+	setAuthExpiredHandler,
+	setConnectionLostHandler,
+} from '@renderer/function/utils/connectionEvent'
 import WhyNeedToken from '@renderer/components/popBox/doc/WhyNeedToken.vue'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { parseProtocol } from '@renderer/function/utils/baseUtil'
@@ -19,6 +23,29 @@ const SSL_WHITE_LIST = new Set<string>(['localhost', '127.0.0.1'])
 function $t(key: string): string {
 	return app.config.globalProperties.$t(key)
 }
+
+//#region == 连接事件 ===================================================
+setConnectionLostHandler(() => {
+	const runtimeData = useRuntimeData()
+	const adapter = runtimeData.nowAdapter
+	if (!adapter) return
+	popInfo.error($t('连接中断'))
+	runtimeData.clearAdapter()
+	openLoginPan()
+	// 连接已经失效，尽量回收传输层资源（幂等、不抛错）
+	void adapter.close().catch(() => undefined)
+})
+
+setAuthExpiredHandler(() => {
+	const runtimeData = useRuntimeData()
+	const adapter = runtimeData.nowAdapter
+	if (!adapter) return
+	// 具体提示由协议适配器给出（如 Matrix 的「登录状态已失效」），这里只统一收尾
+	popInfo.error($t('登录失效'))
+	runtimeData.clearAdapter()
+	openLoginPan()
+})
+//#endregion
 
 const adapters = import.meta.glob('@renderer/function/adapter/*/adapter.ts', {
 	eager: true,
@@ -46,6 +73,15 @@ async function tryLogin(
 	const checkRe = await preCheck(originUrl, token_)
 	if (typeof checkRe === 'string') return checkRe
 	const { protocol, ssl, url, token } = checkRe
+
+	// 切换协议 / 重新登录前先关闭旧连接，避免旧 socket 或轮询泄漏
+	if (runtimeData.nowAdapter) {
+		try {
+			await runtimeData.nowAdapter.close()
+		} catch {
+			// 旧连接关闭失败不应阻止新登录
+		}
+	}
 
 	let adapter = adapterMap.get(protocol) as AdapterInterface
 	runtimeData.nowAdapter = markRaw(adapter)
@@ -76,27 +112,6 @@ async function tryLogin(
 	// 设置个人信息
 	runtimeData.selfInfo = new User(selfInfo)
 
-	// 上报协议端类型
-	if (runtimeData.sysConfig.open_ga_bot) {
-		const implInfo = await runtimeData.nowAdapter.getImplInfo()
-		const implName = implInfo?.name ?? '（未知）'
-		const bot_version = implInfo?.version
-			? implName + ',' + implInfo.version
-			: implName
-		sendStatEvent('connect', { method: bot_version })
-		sendIdentifyData({ bot_version })
-	}
-
-	const title = `${loginData.nickname}（${loginData.uin}）`
-	document.title = title + '- Stapxs QQ Lite X'
-
-	// 跳转标签卡
-	const barMsg = document.getElementById('bar-msg')
-	if (barMsg != null) barMsg.click()
-
-	// 加载列表消息
-	await reloadUsers()
-
 	return true
 }
 
@@ -111,17 +126,47 @@ export async function login(
 	runtimeData.connectInfo.token = token
 
 	// 登陆
+	runtimeData.connectionStatus = 'connecting'
 	const re = await tryLogin(originUrl, token)
 
 	// 登陆成功
-	if (re === true) return re
+	if (re === true) {
+		runtimeData.connectionStatus = 'connected'
+
+		// 上报协议端类型
+		if (runtimeData.sysConfig.open_ga_bot) {
+			const implInfo = await runtimeData.nowAdapter!.getImplInfo()
+			const implName = implInfo?.name ?? '（未知）'
+			const bot_version = implInfo?.version
+				? implName + ',' + implInfo.version
+				: implName
+			sendStatEvent('connect', { method: bot_version })
+			sendIdentifyData({ bot_version })
+		}
+
+		const title = `${runtimeData.selfInfo!.nickname}（${runtimeData.selfInfo!.user_id}）`
+		document.title = title + '- Stapxs QQ Lite X'
+
+		// 跳转标签卡
+		const barMsg = document.getElementById('bar-msg')
+		if (barMsg != null) barMsg.click()
+
+		// 加载列表消息
+		await reloadUsers()
+
+		return re
+	}
 
 	// 登陆失败的垃圾回收
 	popInfo.error($t('登录失败: ') + re)
 	runtimeData.connectInfo.address = undefined
 	runtimeData.connectInfo.token = undefined
-	runtimeData.nowAdapter?.close()
-	runtimeData.nowAdapter = undefined
+	try {
+		await runtimeData.nowAdapter?.close()
+	} catch {
+		// 关闭失败不影响回到登录页
+	}
+	runtimeData.clearAdapter()
 	return false
 }
 

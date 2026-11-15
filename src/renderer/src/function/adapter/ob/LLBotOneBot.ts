@@ -81,7 +81,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 	override version = '0.0.1'
 	constructor(connector: ObConnector, botInfo?: ObGetVersionInfo) {
 		super()
-		this.connector = connector
+		this.bindConnector(connector)
 		this.botInfo.value = botInfo
 		connector.setOnMessageHook(this.onmessage.bind(this))
 	}
@@ -124,10 +124,10 @@ export default class LLBTOneBot extends OneBotAdapter {
 		for (const category of data.data) {
 			for (const friend of category.buddyList) {
 				const id = Number(friend.user_id)
-					this.remarkCache.set(id, friend.remark)
-					out.push({
-						id: id.toString(),
-						avatar: this.getUserAvatar(id),
+				this.remarkCache.set(id, friend.remark)
+				out.push({
+					id: id.toString(),
+					avatar: this.getUserAvatar(id),
 					nickname: friend.nickname,
 					remark: friend.remark === '' ? undefined : friend.remark,
 					regTime: 0,

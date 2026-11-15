@@ -143,6 +143,14 @@ export class OneBotAdapter implements AdapterInterface {
 
 	constructor() {
 		this.init()
+		this.bindConnector(this.connector)
+	}
+	/**
+	 * 绑定连接对象，把连接层状态变化写入 runtimeData
+	 * @param connector 连接对象（redirect 出的子类会复用同一个）
+	 */
+	protected bindConnector(connector: ObConnector): void {
+		this.connector = connector
 	}
 	protected init() {
 		this.segParsers['text'] = this.textParser.bind(this)
@@ -201,7 +209,7 @@ export class OneBotAdapter implements AdapterInterface {
 	}
 
 	async close(): Promise<true> {
-		// 关闭连接
+		// 关闭连接（连接层幂等、不抛错；nowAdapter 由 login/UI 层负责）
 		await this.connector.close()
 		return true
 	}

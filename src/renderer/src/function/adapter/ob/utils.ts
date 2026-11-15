@@ -1,8 +1,9 @@
 import app from '@renderer/main'
-import driver from '@renderer/function/driver'
 import { Gender, Role } from '@renderer/function/adapter/enmu'
 import { ObRequest, ObResponse } from '@renderer/function/adapter/ob/type'
-import { logger } from '@renderer/function/base'
+import { ObWsConnection } from '@renderer/function/adapter/ob/connection'
+import type { ConnectionState } from '@renderer/function/adapter/ob/connection'
+import { logger, popInfo } from '@renderer/function/base'
 
 class WsError extends Error {
 	params: any
@@ -124,23 +125,52 @@ class Request {
  */
 export class ObConnector {
 	private onmessageHook: (msg: string) => void
+	private readonly connection: ObWsConnection
+	private readonly stateListeners = new Set<
+		(state: ConnectionState) => void
+	>()
 	constructor(onmessage: (msg: string) => void) {
 		this.onmessageHook = onmessage
+		// 连接对象与 ObConnector 同生命周期：redirect 出的子类复用同一个 socket
+		this.connection = new ObWsConnection({
+			onStateChange: (state) => {
+				for (const listener of this.stateListeners) listener(state)
+			},
+			onReconnecting: () => popInfo.info('连接不稳定'),
+		})
+	}
+
+	/**
+	 * 订阅连接状态变化（单槽，后订阅覆盖前订阅）
+	 * @param callback 状态回调，传 undefined 取消订阅
+	 */
+	setOnStateChange(
+		callback: ((state: ConnectionState) => void) | undefined,
+	): void {
+		this.stateListeners.clear()
+		if (callback) this.stateListeners.add(callback)
+	}
+
+	/** 连接层当前状态（redirect 后复用同一连接对象） */
+	get state(): ConnectionState {
+		return this.connection.state
 	}
 
 	/**
 	 * 连接到WebSocket
-	 * @param retry 重试次数
-	 * @returns
+	 * @param url 协议端地址
+	 * @param ssl 是否使用 wss
+	 * @param token 访问令牌
+	 * @returns 是否连接成功
 	 */
 	async open(url: string, ssl: boolean, token?: string): Promise<boolean> {
-		driver.reset(url, ssl, token) // 重置driver状态
-		driver.onMessage(this.onmessage.bind(this)) // 设置消息钩子
-		return await driver.open()
+		this.connection.configure(url, ssl, token)
+		this.connection.onMessage(this.onmessage.bind(this)) // 设置消息钩子
+		return await this.connection.connect()
 	}
 
 	async close(): Promise<void> {
-		await driver.close()
+		await this.connection.close()
 	}
 
 	onmessage(getData: string) {
@@ -160,7 +190,7 @@ export class ObConnector {
 	 */
 	setOnMessageHook(onmessage: (msg: string) => void): void {
 		this.onmessageHook = onmessage
-		driver.onMessage(this.onmessage.bind(this))
+		this.connection.onMessage(this.onmessage.bind(this))
 	}
 
 	async send(
@@ -168,13 +198,13 @@ export class ObConnector {
 		args: { [key: string]: any },
 	): Promise<ObResponse<any>> {
 		// 过滤掉空的参数
-		if (!driver.isConnected())
+		if (!this.connection.isConnected())
 			throw new Error('WebSocket未连接，无法发送消息')
 
 		// 创建请求
 		const resp = new Request(name, args)
 		// 发送
-		driver.send(resp.createJson())
+		this.connection.send(resp.createJson())
 		return await resp.waitResponse()
 	}
 }

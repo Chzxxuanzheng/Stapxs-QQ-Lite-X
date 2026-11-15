@@ -1,4 +1,4 @@
-import driver from '@renderer/function/driver'
+import { MilkyConnection } from '@renderer/function/adapter/mk/connection'
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
 import { Msg } from '@renderer/function/model/msg'
 import {
@@ -72,6 +72,7 @@ import useRuntimeData from '@renderer/state/runtimeData'
 import type {
 	ApiInput,
 	ApiOutput,
+	BotOfflineEventData,
 	FriendEntity,
 	FriendNudgeEventData,
 	GetGroupFilesOutput,
@@ -102,7 +103,7 @@ import {
 	parseApiOutput,
 	safeParseEvent,
 } from '@renderer/function/adapter/mk/types'
-import { Component } from 'vue'
+import { type Component } from 'vue'
 import * as ISeg from '@renderer/function/adapter/mk/incomeSeg'
 import MkInfo from '@renderer/function/adapter/mk/MkInfo.vue'
 import * as OSeg from '@renderer/function/adapter/mk/outgoingSeg'
@@ -117,6 +118,7 @@ import {
 } from '@renderer/function/adapter/mk/utils'
 import type { MilkyVersion } from '@renderer/function/adapter/mk/utils'
 import { logger, popInfo } from '@renderer/function/base'
+import { emitConnectionLost } from '@renderer/function/utils/connectionEvent'
 import Emoji from '@renderer/function/model/emoji'
 
 // 定义 API 装饰器：在方法外层包裹 try/catch，失败时返回 undefined
@@ -140,6 +142,16 @@ export class MilkyAdapter implements AdapterInterface {
 	 * 协议端 Milky 版本，连接时判定一次
 	 */
 	protected milkyVersion: MilkyVersion = '1.0'
+
+	/**
+	 * 连接层：WS 收事件 + HTTP 发 API
+	 * 对外的连接状态统一写在 runtimeData，由连接层回调驱动
+	 */
+	protected readonly connection = new MilkyConnection({
+		onEvent: (json) => this.handleEvent(json),
+		onReconnecting: () => popInfo.info('连接不稳定'),
+		onReconnectFailed: () => emitConnectionLost(),
+	})
 
 	constructor() {
 		this.init()
@@ -189,6 +201,7 @@ export class MilkyAdapter implements AdapterInterface {
 			this.groupDisbandEvent.bind(this)
 		this.eventProcessers['group_message_reaction'] =
 			this.groupMessageReaction.bind(this)
+		this.eventProcessers['bot_offline'] = this.botOfflineEvent.bind(this)
 	}
 
 	optInfo(): Component {
@@ -207,13 +220,16 @@ export class MilkyAdapter implements AdapterInterface {
 	 * @returns 是否连接成功
 	 */
 	async connect(url: string, ssl: boolean, token: string): Promise<boolean> {
-		driver.reset(url, ssl, token, 'event')
-		driver.onMessage(this.handleEvent.bind(this))
-		const re = await driver.open()
-		if (!re) return re
+		// 先注册事件钩子再建立 WS，避免首帧落在空钩子上（顺序对齐 ob/utils.ts:168）
+		this.connection.onMessage((json) => this.handleEvent(json))
+		const re = await this.connection.connect(url, ssl, token)
 
 		const implInfo = await this.getImplInfoRaw()
-		if (!implInfo) return false
+		if (!implInfo) {
+			// 版本探测失败：回收已建立的 WS，避免留下无人使用的连接
+			await this.connection.close()
+			return false
+		}
 
 		let version = checkMilkyVersion(implInfo.milky_version)
 		if (!version) {
@@ -238,7 +254,7 @@ export class MilkyAdapter implements AdapterInterface {
 		return re
 	}
 	async close(): Promise<true | undefined> {
-		await driver.close()
+		await this.connection.close()
 		return true
 	}
 	/**
@@ -1641,6 +1657,19 @@ export class MilkyAdapter implements AdapterInterface {
 		}
 	}
 
+	/**
+	 * 机器人离线：QQ 账号掉线但协议端仍然在线，走与重连失败相同的失联路径
+	 * （login 层负责清理 nowAdapter 并弹出登录窗）
+	 */
+	async botOfflineEvent(
+		_: MilkyEvent,
+		data: BotOfflineEventData,
+	): Promise<undefined> {
+		logger.error(null, `Milky 机器人离线: ${data.reason}`)
+		emitConnectionLost()
+		return undefined
+	}
+
 	async handleEvent(json: string): Promise<void> {
 		let raw: unknown
 		try {
@@ -1666,7 +1695,9 @@ export class MilkyAdapter implements AdapterInterface {
 	): Promise<ApiOutput<K>> {
 		const sendArg = parseApiInput(apiName, args)
 		const apiPath = camelCaseToUnderline(apiName)
-		const json = await driver.post(
+		// HTTP 通道受 WS 连接状态门禁，断线时不能静默发出请求
+		if (!this.connection.isConnected()) throw new Error('未与协议段连接')
+		const json = await this.connection.http.post(
 			`api/${apiPath}`,
 			sendArg as Record<string, any>,
 		)

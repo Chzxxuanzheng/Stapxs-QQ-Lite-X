@@ -72,7 +72,7 @@ export default class LagrangeOneBot
 	declare botInfo: ShallowRef<LgrObGetVersionInfo | undefined>
 	constructor(connector: ObConnector, botInfo?: ObGetVersionInfo) {
 		super()
-		this.connector = connector
+		this.bindConnector(connector)
 		this.botInfo.value = botInfo as LgrObGetVersionInfo
 		connector.setOnMessageHook(this.onmessage.bind(this))
 	}
