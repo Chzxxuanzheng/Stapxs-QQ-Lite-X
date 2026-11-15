@@ -126,7 +126,7 @@ export class Msg extends Message {
 				if (seg.type === 'atall') this.atall = true
 				else if (
 					seg instanceof AtSeg &&
-					Number(seg.user_id) === Number(runtimeData.loginInfo?.uin)
+					seg.user_id === runtimeData.loginInfo?.uin
 				)
 					this.atme = true
 			}

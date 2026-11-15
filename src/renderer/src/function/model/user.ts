@@ -14,6 +14,7 @@ import { Gender, Role } from '@renderer/function/adapter/enmu'
 import { Name, Time } from '@renderer/function/model/data'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 import { UserSession } from '@renderer/function/model/session'
+import { shallowRef, type ShallowRef } from 'vue'
 import useRuntimeData from '@renderer/state/runtimeData'
 
 /**
@@ -21,7 +22,7 @@ import useRuntimeData from '@renderer/state/runtimeData'
  */
 export class User {
 	user_id: string
-	_avatar: ProxyUrl
+	_avatar: ShallowRef<ProxyUrl>
 	_nickname: Name
 	_remark?: Name
 	_longNick?: Name
@@ -36,7 +37,7 @@ export class User {
 	}
 	constructor(data: UserData) {
 		this.user_id = data.id ?? '0'
-		this._avatar = new ProxyUrl(data.avatar)
+		this._avatar = shallowRef(new ProxyUrl(data.avatar))
 		this._nickname = new Name(data.nickname)
 		if (data.remark) this._remark = new Name(data.remark)
 		if (data.longNick) this._longNick = new Name(data.longNick)
@@ -50,9 +51,12 @@ export class User {
 
 	upgrade(data: UserData, force = false) {
 		for (const key in data) {
+			if (key === 'id' || key === 'avatar') continue
 			if (data[key] === undefined && !force) continue
 			this[key] = data[key]
 		}
+		if (data.id !== undefined) this.user_id = data.id
+		if (data.avatar !== undefined) this.avatar = data.avatar
 	}
 
 	get nickname(): Name | undefined {
@@ -83,7 +87,11 @@ export class User {
 	}
 
 	get avatar(): string {
-		return this._avatar.url
+		return this._avatar.value.url
+	}
+
+	set avatar(value: string | undefined) {
+		this._avatar.value = new ProxyUrl(value ?? '')
 	}
 
 	get name(): string {

@@ -48,7 +48,7 @@ export abstract class Session {
 	abstract sessionClass: SessionClass
 	id: string
 	_name: Name
-	_avatar: ProxyUrl
+	_avatar: ShallowRef<ProxyUrl>
 	_remark?: Name
 	// 消息列表相关
 	readonly messageList: Message[] = shallowReactive([])
@@ -97,7 +97,7 @@ export abstract class Session {
 	constructor(id: string, name: string, avatar: string, remark?: string) {
 		this.id = id
 		this._name = new Name(name)
-		this._avatar = new ProxyUrl(avatar)
+		this._avatar = shallowRef(new ProxyUrl(avatar))
 		Session.sessionList.push(this)
 		this._remark = remark ? new Name(remark) : undefined
 	}
@@ -753,7 +753,11 @@ export abstract class Session {
 	}
 
 	get avatar(): string {
-		return this._avatar.url
+		return this._avatar.value.url
+	}
+
+	set avatar(value: string | undefined) {
+		this._avatar.value = new ProxyUrl(value ?? '')
 	}
 
 	get showName(): string {
@@ -1337,7 +1341,7 @@ export class TempSession extends Session {
 		str = str.trim().toLowerCase()
 		if (this.name.matchStr(str)) return true
 		if (String(this.id).includes(str)) return true
-		if (typeof this.group === 'number' && String(this.group).includes(str))
+		if (typeof this.group === 'string' && this.group.includes(str))
 			return true
 		if (this.group instanceof GroupSession && this.group.name.matchStr(str))
 			return true
