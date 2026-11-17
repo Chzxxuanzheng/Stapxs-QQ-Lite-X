@@ -347,7 +347,9 @@ export class SelfMsg extends Msg {
 	state: 'notSend' | 'sending' | 'sent' | 'failed' = 'notSend'
 	private static lock: number = 0
 	declare session: Session
-	static readonly sendIds: TimeoutSet<string> = new TimeoutSet()
+	static readonly sendIds: TimeoutSet<string> = new TimeoutSet<string>(
+		5 * 60 * 1000,
+	)
 
 	protected constructor(segs: Seg[], session: Session) {
 		const sender = session.getMe()
@@ -427,6 +429,7 @@ export class SelfMsg extends Msg {
 			return true
 		}
 		// 更新自身内容
+		if (msg.time) this.time = msg.time
 		this.message = msg.message
 		const oldImgs = this.imgList
 		this.imgList = msg.imgList

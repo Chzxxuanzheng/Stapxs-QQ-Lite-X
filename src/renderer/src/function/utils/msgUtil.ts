@@ -24,9 +24,10 @@ export function sendMsgRaw(session: Session, msg: Seg[]): SelfMsg[] {
 	// 预览消息 =======================================================
 	const preMsg = SelfMsg.create(msg, session)
 	// 添加进会话
-	preMsg.map((m) => session.addMessage(m))
+	const added = preMsg.map((m) => session.addMessage(m))
 	// 发送消息
 	async function send() {
+		await Promise.allSettled(added)
 		for (const m of preMsg) {
 			await m.send()
 		}
