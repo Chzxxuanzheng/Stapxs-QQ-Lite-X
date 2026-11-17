@@ -644,15 +644,21 @@
 .msg-link-view.og > div > div.body {
     flex-direction: column;
     display: flex;
+	overflow: hidden;
 }
 
 .msg-link-view > div > div.body p {
     font-weight: bold;
     margin-bottom: 0;
+	margin-top: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .msg-link-view.og > div > div.body span {
     font-size: 0.9rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .msg-link-view.og > div > div.body span:nth-child(3) {
