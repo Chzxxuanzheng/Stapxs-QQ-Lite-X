@@ -94,7 +94,7 @@ pnpm build
 ## ⭐️ Star History
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&theme=dark&legend=top-left" />
-  <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
-  <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=stapxs/Stapxs-QQ-Lite-2.0&type=date&legend=top-left" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=chzxxuanzheng/stapxs-QQ-Lite-X&type=date&theme=dark&legend=top-left" />
+  <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=chzxxuanzheng/stapxs-QQ-Lite-X&type=date&legend=top-left" />
+  <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=chzxxuanzheng/stapxs-QQ-Lite-X&type=date&legend=top-left" />
 </picture>
