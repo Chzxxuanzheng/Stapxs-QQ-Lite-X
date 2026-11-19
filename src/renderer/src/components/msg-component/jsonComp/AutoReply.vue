@@ -25,7 +25,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { logger } from '@renderer/function/base'
 import { useCurrentMsg } from '@renderer/function/composable/inject/useCurrentMsg'
-import { AtSeg, JsonSeg, TxtSeg } from '@renderer/function/model/seg'
+import { AtSeg, JsonSeg, TextSeg } from '@renderer/function/model/segs'
 import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
 import * as z from 'zod'
 
@@ -69,7 +69,13 @@ if (!success) {
 
 function sendNotify(content: string) {
 	if (!msg?.session) return
-	sendMsgRaw(msg.session, [new AtSeg('2854196310'), new TxtSeg(content)])
+	sendMsgRaw(msg.session, [
+		new AtSeg('2854196310'),
+		new TextSeg({
+			type: 'text',
+			text: content,
+		}),
+	])
 }
 </script>
 

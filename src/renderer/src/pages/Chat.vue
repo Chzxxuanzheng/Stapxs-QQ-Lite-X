@@ -168,7 +168,7 @@ import { logger, popInfo } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { InputMsg } from '@renderer/function/model/inputMsg'
 import { Msg } from '@renderer/function/model/msg'
-import { AtSeg } from '@renderer/function/model/seg'
+import { AtSeg } from '@renderer/function/model/segs'
 import {
 	GroupSession,
 	Session,

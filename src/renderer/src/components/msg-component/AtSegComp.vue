@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCurrentMsg } from '@renderer/function/composable/inject/useCurrentMsg'
-import { AtSeg } from '@renderer/function/model/seg'
+import { AtSeg } from '@renderer/function/model/segs'
 import { User } from '@renderer/function/model/user'
 import { vUserTooltip } from '@renderer/function/tooltip'
 import useRuntimeData from '@renderer/state/runtimeData'
@@ -25,10 +25,9 @@ function getAtMember(): User | string {
 <template>
 	<span
 		v-user-tooltip="() => getAtMember()"
-		class="msg-at"
+		class="msg-at msg-inline"
 		:class="{
 			atme: seg.user_id === runtimeData.loginInfo?.uin && showToMe,
-			'msg-inline': seg.inline,
 		}"
 	>
 		{{ seg.plaintext(msg) }}

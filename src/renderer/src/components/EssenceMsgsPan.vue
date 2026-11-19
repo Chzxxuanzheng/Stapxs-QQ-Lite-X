@@ -57,25 +57,7 @@
 						}}</span>
 					</div>
 					<div class="context">
-						<template
-							v-for="(seg, indexc) in item.message"
-							:key="'jinc-' + index + '-' + indexc"
-						>
-							<span v-if="seg instanceof TxtSeg">{{
-								seg.text
-							}}</span>
-							<EmojiFace
-								v-if="seg instanceof FaceSeg"
-								:emoji="seg.face"
-								class="msg-face"
-							/>
-							<img
-								v-if="seg instanceof ImgSeg"
-								:src="seg.src"
-								:alt="'[' + $t('图片') + ']'"
-								@click="viewImg(seg)"
-							/>
-						</template>
+						<Segs :segs="item.message" />
 					</div>
 				</div>
 			</template>
@@ -84,13 +66,9 @@
 </template>
 
 <script setup lang="ts">
-import { FaceSeg, ImgSeg, TxtSeg } from '@renderer/function/model/seg'
 import { GroupSession } from '@renderer/function/model/session'
-import EmojiFace from '@renderer/components/EmojiFace.vue'
 import { watchEffect } from 'vue'
-import { useViewer } from '@renderer/function/composable/inject/useViewer.js'
-
-const viewer = useViewer()
+import Segs from '@root/src/renderer/src/components/msg-component/Segs.vue'
 
 const { session } = defineProps<{
 	session: GroupSession
@@ -102,8 +80,4 @@ const emit = defineEmits<{
 watchEffect(() => {
 	if (!session.essenceMsgLoaded) session.loadEssenceMsgs()
 })
-
-function viewImg(seg: ImgSeg): void {
-	viewer?.value?.open(seg.imgData)
-}
 </script>

@@ -2,7 +2,7 @@
 
 import useRuntimeData from '@renderer/state/runtimeData'
 import { Msg, SelfMsg } from '@renderer/function/model/msg'
-import { Seg } from '@renderer/function/model/seg'
+import { Seg } from '@renderer/function/model/segs'
 import {
 	GroupSession,
 	Session,

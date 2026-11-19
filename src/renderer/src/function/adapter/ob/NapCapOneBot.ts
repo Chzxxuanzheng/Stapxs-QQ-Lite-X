@@ -5,9 +5,8 @@ import {
 	FileSeg,
 	ForwardSeg,
 	ImgSeg,
-	MdSeg,
 	MfaceSeg,
-} from '@renderer/function/model/seg'
+} from '@renderer/function/model/segs'
 import {
 	GroupSession,
 	Session,
@@ -28,7 +27,6 @@ import {
 	ImplInfo,
 	JsonSegData,
 	LeaveEventData,
-	MdSegData,
 	MessageEventData,
 	MsgData,
 	PokeEventData,
@@ -52,7 +50,6 @@ import type {
 	NcObGetStrangerInfo,
 	NcObGroupMsgEmojiLikeEvent,
 	NcObImgSeg,
-	NcObMdSeg,
 	NcObMessageSendEvent,
 	NcObMfaceSeg,
 	NcObPokeEvent,
@@ -100,10 +97,9 @@ export default class NapCapOneBot extends OneBotAdapter {
 
 	protected override init(): void {
 		super.init()
-		this.segParsers['markdown'] = this.mdParser.bind(this)
+		this.segParsers['markdown'] = this.markdownParser.bind(this)
 		this.segParsers['file'] = this.fileParser.bind(this)
 
-		this.segSerializer['markdown'] = this.mdSerializer.bind(this)
 		this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
 		this.segSerializer['file'] = this.fileSerializer.bind(this)
 
@@ -553,16 +549,10 @@ export default class NapCapOneBot extends OneBotAdapter {
 
 	//#region == 消息相关 ===========================================
 	//#region == 反序列化 ===========================
-	async mdParser(data: NcObMdSeg, _?: ObMsg): Promise<MdSegData> {
-		return {
-			type: 'md',
-			content: data.data.content,
-		}
-	}
 	override async imageParser(
 		data: NcObImgSeg,
 		msg?: ObMsg,
-	): Promise<ImgSegData> {
+	): Promise<ImgSegData[]> {
 		if (!('key' in data.data)) {
 			let type: RkeyType
 
@@ -570,36 +560,43 @@ export default class NapCapOneBot extends OneBotAdapter {
 			else if (msg.message_type === 'private') type = 'PRIVATE'
 			else type = 'GROUP'
 
-			return {
-				type: 'image',
-				url: await this.createResource(data.data.url, type),
-				isFace: data.data.sub_type === 7 || data.data.sub_type === 1,
-				summary: data.data.summary || '[图片]',
-			}
+			return [
+				{
+					type: 'image',
+					url: await this.createResource(data.data.url, type),
+					isFace:
+						data.data.sub_type === 7 || data.data.sub_type === 1,
+					summary: data.data.summary || '[图片]',
+				},
+			]
 		} else {
-			return {
-				type: 'mface',
-				url: data.data.url,
-				summary: data.data.summary,
-				packageId: data.data.emoji_package_id,
-				id: data.data.emoji_id,
-				key: data.data.key,
-			} as any as ImgSegData
+			return [
+				{
+					type: 'mface',
+					url: data.data.url,
+					summary: data.data.summary,
+					packageId: data.data.emoji_package_id,
+					id: data.data.emoji_id,
+					key: data.data.key,
+				} as any as ImgSegData,
+			]
 		}
 	}
-	async fileParser(data: NcObFileSeg, _?: ObMsg): Promise<FileSegData> {
-		return {
-			type: 'file',
-			name: data.data.file,
-			size: data.data.file_size,
-			url: `${data.data.url}${data.data.file}`,
-			file_id: data.data.file_id,
-		}
+	async fileParser(data: NcObFileSeg, _?: ObMsg): Promise<FileSegData[]> {
+		return [
+			{
+				type: 'file',
+				name: data.data.file,
+				size: data.data.file_size,
+				url: `${data.data.url}${data.data.file}`,
+				file_id: data.data.file_id,
+			},
+		]
 	}
 	override async forwardParser(
 		_data: ObForwardSeg,
 		_?: ObMsg,
-	): Promise<ForwardSegData> {
+	): Promise<ForwardSegData[]> {
 		const data = _data as any as NcObForwardSeg
 		const id = data.data.id
 		let nodes: ForwardNodeData[] = []
@@ -610,16 +607,18 @@ export default class NapCapOneBot extends OneBotAdapter {
 		} else {
 			nodes = await this.getForwardMsg(id)
 		}
-		return {
-			type: 'forward',
-			id,
-			content: nodes,
-		}
+		return [
+			{
+				type: 'forward',
+				id,
+				content: nodes,
+			},
+		]
 	}
 	override async jsonParser(
 		data: ObJsonSeg,
 		_?: ObMsg,
-	): Promise<JsonSegData> {
+	): Promise<JsonSegData[]> {
 		const jsonData = JSON.parse(data.data.data)
 		if (jsonData['app'] !== 'com.tencent.multimsg')
 			return super.jsonParser(data)
@@ -631,7 +630,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 			id: forwardId,
 			content: await this.getForwardMsg(forwardId),
 		}
-		return out as any as JsonSegData
+		return [out as any as JsonSegData]
 	}
 	async ncNodeParser(
 		data: NcForwardData,
@@ -649,14 +648,6 @@ export default class NapCapOneBot extends OneBotAdapter {
 	//#endregion
 
 	//#region == 序列化 =============================
-	async mdSerializer(seg: MdSeg): Promise<NcObMdSeg> {
-		return {
-			type: 'markdown',
-			data: {
-				content: seg.content,
-			},
-		}
-	}
 	override async imageSerializer(seg: ImgSeg): Promise<NcObImgSeg> {
 		return {
 			type: 'image',

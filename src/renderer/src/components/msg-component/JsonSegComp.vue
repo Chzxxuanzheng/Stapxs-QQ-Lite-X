@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { JsonSeg } from '@renderer/function/model/seg'
+import { JsonSeg } from '@renderer/function/model/segs'
 
 const comps = import.meta.glob('./jsonComp/*.vue', {
 	eager: true,

@@ -8,7 +8,7 @@ import {
 	Seg,
 	VideoSeg,
 	XmlSeg,
-} from '@renderer/function/model/seg'
+} from '@renderer/function/model/segs'
 
 export function $t(value: string, args: Record<string, any> = {}): string {
 	return app.config.globalProperties.$t(value, args)

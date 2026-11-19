@@ -130,7 +130,7 @@ import MsgBar from '@renderer/components/MsgBar.vue'
 import { popInfo } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { Msg } from '@renderer/function/model/msg'
-import { ForwardSeg } from '@renderer/function/model/seg'
+import { ForwardSeg } from '@renderer/function/model/segs'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
 import { mergeForward, singleForward } from '@renderer/function/utils/msgUtil'
 import {

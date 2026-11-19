@@ -430,13 +430,12 @@ pre:after {
     display: none !important;
 }
 pre > code {
-    font-family: 'Fira Code', monospace !important;
-    padding: 1rem !important;
+    font-family: 'Fira Code', monospace;
 }
 @supports (font-variation-settings: normal) {
     pre > code
     {
-        font-family: 'Fira Code VF', monospace !important;
+        font-family: 'Fira Code VF', monospace;
     }
 }
 

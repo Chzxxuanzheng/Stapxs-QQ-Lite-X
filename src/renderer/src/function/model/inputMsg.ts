@@ -10,11 +10,12 @@ import { shallowRef, shallowReactive, computed, nextTick, reactive } from 'vue'
 import { Msg } from '@renderer/function/model/msg'
 import {
 	AtSeg,
+	BreakSeg,
 	ImgSeg,
 	ReplySeg,
 	Seg,
-	TxtSeg,
-} from '@renderer/function/model/seg'
+	TextSeg,
+} from '@renderer/function/model/segs'
 import { autoMarkRaw } from '@renderer/function/model/utils'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { Session } from '@renderer/function/model/session'
@@ -22,6 +23,8 @@ import { queueWait } from '@renderer/function/utils/baseUtil'
 import { logger, popInfo } from '@renderer/function/base'
 import imageCompression from 'browser-image-compression'
 import app from '@renderer/main'
+import { SendMsgTextType } from '@root/src/renderer/src/function/adapter/interface'
+import { parseMarkdown } from '@root/src/renderer/src/function/utils/markdown'
 
 interface ImgCache {
 	state: 'compressing' | 'done' | 'error'
@@ -160,7 +163,7 @@ export class InputMsg {
 					state: 'compressing',
 					id: this.sqCache.length,
 				})
-				this.sqCache.push(new TxtSeg('')) // 占位，等待图片处理完成后更新
+				this.sqCache.push(TextSeg.create('[图片]')) // 占位，等待图片处理完成后更新
 				this.processImgFile(img, hash)
 			}
 
@@ -185,17 +188,17 @@ export class InputMsg {
 	/**
 	 * 渲染出消息序列
 	 */
-	render(): Seg[] {
+	async render(type: SendMsgTextType): Promise<Seg[]> {
 		const $t = app.config.globalProperties.$t
 		// 解析图片
 		for (const info of this.imgCache.values()) {
 			let seg: Seg
 			switch (info.state) {
 				case 'compressing':
-					seg = new TxtSeg(`[${$t('正在处理图片')}]`)
+					seg = TextSeg.create(`[${$t('正在处理图片')}]`)
 					break
 				case 'error':
-					seg = new TxtSeg(`[${$t('图片处理失败')}]`)
+					seg = TextSeg.create(`[${$t('图片处理失败')}]`)
 					break
 				case 'done':
 					seg = new ImgSeg(
@@ -210,7 +213,7 @@ export class InputMsg {
 			this.sqCache[info.id] = seg
 		}
 		// 解析消息
-		let back = this.parseMsgToSegs()
+		let back = await this.parseMsgToSegs(type)
 		const runtimeData = useRuntimeData()
 		// 插入引用
 		if (this.reply?.message_id) {
@@ -225,7 +228,7 @@ export class InputMsg {
 			if (tail && tail != '') {
 				for (let i = back.length - 1; i >= 0; i--) {
 					const seg = back[i]
-					if (seg instanceof TxtSeg) {
+					if (seg instanceof TextSeg) {
 						seg.text += tail
 						break
 					}
@@ -245,13 +248,20 @@ export class InputMsg {
 	reeditFromMsg(msg: Msg): void {
 		this.clear()
 		this.focus()
+		const redditSegs: (string | Seg)[] = []
 		for (const seg of msg.message) {
-			// TODO 支持图片
 			if (seg instanceof ReplySeg) {
 				const replyMsg = this.session.getMsgById(seg.id)
 				if (replyMsg) this.setReply(replyMsg, false)
-			} else if (seg instanceof TxtSeg) {
-				this.content += seg.text
+				continue
+			}
+
+			redditSegs.push(...seg.reedit())
+		}
+
+		for (const seg of redditSegs) {
+			if (typeof seg === 'string') {
+				this.content += seg
 			} else {
 				this.addSq(seg)
 			}
@@ -350,7 +360,7 @@ export class InputMsg {
 	 * 解析输入消息成为消息段
 	 * @returns
 	 */
-	private parseMsgToSegs(): Seg[] {
+	private async parseMsgToSegs(type: SendMsgTextType): Promise<Seg[]> {
 		const re: Seg[] = []
 
 		let cacheTxt: string = ''
@@ -384,7 +394,7 @@ export class InputMsg {
 				if (isSqCode) {
 					// 处理缓存文本
 					if (cacheTxt.length > 0) {
-						re.push(new TxtSeg(cacheTxt))
+						re.push(...(await this.renderText(cacheTxt, type)))
 						cacheTxt = ''
 					}
 					// 添加 SQ 码消息段
@@ -401,9 +411,32 @@ export class InputMsg {
 		}
 
 		if (cacheTxt.length > 0) {
-			re.push(new TxtSeg(cacheTxt))
+			re.push(...(await this.renderText(cacheTxt, type)))
 		}
 
 		return re
+	}
+
+	private async renderText(
+		content: string,
+		type: SendMsgTextType,
+	): Promise<Seg[]> {
+		if (type === 'md') return this.renderTextToMd(content)
+		else return this.renderTextToText(content)
+	}
+
+	private async renderTextToText(content: string): Promise<Seg[]> {
+		const out: Seg[] = []
+		const lines = content.split('\n')
+		for (let i = 0; i < lines.length; i++) {
+			if (i > 0) out.push(new BreakSeg({ type: 'break' }))
+			if (lines[i]) out.push(TextSeg.create(lines[i]))
+		}
+		return out
+	}
+
+	private async renderTextToMd(content: string): Promise<Seg[]> {
+		const segData = await Promise.all(await parseMarkdown(content))
+		return await Promise.all(segData.map((data) => Seg.parse(data)))
 	}
 }

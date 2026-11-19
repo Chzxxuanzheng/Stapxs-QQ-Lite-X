@@ -3,11 +3,10 @@ import { Msg } from '@renderer/function/model/msg'
 import { Resource } from '@renderer/function/model/resource'
 import {
 	ForwardSeg,
-	MdSeg,
 	ImgSeg,
 	MfaceSeg,
 	FileSeg,
-} from '@renderer/function/model/seg'
+} from '@renderer/function/model/segs'
 import {
 	GroupSession,
 	Session,
@@ -26,7 +25,6 @@ import type {
 	MsgData,
 	FilesData,
 	SegData,
-	MdSegData,
 	ImgSegData,
 	MfaceSegData,
 	FileSegData,
@@ -50,7 +48,6 @@ import type {
 	LgrObGetGroupFileRoot as LgrObGetGroupFile,
 	LgrObGetFileUrl,
 	ObForwardNodeSeg,
-	LgrObMdSeg,
 	LgrObImgSeg,
 	LgrObMfaceSeg,
 	LgrObFileSeg,
@@ -79,11 +76,10 @@ export default class LagrangeOneBot
 
 	protected override init(): void {
 		super.init()
-		this.segParsers['markdown'] = this.mdParser.bind(this)
+		this.segParsers['markdown'] = this.markdownParser.bind(this)
 		this.segParsers['mface'] = this.mfaceParser.bind(this)
 		this.segParsers['file'] = this.fileParser.bind(this)
 
-		this.segSerializer['markdown'] = this.mdSerializer.bind(this)
 		this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
 		this.segSerializer['file'] = this.fileSerializer.bind(this)
 	}
@@ -433,49 +429,41 @@ export default class LagrangeOneBot
 		return out
 	}
 	//#region == 反序列化 ===========================
-	async mdParser(data: LgrObMdSeg): Promise<MdSegData> {
-		return {
-			type: 'md',
-			content: data.data.content,
-		}
+	override async imageParser(data: LgrObImgSeg): Promise<ImgSegData[]> {
+		return [
+			{
+				type: 'image',
+				url: Resource.fromUrl(data.data.url),
+				isFace: data.data.subType === 7 || data.data.subType === 1,
+				summary: data.data.summary,
+			},
+		]
 	}
-	override async imageParser(data: LgrObImgSeg): Promise<ImgSegData> {
-		return {
-			type: 'image',
-			url: Resource.fromUrl(data.data.url),
-			isFace: data.data.subType === 7 || data.data.subType === 1,
-			summary: data.data.summary,
-		}
+	async mfaceParser(data: LgrObMfaceSeg): Promise<MfaceSegData[]> {
+		return [
+			{
+				type: 'mface',
+				url: data.data.url,
+				summary: data.data.summary,
+				packageId: data.data.emoji_package_id,
+				id: data.data.emoji_id,
+				key: data.data.key,
+			},
+		]
 	}
-	async mfaceParser(data: LgrObMfaceSeg): Promise<MfaceSegData> {
-		return {
-			type: 'mface',
-			url: data.data.url,
-			summary: data.data.summary,
-			packageId: data.data.emoji_package_id,
-			id: data.data.emoji_id,
-			key: data.data.key,
-		}
-	}
-	async fileParser(data: LgrObFileSeg): Promise<FileSegData> {
-		return {
-			type: 'file',
-			name: data.data.file_name,
-			size: 0,
-			url: data.data.url,
-			file_id: data.data.file_id,
-		}
+	async fileParser(data: LgrObFileSeg): Promise<FileSegData[]> {
+		return [
+			{
+				type: 'file',
+				name: data.data.file_name,
+				size: 0,
+				url: data.data.url,
+				file_id: data.data.file_id,
+			},
+		]
 	}
 	//#endregion
 	//#region == 序列化 =============================
-	async mdSerializer(seg: MdSeg): Promise<LgrObMdSeg> {
-		return {
-			type: 'markdown',
-			data: {
-				content: seg.content,
-			},
-		}
-	}
 	override async imageSerializer(seg: ImgSeg): Promise<LgrObImgSeg> {
 		return {
 			type: 'image',

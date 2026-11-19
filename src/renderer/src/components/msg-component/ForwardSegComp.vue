@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { VueCompData } from '@renderer/function/elements/vueComp'
 import { Msg } from '@renderer/function/model/msg'
-import { ForwardSeg } from '@renderer/function/model/seg'
+import { ForwardSeg } from '@renderer/function/model/segs'
 import MsgPrevTooltip from '@renderer/components/tooltip/MsgPrevTooltip.vue'
 import { popInfo } from '@renderer/function/base.js'
 import app from '@renderer/main.js'

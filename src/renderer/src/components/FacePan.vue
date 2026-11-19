@@ -173,7 +173,7 @@
 import { computed, ComputedRef, Ref, shallowRef } from 'vue'
 
 import Emoji from '@renderer/function/model/emoji'
-import { FaceSeg, ImgSeg, Seg, TxtSeg } from '@renderer/function/model/seg'
+import { FaceSeg, ImgSeg, Seg, TextSeg } from '@renderer/function/model/segs'
 import Tab from '@renderer/components/Tab.vue'
 import EmojiFace from '@renderer/components/EmojiFace.vue'
 import { VueCompData } from '@renderer/function/elements/vueComp'
@@ -268,7 +268,7 @@ function addBaseFace(id: string) {
 	// 记录最近使用的表情
 	recordRecentEmoji(recentEmojisId, id)
 	if (+id < 5000) addSpecialSeg(new FaceSeg(id))
-	else addSpecialSeg(new TxtSeg(Emoji.get(+id)!.value))
+	else addSpecialSeg(TextSeg.create(Emoji.get(+id)!.value))
 }
 function addImgFace(url: string) {
 	// 记录最近使用的表情

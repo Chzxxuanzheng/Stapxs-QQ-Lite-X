@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VideoSeg } from '@renderer/function/model/seg'
+import { VideoSeg } from '@renderer/function/model/segs'
 
 const { seg } = defineProps<{
 	seg: VideoSeg

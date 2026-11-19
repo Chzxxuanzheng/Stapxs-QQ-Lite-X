@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCurrentMsg } from '@renderer/function/composable/inject/useCurrentMsg'
-import { FileSeg } from '@renderer/function/model/seg'
+import { FileSeg } from '@renderer/function/model/segs'
 
 const IMAGE_SUFFIX = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']
 
