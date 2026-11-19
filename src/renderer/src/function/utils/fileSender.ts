@@ -6,7 +6,7 @@ import { popInfo } from '@renderer/function/base'
 import { noticePopBox, waitPopBox } from '@renderer/function/utils/popBox'
 import { GroupFileFolder } from '@renderer/function/model/file'
 import { FileSegData } from '@renderer/function/adapter/interface'
-import { FileSeg } from '@renderer/function/model/seg'
+import { FileSeg } from '@renderer/function/model/segs'
 import { uploadFile } from '@renderer/function/input'
 import { TimeoutSet } from '@renderer/function/utils/baseUtil'
 

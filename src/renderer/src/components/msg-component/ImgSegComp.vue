@@ -7,7 +7,7 @@
 -->
 <script setup lang="ts">
 import { useViewer } from '@renderer/function/composable/inject/useViewer'
-import { ImgSeg, MfaceSeg } from '@renderer/function/model/seg'
+import { ImgSeg, MfaceSeg } from '@renderer/function/model/segs'
 import { computed, nextTick, shallowRef, useTemplateRef } from 'vue'
 
 const { seg, pos } = defineProps<{
@@ -27,6 +27,9 @@ const src = computed(() => {
 	const url = seg.url
 	if (!url) return ''
 	if (url.startsWith('http')) return url
+	// 认证媒体下载后是 blob URL，浏览器 <img> 无法携带 Authorization，
+	// 只能通过这种本地对象地址展示
+	if (url.startsWith('blob:')) return url
 	if (url.startsWith('data:')) return url
 	if (url.startsWith('base64://')) {
 		return url.replace('base64://', 'data:image/png;base64,')

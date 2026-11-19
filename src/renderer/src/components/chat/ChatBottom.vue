@@ -253,7 +253,7 @@ import { logger } from '@renderer/function/base'
 import app from '@renderer/main'
 import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
 import { delay } from '@renderer/function/utils/systemUtil'
-import { AtAllSeg, AtSeg } from '@renderer/function/model/seg'
+import { AtAllSeg, AtSeg } from '@renderer/function/model/segs'
 import {
 	useTemplateRef,
 	shallowRef,
@@ -458,7 +458,7 @@ function mainKeyUp(event: KeyboardEvent) {
 /**
  * 发送消息
  */
-function sendMsg() {
+async function sendMsg() {
 	if (inputMsg.value.isVoid) return void inputMsg.value.focus()
 	// 关闭所有其他的已打开的更多功能弹窗
 	switchDetail(undefined)
@@ -471,7 +471,10 @@ function sendMsg() {
 	//               ^^^^^^^ 0 ^^^^^^^   ^^^^^^^^^^ 1 ^^^^^^^^^^
 	// 在发送操作触发之后，将会解析此条字符串排列出最终需要发送的消息结构用于发送。
 
-	sendMsgRaw(session, inputMsg.value.render())
+	sendMsgRaw(
+		session,
+		await inputMsg.value.render(runtimeData.nowAdapter!.sendMsgTextType),
+	)
 	// 发送后事务
 	inputMsg.value.clear()
 	nextTick(async () => {

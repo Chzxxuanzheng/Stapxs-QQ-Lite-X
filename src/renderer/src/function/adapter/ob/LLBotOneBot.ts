@@ -6,10 +6,9 @@ import {
 	FileSeg,
 	ForwardSeg,
 	ImgSeg,
-	MdSeg,
 	MfaceSeg,
 	SuperFaceSeg,
-} from '@renderer/function/model/seg'
+} from '@renderer/function/model/segs'
 import {
 	GroupSession,
 	Session,
@@ -27,7 +26,6 @@ import {
 	GroupAnnouncementData,
 	ImgSegData,
 	ImplInfo,
-	MdSegData,
 	MessageEventData,
 	MfaceSegData,
 	MsgData,
@@ -59,7 +57,6 @@ import type {
 	LlbotObGetStrangerInfo,
 	LlbotObGroupMsgEmojiLikeEvent,
 	LlbotObImageSeg,
-	LlbotObMdSeg,
 	LlbotObMessageSendEvent,
 	LlbotObMfaceSeg,
 	LlbotObMsg,
@@ -92,12 +89,11 @@ export default class LLBTOneBot extends OneBotAdapter {
 
 	protected override init(): void {
 		super.init()
-		this.segParsers['markdown'] = this.mdParser.bind(this)
+		this.segParsers['markdown'] = this.markdownParser.bind(this)
 		this.segParsers['face'] = this.llbotFaceParser.bind(this)
 		this.segParsers['mface'] = this.mfaceParser.bind(this)
 		this.segParsers['file'] = this.fileParser.bind(this)
 
-		this.segSerializer['markdown'] = this.mdSerializer.bind(this)
 		this.segSerializer['face'] = this.llbotFaceSerializer.bind(this)
 		this.segSerializer['super-face'] =
 			this.llbotSuperFaceSerializer.bind(this)
@@ -567,62 +563,65 @@ export default class LLBTOneBot extends OneBotAdapter {
 		return base
 	}
 	//#region == 反序列化 ===========================
-	async mdParser(data: LlbotObMdSeg, _?: ObMsg): Promise<MdSegData> {
-		return {
-			type: 'md',
-			content: data.data.content,
-		}
-	}
 	override async imageParser(
 		data: LlbotObImageSeg,
 		msg?: ObMsg,
-	): Promise<ImgSegData> {
+	): Promise<ImgSegData[]> {
 		let type: RkeyType
 
 		if (!msg) type = 'UNKNOWN'
 		else if (msg.message_type === 'private') type = 'PRIVATE'
 		else type = 'GROUP'
 
-		return {
-			type: 'image',
-			url: await this.createResource(data.data.url, type),
-			isFace: data.data.subType === 7 || data.data.subType === 1,
-			summary: data.data.summary,
-		}
+		return [
+			{
+				type: 'image',
+				url: await this.createResource(data.data.url, type),
+				isFace: data.data.subType === 7 || data.data.subType === 1,
+				summary: data.data.summary,
+			},
+		]
 	}
 	async llbotFaceParser(
 		data: LlbotObFaceSeg,
 		msg?: ObMsg,
-	): Promise<FaceSegData | SuperFaceSegData> {
+	): Promise<FaceSegData[] | SuperFaceSegData[]> {
 		const id = Number(data.data.id)
 		if (data.data.sub_type === 3 && Emoji.superList.includes(id))
-			return { type: 'super-face', id: id.toString() }
+			return [{ type: 'super-face', id: id.toString() }]
 		else if (
 			data.data.sub_type === undefined &&
 			msg?.message.length === 1 &&
 			Emoji.superList.includes(id)
 		)
-			return { type: 'super-face', id: id.toString() }
-		return { type: 'face', id: id.toString() }
+			return [{ type: 'super-face', id: id.toString() }]
+		return [{ type: 'face', id: id.toString() }]
 	}
-	async mfaceParser(data: LlbotObMfaceSeg, _?: ObMsg): Promise<MfaceSegData> {
-		return {
-			type: 'mface',
-			url: data.data.url,
-			summary: data.data.summary,
-			packageId: data.data.emoji_package_id,
-			id: data.data.emoji_id,
-			key: data.data.key,
-		}
+	async mfaceParser(
+		data: LlbotObMfaceSeg,
+		_?: ObMsg,
+	): Promise<MfaceSegData[]> {
+		return [
+			{
+				type: 'mface',
+				url: data.data.url,
+				summary: data.data.summary,
+				packageId: data.data.emoji_package_id,
+				id: data.data.emoji_id,
+				key: data.data.key,
+			},
+		]
 	}
-	async fileParser(data: LlbotObFileSeg, _?: ObMsg): Promise<FileSegData> {
-		return {
-			type: 'file',
-			name: data.data.file,
-			size: Number(data.data.file_size),
-			url: `${data.data.url}${data.data.file}`,
-			file_id: data.data.file_id,
-		}
+	async fileParser(data: LlbotObFileSeg, _?: ObMsg): Promise<FileSegData[]> {
+		return [
+			{
+				type: 'file',
+				name: data.data.file,
+				size: Number(data.data.file_size),
+				url: `${data.data.url}${data.data.file}`,
+				file_id: data.data.file_id,
+			},
+		]
 	}
 	async lltbNodeParser(
 		data: LlbotObForwardNode,
@@ -640,14 +639,6 @@ export default class LLBTOneBot extends OneBotAdapter {
 	//#endregion
 
 	//#region == 序列化 =============================
-	async mdSerializer(seg: MdSeg): Promise<LlbotObMdSeg> {
-		return {
-			type: 'markdown',
-			data: {
-				content: seg.content,
-			},
-		}
-	}
 	override async imageSerializer(seg: ImgSeg): Promise<LlbotObImageSeg> {
 		return {
 			type: 'image',

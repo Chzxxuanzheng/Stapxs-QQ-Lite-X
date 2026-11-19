@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AtAllSeg } from '@renderer/function/model/seg'
+import { AtAllSeg } from '@renderer/function/model/segs'
 
 const { seg: _seg, showToMe = true } = defineProps<{
 	seg: AtAllSeg
@@ -8,13 +8,7 @@ const { seg: _seg, showToMe = true } = defineProps<{
 </script>
 
 <template>
-	<span
-		:class="{
-			'msg-at': true,
-			atme: showToMe,
-			'msg-inline': seg.inline,
-		}"
-	>
+	<span class="msg-at msg-inline" :class="{ atme: showToMe }">
 		@{{ $t('全体成员') }}
 	</span>
 </template>

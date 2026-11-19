@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ReplySeg } from '@renderer/function/model/seg'
+import { ReplySeg } from '@renderer/function/model/segs'
 import { vTooltip } from '@renderer/function/utils/vcmd'
 import MsgPrevTooltip from '@renderer/components/tooltip/MsgPrevTooltip.vue'
 import { Msg } from '@renderer/function/model/msg'

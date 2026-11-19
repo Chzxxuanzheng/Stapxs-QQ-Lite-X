@@ -199,55 +199,68 @@
     white-space: pre-wrap;
 }
 
-.msg-md *:first-child {
-	margin-top: 0;
-}
-
-.msg-md *:last-child {
-	margin-bottom: 0;
-}
-
-.msg-md code {
+.message-content code {
 	word-wrap:break-word;
 }
 
-.msg-md h1,
-.msg-md h2,
-.msg-md h3,
-.msg-md h4 {
+h1.msg-heading,
+h2.msg-heading,
+h3.msg-heading,
+h4.msg-heading,
+h5.msg-heading,
+h6.msg-heading {
     align-items: flex-end;
     flex-direction: row;
     display: flex;
     margin: 0;
 }
 
-.msg-md img {
-    border-radius: 7px;
-    max-width: 100%;
-}
+.msg-break { display: none; }
 
-.msg-md blockquote {
+.msg-inline + .msg-break { display: unset; }
+
+.msg-blockquote {
 	background-color: #00000017;
     border-left: 3px solid var(--color-font-2);
     color: var(--color-font-1);
     border-radius: 3px;
-    font-size: 0.8rem;
     padding: 0 10px;
     margin: 0;
 }
 
-.msg-md pre {
-	overflow-x: auto;
-	overflow-y: hidden;
+.msg-button {
+	all: unset;
+	color: var(--color-main);
+	text-decoration: underline;
+	text-decoration-style:dashed;
+	cursor: pointer;
 }
 
-.msg-md pre {
+.msg-button:hover {
+	text-decoration-style: solid;
+}
+
+.msg-code {
+	overflow-x:auto;
+	overflow-y:hidden;
+	background-color:#00000017;
+	padding:5px;
+	border-radius:5px;
+	white-space: pre;
+	margin: 0;
+}
+
+.msg-inline-code {
 	background-color: #00000017;
-	padding: 5px;
-	border-radius: 5px;
+	border-radius:5px;
+	padding: 0 3px;
 }
 
-.msg-md table {
+.msg-list {
+	margin: 0;
+}
+
+.msg-table {
 	border-collapse: separate;   /* 关键：放开折叠 */
 	border-spacing: 0;           /* 关键：默认 2px 会撑出缝隙 */
 	border: 1px solid;
@@ -255,25 +268,25 @@
 	overflow: hidden;
 }
 
-.msg-md table > thead {
+.msg-table > thead {
 	background-color: #00000017;
 	color: var(--color-font-1)
 }
 
-.msg-md table > thead > tr > th,
-.msg-md table > tbody > tr > td {
+.msg-table > thead > tr > th,
+.msg-table > tbody > tr > td {
 	border-right: 1px solid;
 	border-bottom: 1px solid;
 	padding: 8px;
 	text-align: left;
 }
 
-.msg-md table > thead > tr > th:last-child,
-.msg-md table > tbody > tr > td:last-child {
+.msg-table > thead > tr > th:last-child,
+.msg-table > tbody > tr > td:last-child {
 	border-right: none
 }
 
-.msg-md table > tbody > tr:last-child > td {
+.msg-table > tbody > tr:last-child > td {
 	border-bottom: none
 }
 

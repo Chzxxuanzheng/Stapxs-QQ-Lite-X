@@ -12,7 +12,7 @@ import {
 	Seg,
 	VideoSeg,
 	XmlSeg,
-} from '@renderer/function/model/seg'
+} from '@renderer/function/model/segs'
 
 class WsError extends Error {
 	params: any

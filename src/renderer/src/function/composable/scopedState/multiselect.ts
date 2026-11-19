@@ -4,13 +4,12 @@ import { Msg } from '@renderer/function/model/msg'
 import {
 	ErrorSeg,
 	JsonSeg,
-	MdSeg,
 	UnknownSeg,
 	XmlSeg,
-} from '@renderer/function/model/seg'
+} from '@renderer/function/model/segs'
 import { Message } from '@renderer/function/model/message'
 
-const BLACK_SEGS = [MdSeg, JsonSeg, XmlSeg, ErrorSeg, UnknownSeg]
+const BLACK_SEGS = [JsonSeg, XmlSeg, ErrorSeg, UnknownSeg]
 
 function isCantSendMsg(msg: Msg): boolean {
 	for (const seg of msg.message) {

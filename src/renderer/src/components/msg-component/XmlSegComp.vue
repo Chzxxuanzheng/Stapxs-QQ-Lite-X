@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { logger } from '@renderer/function/base'
 import { useCurrentMsg } from '@renderer/function/composable/inject/useCurrentMsg'
-import { XmlSeg } from '@renderer/function/model/seg'
+import { XmlSeg } from '@renderer/function/model/segs'
 import { openLink } from '@renderer/function/utils/appUtil'
 import app from '@renderer/main'
 import { useTemplateRef } from 'vue'

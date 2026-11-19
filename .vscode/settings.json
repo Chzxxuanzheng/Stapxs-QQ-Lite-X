@@ -39,5 +39,9 @@
 	},
 	"[vue]": {
 		"editor.defaultFormatter": "oxc.oxc-vscode"
-	}
+	},
+	"js/ts.preferences.importModuleSpecifier": "non-relative",
+	"js/ts.preferences.autoImportSpecifierExcludeRegexes": [
+		"^@root/src/renderer$"
+	]
 }

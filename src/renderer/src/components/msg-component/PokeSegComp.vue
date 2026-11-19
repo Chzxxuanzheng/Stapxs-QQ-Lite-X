@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PokeSeg } from '@renderer/function/model/seg'
+import { PokeSeg } from '@renderer/function/model/segs'
 
 const { seg: _seg } = defineProps<{
 	seg: PokeSeg
@@ -7,7 +7,7 @@ const { seg: _seg } = defineProps<{
 </script>
 
 <template>
-	<div v-once class="msg-poke" :class="{ 'msg-inline': seg.inline }">
+	<div v-once class="msg-poke">
 		<font-awesome-icon
 			class="poke-hand"
 			style="margin-right: 5px"

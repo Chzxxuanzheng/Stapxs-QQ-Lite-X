@@ -23,10 +23,10 @@ import { Message } from '@renderer/function/model/message'
 import {
 	AtSeg,
 	ForwardSeg,
+	LinkSeg,
 	ReplySeg,
 	Seg,
-	TxtSeg,
-} from '@renderer/function/model/seg'
+} from '@renderer/function/model/segs'
 import {
 	GroupSession,
 	Session,
@@ -161,8 +161,8 @@ export class Msg extends Message {
 		// 连接预览
 		const links: string[] = []
 		for (const seg of this.message) {
-			if (!(seg instanceof TxtSeg)) continue
-			links.push(...seg.links)
+			if (!(seg instanceof LinkSeg)) continue
+			links.push(seg.url)
 		}
 		void parseLinks(links).then((info) => {
 			if (!info) return

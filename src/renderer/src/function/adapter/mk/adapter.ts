@@ -31,7 +31,6 @@ import {
 	LoginInfo,
 	MemberData,
 	MfaceSegData,
-	MdSegData,
 	MsgData,
 	MsgEventData,
 	PokeEventData,
@@ -47,6 +46,9 @@ import {
 	XmlSegData,
 	SuperFaceSegData,
 	FriendData,
+	BreakSegData,
+	LinkSegData,
+	ButtonSegData,
 } from '@renderer/function/adapter/interface'
 
 import { handleEvent } from '@renderer/function/event'
@@ -54,20 +56,31 @@ import { Resource } from '@renderer/function/model/resource'
 import {
 	AtAllSeg,
 	AtSeg,
+	BlockquoteSeg,
+	BreakSeg,
+	DeleteSeg,
+	EmphasisSeg,
 	FaceSeg,
 	ForwardSeg,
+	HeadingSeg,
 	ImgSeg,
+	InlineCodeSeg,
 	JsonSeg,
+	LinkSeg,
+	ListSeg,
 	MfaceSeg,
 	ReplySeg,
 	Seg,
+	StrongSeg,
 	SuperFaceSeg,
-	TxtSeg,
+	TableSeg,
+	TextSeg,
+	ThematicBreakSeg,
 	UnknownSeg,
 	VideoSeg,
 	XmlSeg,
-} from '@renderer/function/model/seg'
-import { queueWait } from '@renderer/function/utils/baseUtil'
+} from '@renderer/function/model/segs'
+import { parseUrlFromMsg, queueWait } from '@renderer/function/utils/baseUtil'
 import useRuntimeData from '@renderer/state/runtimeData'
 import type {
 	ApiInput,
@@ -121,6 +134,8 @@ import type { MilkyVersion } from '@renderer/function/adapter/mk/utils'
 import { logger, popInfo } from '@renderer/function/base'
 import { emitConnectionLost } from '@renderer/function/utils/connectionEvent'
 import Emoji from '@renderer/function/model/emoji'
+import { parseMarkdown } from '@root/src/renderer/src/function/utils/markdown'
+import { ButtonSeg } from '@root/src/renderer/src/function/model/segs/buttonSeg'
 
 // 定义 API 装饰器：在方法外层包裹 try/catch，失败时返回 undefined
 function api(_: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -139,6 +154,7 @@ export class MilkyAdapter implements AdapterInterface {
 	readonly name = 'Milky'
 	readonly version = '0.0.2'
 	readonly protocol = 'mk'
+	readonly sendMsgTextType = 'text'
 	/**
 	 * 协议端 Milky 版本，连接时判定一次
 	 */
@@ -174,7 +190,9 @@ export class MilkyAdapter implements AdapterInterface {
 		this.segParsers['light_app'] = this.lightAppParser.bind(this)
 		this.segParsers['markdown'] = this.markdownParser.bind(this)
 
-		this.segSerializer['text'] = this.textSerializer.bind(this)
+		for (const seg of this.mdSegs) {
+			this.segSerializer[seg.type] = this.mdSegSerializer.bind(this)
+		}
 		this.segSerializer['image'] = this.imageSerializer.bind(this)
 		this.segSerializer['face'] = this.faceSerializer.bind(this)
 		this.segSerializer['super-face'] = this.superFaceSerializer.bind(this)
@@ -184,6 +202,7 @@ export class MilkyAdapter implements AdapterInterface {
 		this.segSerializer['video'] = this.videoSerializer.bind(this)
 		this.segSerializer['forward'] = this.forwardSerializer.bind(this)
 		this.segSerializer['reply'] = this.replySerializer.bind(this)
+		this.segSerializer['button'] = this.buttonSerialize.bind(this)
 		// this.segSerializer['poke'] = this.pokeSerializer.bind(this)
 		this.segSerializer['xml'] = this.xmlSerializer.bind(this)
 		this.segSerializer['json'] = this.jsonSerializer.bind(this)
@@ -1012,12 +1031,12 @@ export class MilkyAdapter implements AdapterInterface {
 	//#region == 反序列化 ===========================
 	segParsers: Record<
 		string,
-		(data: any, msg?: IncomingMessage) => Promise<SegData>
+		(data: any, msg?: IncomingMessage) => Promise<SegData[]>
 	> = {}
 	async parseSeg(
 		data: IncomingSegment,
 		msg?: IncomingMessage,
-	): Promise<SegData>
+	): Promise<SegData[]>
 	async parseSeg(
 		data: IncomingSegment[],
 		msg?: IncomingMessage,
@@ -1025,147 +1044,203 @@ export class MilkyAdapter implements AdapterInterface {
 	async parseSeg(
 		data: IncomingSegment | IncomingSegment[],
 		msg?: IncomingMessage,
-	): Promise<SegData | SegData[]> {
+	): Promise<SegData[]> {
 		if (Array.isArray(data)) {
-			return await Promise.all(data.map((d) => this.parseSeg(d, msg)))
+			const segsList = await Promise.all(
+				data.map((d) => this.parseSeg(d, msg)),
+			)
+			const result: SegData[] = []
+			for (const segs of segsList) {
+				result.push(...segs)
+			}
+			return result
 		} else {
 			try {
 				const parser = this.segParsers[data.type]
 				if (parser) return await parser(data, msg)
-				return this.unknownParser(data, msg)
+				return [this.unknownParser(data, msg)]
 			} catch (err) {
 				logger.error(
 					err as Error,
 					'消息段解析失败:' + JSON.stringify(data),
 				)
-				return { type: 'error' }
+				return [{ type: 'error' }]
 			}
 		}
 	}
 	async textParser(
 		data: ISeg.TextSeg,
 		_?: IncomingMessage,
-	): Promise<TextSegData> {
-		return {
-			type: 'text',
-			text: data.data.text,
+	): Promise<(TextSegData | LinkSegData | BreakSegData)[]> {
+		const result: (TextSegData | LinkSegData | BreakSegData)[] = []
+		for (const seg of data.data.text.split('\n')) {
+			const textAndLinkList = parseUrlFromMsg(seg)
+			for (const textOrLink of textAndLinkList) {
+				if (textOrLink.type === 'txt') {
+					result.push({
+						type: 'text',
+						text: textOrLink.content,
+					})
+				} else {
+					const name = textOrLink.content
+					const url = name.startsWith('http')
+						? name
+						: `https://${name}`
+					result.push({
+						type: 'link',
+						name,
+						url,
+					})
+				}
+			}
+			result.push({ type: 'break' })
 		}
+
+		result.pop()
+
+		return result
 	}
 	async imageParser(
 		data: ISeg.ImageSeg,
 		_?: IncomingMessage,
-	): Promise<ImgSegData> {
-		return {
-			type: 'image',
-			url: Resource.fromUrl(data.data.temp_url, data.data.resource_id),
-			isFace: data.data.sub_type === 'sticker',
-			width: data.data.width,
-			height: data.data.height,
-		}
+	): Promise<ImgSegData[]> {
+		return [
+			{
+				type: 'image',
+				url: Resource.fromUrl(
+					data.data.temp_url,
+					data.data.resource_id,
+				),
+				isFace: data.data.sub_type === 'sticker',
+				width: data.data.width,
+				height: data.data.height,
+			},
+		]
 	}
 	async marketFaceParser(
 		data: ISeg.MarketFaceSeg,
 		_?: IncomingMessage,
-	): Promise<MfaceSegData> {
-		return {
-			type: 'mface',
-			url: data.data.url,
-			summary: data.data.summary,
-			packageId: data.data.emoji_package_id,
-			id: data.data.emoji_id,
-			key: data.data.key,
-		}
+	): Promise<MfaceSegData[]> {
+		return [
+			{
+				type: 'mface',
+				url: data.data.url,
+				summary: data.data.summary,
+				packageId: data.data.emoji_package_id,
+				id: data.data.emoji_id,
+				key: data.data.key,
+			},
+		]
 	}
 	async v1MarketFaceParser(
 		data: ISeg.MarketFaceSeg,
 		_?: IncomingMessage,
-	): Promise<MfaceSegData> {
-		return {
-			type: 'mface',
-			url: data.data.url,
-			summary: '[动画表情]',
-			packageId: 0,
-			id: '',
-			key: '',
-		}
+	): Promise<MfaceSegData[]> {
+		return [
+			{
+				type: 'mface',
+				url: data.data.url,
+				summary: '[动画表情]',
+				packageId: 0,
+				id: '',
+				key: '',
+			},
+		]
 	}
 	async faceParser(
 		data: ISeg.FaceSeg,
 		_?: IncomingMessage,
-	): Promise<FaceSegData | SuperFaceSegData> {
+	): Promise<FaceSegData[] | SuperFaceSegData[]> {
 		if (data.data.is_large)
-			return {
-				type: 'super-face',
-				id: data.data.face_id,
-			}
+			return [
+				{
+					type: 'super-face',
+					id: data.data.face_id,
+				},
+			]
 		else
-			return {
-				type: 'face',
-				id: data.data.face_id,
-			}
+			return [
+				{
+					type: 'face',
+					id: data.data.face_id,
+				},
+			]
 	}
 	async v1FaceParser(
 		data: ISeg.FaceSeg,
 		msg?: IncomingMessage,
-	): Promise<FaceSegData | SuperFaceSegData> {
+	): Promise<FaceSegData[] | SuperFaceSegData[]> {
 		const id = Number(data.data.face_id)
 		if (msg?.segments.length === 1 && Emoji.superList.includes(id))
-			return { type: 'super-face', id: data.data.face_id }
-		else return { type: 'face', id: data.data.face_id }
+			return [{ type: 'super-face', id: data.data.face_id }]
+		else return [{ type: 'face', id: data.data.face_id }]
 	}
 	async mentionParser(
 		data: ISeg.MentionSeg,
 		_?: IncomingMessage,
-	): Promise<AtSegData> {
-		return {
-			type: 'at',
-			user_id: data.data.user_id.toString(),
-		}
+	): Promise<AtSegData[]> {
+		return [
+			{
+				type: 'at',
+				user_id: data.data.user_id.toString(),
+			},
+		]
 	}
 	async mentionAllParser(
 		_data: ISeg.MentionAllSeg,
 		_?: IncomingMessage,
-	): Promise<AtAllSegData> {
-		return {
-			type: 'atall',
-		}
+	): Promise<AtAllSegData[]> {
+		return [
+			{
+				type: 'atall',
+			},
+		]
 	}
 	async videoParser(
 		data: ISeg.VideoSeg,
 		_?: IncomingMessage,
-	): Promise<VideoSegData> {
-		return {
-			type: 'video',
-			file: $t('[视频]'),
-			url: Resource.fromUrl(data.data.temp_url, data.data.resource_id),
-		}
+	): Promise<VideoSegData[]> {
+		return [
+			{
+				type: 'video',
+				file: $t('[视频]'),
+				url: Resource.fromUrl(
+					data.data.temp_url,
+					data.data.resource_id,
+				),
+			},
+		]
 	}
 	async forwardParser(
 		data: ISeg.ForwardSeg,
 		_?: IncomingMessage,
-	): Promise<ForwardSegData> {
+	): Promise<ForwardSegData[]> {
 		const id: string = data.data.forward_id
 		const nodes = await this.getForwardMsg(id)
 		if (!nodes) throw new Error('获取合并转发消息失败')
-		return {
-			type: 'forward',
-			id,
-			content: nodes,
-		}
+		return [
+			{
+				type: 'forward',
+				id,
+				content: nodes,
+			},
+		]
 	}
 	async replyParser(
 		data: ISeg.ReplySeg,
 		_?: IncomingMessage,
-	): Promise<ReplySegData> {
-		return {
-			type: 'reply',
-			id: data.data.message_seq.toString(),
-		}
+	): Promise<ReplySegData[]> {
+		return [
+			{
+				type: 'reply',
+				id: data.data.message_seq.toString(),
+			},
+		]
 	}
 	async fileParser(
 		data: ISeg.FileSeg,
 		msg?: IncomingMessage,
-	): Promise<FileSegData> {
+	): Promise<FileSegData[]> {
 		let url: string
 		try {
 			if (msg?.message_scene === 'group') {
@@ -1194,13 +1269,15 @@ export class MilkyAdapter implements AdapterInterface {
 		} catch {
 			url = ''
 		}
-		return {
-			type: 'file',
-			name: data.data.file_name,
-			size: data.data.file_size,
-			url: `${url}${data.data.file_name}`,
-			file_id: data.data.file_id,
-		}
+		return [
+			{
+				type: 'file',
+				name: data.data.file_name,
+				size: data.data.file_size,
+				url: `${url}${data.data.file_name}`,
+				file_id: data.data.file_id,
+			},
+		]
 	}
 	// async pokeParser(_: ObPokeSeg): Promise<PokeSegData> {
 	//     return { type: 'poke' }
@@ -1208,44 +1285,99 @@ export class MilkyAdapter implements AdapterInterface {
 	async xmlParser(
 		data: ISeg.XmlSeg,
 		_?: IncomingMessage,
-	): Promise<XmlSegData> {
-		return {
-			type: 'xml',
-			data: data.data.xml_payload,
-			id: data.data.service_id.toString(),
-		}
+	): Promise<XmlSegData[]> {
+		return [
+			{
+				type: 'xml',
+				data: data.data.xml_payload,
+				id: data.data.service_id.toString(),
+			},
+		]
 	}
 	async markdownParser(
 		data: ISeg.MarkdownSeg,
 		_?: IncomingMessage,
-	): Promise<MdSegData> {
-		return {
-			type: 'md',
-			content: data.data.content,
-		}
+	): Promise<SegData[]> {
+		return await parseMarkdown(data.data.content, {
+			image: async (node) => {
+				const url = node.url ?? ''
+				// alt 形如 "图片 #1050px #3109px"
+				const imageSizeRe =
+					/^(.*?)\s*#\s*(\d+(?:\.\d+)?)px\s*#\s*(\d+(?:\.\d+)?)px\s*$/
+				const size = imageSizeRe.exec(node.alt ?? '')
+				const seg: ImgSegData = {
+					type: 'image',
+					url: Resource.fromUrl(url),
+					isFace: false,
+				}
+				if (size) {
+					seg.summary = size[1].trim() || undefined
+					seg.width = Math.round(Number(size[2]))
+					seg.height = Math.round(Number(size[3]))
+				} else if (node.alt) {
+					seg.summary = node.alt
+				}
+				return [seg as ImgSegData]
+			},
+			link: async (node, parser) => {
+				const url = node.url ?? ''
+				const name = parser.getPlaintext(node.children ?? []).trim()
+
+				if (url.startsWith('%7B%22version%22%3A')) return []
+
+				// 回复人
+				if (url.startsWith('mqqapi://markdown/mention?')) {
+					const arg = new URL(url).searchParams
+					return [
+						{
+							type: 'at',
+							user_id: arg.get('at_tinyid') ?? '0',
+						} as AtSegData,
+					]
+				}
+
+				// 按钮消息
+				// "mqqapi://aio/inlinecmd?command=%E7%AD%BE%E5%88%B0%E8%AE%BE%E7%BD%AE&enter=false&reply=false"
+				if (url.startsWith('mqqapi://')) {
+					return [
+						{
+							type: 'button',
+							cmd: 'todo',
+							name: name,
+						} as ButtonSegData,
+					]
+				}
+
+				return [{ type: 'link', url, name: name || url } as LinkSegData]
+			},
+		})
 	}
 	async lightAppParser(
 		data: ISeg.LightAppSeg,
 		_?: IncomingMessage,
-	): Promise<JsonSegData | ForwardSegData> {
+	): Promise<JsonSegData[] | ForwardSegData[]> {
 		if (data.data.app_name === 'com.tencent.multimsg') {
 			const jsonData = JSON.parse(data.data.json_payload)
 			const forwardId = jsonData['meta']['detail']['resid']
 			if (!forwardId) throw new Error('获取合并转发消息ID失败')
 			const nodes = await this.getForwardMsg(forwardId)
 			if (!nodes) throw new Error('获取合并转发消息失败')
-			return {
-				type: 'forward',
-				id: forwardId,
-				content: nodes,
-			}
+			return [
+				{
+					type: 'forward',
+					id: forwardId,
+					content: nodes,
+				},
+			]
 		}
 
-		return {
-			type: 'json',
-			data: data.data.json_payload,
-			id: data.data.app_name,
-		}
+		return [
+			{
+				type: 'json',
+				data: data.data.json_payload,
+				id: data.data.app_name,
+			},
+		]
 	}
 
 	unknownParser(data: IncomingSegment, _?: IncomingMessage): UnknownSegData {
@@ -1278,14 +1410,74 @@ export class MilkyAdapter implements AdapterInterface {
 		seg: Seg | Seg[],
 	): Promise<OutgoingSegment | OutgoingSegment[]> {
 		if (Array.isArray(seg)) {
-			return Promise.all(seg.map((d) => this.serializeSeg(d)))
+			const originSegs = await Promise.all(
+				seg.map((d) => this.serializeSeg(d)),
+			)
+			let result: OutgoingSegment[] = []
+			let cacheText = ''
+			for (const originSeg of originSegs) {
+				if (originSeg.type === 'text') {
+					cacheText += originSeg.data.text
+				} else {
+					if (cacheText) {
+						result.push({
+							type: 'text',
+							data: {
+								text: cacheText,
+							},
+						})
+						cacheText = ''
+					}
+					result.push(originSeg)
+				}
+			}
+			if (cacheText) {
+				result.push({
+					type: 'text',
+					data: {
+						text: cacheText,
+					},
+				})
+				cacheText = ''
+			}
+			return result
 		} else {
 			const serializer = this.segSerializer[seg.type]
 			if (serializer) return await serializer(seg)
 			return this.unmatchSerializer(seg)
 		}
 	}
-	async textSerializer(seg: TxtSeg): Promise<OSeg.TextSeg> {
+	protected readonly mdSegs = [
+		BlockquoteSeg,
+		BreakSeg,
+		DeleteSeg,
+		EmphasisSeg,
+		HeadingSeg,
+		InlineCodeSeg,
+		LinkSeg,
+		ListSeg,
+		StrongSeg,
+		TableSeg,
+		TextSeg,
+		ThematicBreakSeg,
+	]
+	async mdSegSerializer(seg: Seg): Promise<OSeg.TextSeg> {
+		return {
+			type: 'text',
+			data: {
+				text: seg.plaintext(),
+			},
+		}
+	}
+	async buttonSerialize(seg: ButtonSeg): Promise<OSeg.TextSeg> {
+		return {
+			type: 'text',
+			data: {
+				text: `[按钮:${seg.name}]`,
+			},
+		}
+	}
+	async textSerializer(seg: TextSeg): Promise<OSeg.TextSeg> {
 		return {
 			type: 'text',
 			data: {

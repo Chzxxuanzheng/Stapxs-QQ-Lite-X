@@ -16,7 +16,9 @@ import {
 } from '@renderer/function/model/session'
 import { Member, User } from '@renderer/function/model/user'
 import { Gender, Role } from '@renderer/function/adapter/enmu'
-import { Seg } from '@renderer/function/model/seg'
+import { Seg } from '@renderer/function/model/segs'
+
+export type SendMsgTextType = 'md' | 'text'
 
 export interface AdapterInterface {
 	// 基础信息
@@ -65,6 +67,7 @@ export interface AdapterInterface {
 	 * @param url
 	 */
 	splitMsg(segs: Seg[]): Seg[][]
+	get sendMsgTextType(): SendMsgTextType
 	//#endregion
 
 	//#region == API ===============================================
@@ -603,14 +606,81 @@ export interface EssenceData {
 export interface SegData {
 	type: string // 消息段类型
 }
+
+//#region == Markdown ==================================
+type MdChildren = SegData[]
+export interface BlockquoteSegData extends SegData {
+	type: 'blockquote' // 消息段类型
+	children: MdChildren // 文本内容
+}
+export interface BreakSegData extends SegData {
+	type: 'break' // 消息段类型
+}
+export interface CodeSegData extends SegData {
+	type: 'code' // 消息段类型
+	content: string // 代码内容
+	lang: string // 语言
+}
+export interface DeleteSegData extends SegData {
+	type: 'delete' // 消息段类型
+	children: MdChildren // 文本内容
+}
+export interface EmphasisSegData extends SegData {
+	type: 'emphasis' // 消息段类型
+	children: MdChildren // 文本内容
+}
+export interface HeadingSegData extends SegData {
+	type: 'heading' // 消息段类型
+	level: 1 | 2 | 3 | 4 | 5 | 6 // 标题等级
+	children: MdChildren // 文本内容
+}
+export interface InlineCodeSegData extends SegData {
+	type: 'inline-code' // 消息段类型
+	content: string // 代码内容
+}
+export interface LinkSegData extends SegData {
+	type: 'link' // 消息段类型
+	url: string // 连接
+	name: string // 显示名称
+}
+export interface ListSegData extends SegData {
+	type: 'list' // 消息段类型
+	children: MdChildren[] // 列表内容
+	ordered: boolean // 是否为有序列表
+}
+export interface StrongSegData extends SegData {
+	type: 'strong' // 消息段类型
+	children: MdChildren // 加粗内容
+}
 export interface TextSegData extends SegData {
 	type: 'text' // 消息段类型
 	text: string // 文本内容
 }
-export interface MdSegData extends SegData {
-	type: 'md' // 消息段类型
-	content: string // Markdown内容
+export interface ThematicBreakSegData extends SegData {
+	type: 'thematic-break' // 消息段类型
 }
+export interface TableSegData extends SegData {
+	type: 'table'
+	head: MdChildren[]
+	content: MdChildren[][]
+}
+export type PlaintextSegData = TextSegData | LinkSegData | BreakSegData
+export type MdSegData =
+	| BlockquoteSegData
+	| BreakSegData
+	| CodeSegData
+	| DeleteSegData
+	| EmphasisSegData
+	| HeadingSegData
+	| InlineCodeSegData
+	| LinkSegData
+	| ListSegData
+	| StrongSegData
+	| TextSegData
+	| ThematicBreakSegData
+	| TableSegData
+//#endregion
+
 export interface ImgSegData extends SegData {
 	type: 'image' // 消息段类型
 	url: Resource // 图片链接
@@ -669,6 +739,11 @@ export interface ReplySegData extends SegData {
 }
 export interface PokeSegData extends SegData {
 	type: 'poke' // 消息段类型
+}
+export interface ButtonSegData extends SegData {
+	type: 'button' // 消息类型
+	name: string // 按钮显示的名称
+	cmd: string // 要执行的命令
 }
 export interface XmlSegData extends SegData {
 	type: 'xml' // 消息段类型

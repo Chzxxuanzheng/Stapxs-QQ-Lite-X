@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { logger } from '@renderer/function/base'
-import { JsonSeg } from '@renderer/function/model/seg'
+import { JsonSeg } from '@renderer/function/model/segs'
 import { ElAmap, ElAmapMarker } from '@vuemap/vue-amap'
 import * as z from 'zod'
 
