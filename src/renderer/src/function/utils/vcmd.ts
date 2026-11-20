@@ -17,7 +17,6 @@ import {
 	watchEffect,
 	WatchHandle,
 } from 'vue'
-import { Role } from '@renderer/function/adapter/enmu'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { shouldAutoFocus } from '@renderer/function/utils/appUtil'
 import { wheelMask } from '@renderer/function/utils/input'
@@ -25,28 +24,6 @@ import { VueCompData } from '@renderer/function/elements/vueComp'
 import { addTooltip, TooltipController } from '@renderer/function/tooltip'
 import { useStayEvent } from '@renderer/function/composable/useStayEvent'
 
-/**
- * 根据用户角色设置元素的 class 属性
- */
-export const vUserRole: Directive<HTMLSpanElement, Role> = {
-	mounted(el: HTMLElement, binding: DirectiveBinding<Role>) {
-		const role = binding.value
-		if (!role) return
-		// 设置 class
-		el.classList.add('user-title')
-		switch (role) {
-			case Role.Owner:
-				el.classList.add('owner')
-				break
-			case Role.Admin:
-				el.classList.add('admin')
-				break
-			case Role.Bot:
-				el.classList.add('robot')
-				break
-		}
-	},
-}
 /**
  * 创建一个右键菜单指令
  * 用于闭包公用停留事件控制器

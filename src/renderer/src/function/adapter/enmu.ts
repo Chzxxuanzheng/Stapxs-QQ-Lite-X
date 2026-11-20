@@ -8,5 +8,4 @@ export const enum Role {
 	Owner = 'owner',
 	Admin = 'admin',
 	User = 'user',
-	Bot = 'bot',
 }

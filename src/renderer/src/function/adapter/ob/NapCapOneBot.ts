@@ -144,7 +144,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 					nickname: friend.nickname,
 					remark: friend.remark === '' ? undefined : friend.remark,
 					regTime: 0,
-					level: 0,
+					bot: this.isRobot(friend.user_id),
 					age: friend.age,
 					sex: Gender.Unknown,
 					class: {
@@ -171,9 +171,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 		const out = this.buildUnknownUser(userIdNum, user.nickname)
 		out.remark = user.remark === '' ? undefined : user.remark
 		out.longNick = user.long_nick === '' ? undefined : user.long_nick
-		out.qid = user.qid
 		out.regTime = user.reg_time
-		out.level = user.qqLevel
 		out.age = user.age
 		out.sex = getGender(user.sex)
 		return out

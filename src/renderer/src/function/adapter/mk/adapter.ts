@@ -382,13 +382,12 @@ export class MilkyAdapter implements AdapterInterface {
 		const data = await this.callApi('GetUserProfile', { user_id: +userId })
 		return {
 			id: userId.toString(),
-			avatar: this.getUserAvatar(+userId),
+			avatar: this.getUserAvatar(userId),
 			remark: data.remark,
 			nickname: data.nickname,
 			longNick: data.bio,
-			qid: data.qid,
 			regTime: Date.now(),
-			level: data.level ?? 0,
+			bot: this.isRobot(userId),
 			age: data.age,
 			sex: getGender(data.sex),
 		}
@@ -970,7 +969,10 @@ export class MilkyAdapter implements AdapterInterface {
 		let sender: UserData
 		switch (data.message_scene) {
 			case 'friend':
-				sender = this.parseFriend(data.friend)
+				sender =
+					data.sender_id === data.friend.user_id
+						? this.parseFriend(data.friend)
+						: this.buildUnknownUser(data.sender_id)
 				break
 			case 'group':
 				sender = this.parseMember(
@@ -2019,7 +2021,7 @@ export class MilkyAdapter implements AdapterInterface {
 			regTime: 0,
 			avatar: this.getUserAvatar(id),
 			nickname: nickname ?? id.toString(),
-			level: 1,
+			bot: this.isRobot(id),
 			age: 0,
 			sex: getGender('unknown'),
 		}
@@ -2045,13 +2047,17 @@ export class MilkyAdapter implements AdapterInterface {
 		data.group_id = groupId.toString()
 		data.join_time = member.join_time
 		data.last_sent_time = member.last_sent_time
-		data.level = member.level
 		data.nickname = member.nickname
 		data.role = getRole(member.role)
 		data.sex = getGender(member.sex)
 		data.title = member.title
 		data.unfriendly = false
 		data.banTime = member.shut_up_end_time ?? undefined
+
+		const titleInfo: string[] = [`Lv.${member.level ?? 1}`]
+		if (member.title) titleInfo.push(member.title)
+
+		data.title = titleInfo.join(' ')
 
 		return data
 	}
@@ -2064,6 +2070,14 @@ export class MilkyAdapter implements AdapterInterface {
 		return `https://p.qlogo.cn/gh/${id}/${id}/0`
 	}
 	//#endregion
+	protected isRobot(id: string | number): boolean {
+		id = +id
+		if (id >= 4010000000 && id <= 4019999999) return true
+		if (id >= 2854196301 && id <= 2854216399) return true
+		if (id >= 3889000000 && id <= 3889999999) return true
+		if (id === 66600000) return true
+		return false
+	}
 	//#endregion
 }
 

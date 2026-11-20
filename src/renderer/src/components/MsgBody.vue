@@ -39,32 +39,8 @@
 				'hide-face': !config.showAvatar,
 			}"
 		>
-			<div class="message-info">
-				<!-- 一帮头衔之类的 -->
-				<template
-					v-if="msg.sender instanceof Member && config.showAvatar"
-				>
-					<span v-user-role="msg.sender.role">
-						<template v-if="msg.sender.role === Role.Bot">
-							<font-awesome-icon :icon="['fas', 'robot']" />
-						</template>
-						<template v-if="msg.sender.level">
-							{{ 'Lv.' + msg.sender.level }}
-						</template>
-						<template v-if="msg.sender.title">
-							{{
-								msg.sender.title.replace(
-									/[\u202A-\u202E\u2066-\u2069]/g,
-									'',
-								)
-							}}
-						</template>
-					</span>
-				</template>
-				<a v-if="config.showAvatar" class="sender-name">
-					{{ msg.sender.name }}
-				</a>
-			</div>
+			<!-- 一帮头衔之类的 -->
+			<UserName v-if="config.showAvatar" :user="msg.sender" />
 			<div class="message-content">
 				<div
 					v-if="msg.icon && config.showIcon && direction === 'right'"
@@ -190,17 +166,15 @@
 <script setup lang="ts">
 import EmojiFace from '@renderer/components/EmojiFace.vue'
 
-import { Role } from '@renderer/function/adapter/enmu'
 import { MenuEventData } from '@renderer/function/elements/information'
 import Emoji from '@renderer/function/model/emoji'
 import { Msg, SelfMsg } from '@renderer/function/model/msg'
-import { User, Member } from '@renderer/function/model/user'
+import { User } from '@renderer/function/model/user'
 import {
 	vHide,
 	vMenu,
 	vMove,
 	VMoveOptions,
-	vUserRole,
 } from '@renderer/function/utils/vcmd'
 import { computed, provide, shallowRef, useTemplateRef } from 'vue'
 import { vUserTooltip } from '@renderer/function/tooltip'
@@ -214,6 +188,7 @@ import useMsgsConfigState, {
 	MsgsConfig,
 } from '@renderer/function/composable/scopedState/msgsConfig'
 import { MultiselectState } from '@renderer/function/composable/scopedState/multiselect'
+import UserName from '@renderer/components/UserName.vue'
 
 const {
 	msg,

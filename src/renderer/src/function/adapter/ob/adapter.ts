@@ -338,7 +338,7 @@ export class OneBotAdapter implements AdapterInterface {
 				nickname: item.nickname,
 				remark: item.remark === '' ? undefined : item.remark,
 				regTime: 0,
-				level: 0,
+				bot: this.isRobot(item.user_id),
 				age: 0,
 				sex: Gender.Unknown,
 				class: {
@@ -394,9 +394,7 @@ export class OneBotAdapter implements AdapterInterface {
 		const user = this.buildUnknownUser(userIdNum)
 		user.remark = baseInfo?.remark
 		user.nickname = baseInfo?.nickname || data.data.nickname
-		user.qid = $t('不支持')
 		user.regTime = Date.now()
-		user.level = 0
 		user.age = data.data.age
 		user.sex = getGender(data.data.sex)
 		return user
@@ -1285,7 +1283,7 @@ export class OneBotAdapter implements AdapterInterface {
 			regTime: 0,
 			avatar: this.getUserAvatar(id),
 			nickname: nickname ?? id.toString(),
-			level: 1,
+			bot: this.isRobot(id),
 			age: 0,
 			sex: Gender.Unknown,
 		}
@@ -1307,11 +1305,14 @@ export class OneBotAdapter implements AdapterInterface {
 		data.group_id = groupId.toString()
 		data.join_time = member.join_time
 		data.last_sent_time = member.last_sent_time
-		data.level = Number(member.level) || 0
 		data.role = getRole(member.role)
 		data.sex = getGender(member.sex)
 		data.age = member.age
-		data.title = member.title === '' ? undefined : member.title
+
+		const titleInfo: string[] = [`Lv.${member.level ?? 1}`]
+		if (member.title) titleInfo.push(member.title)
+
+		data.title = titleInfo.join(' ')
 		data.unfriendly = member.unfriendly
 
 		return data
@@ -1342,7 +1343,7 @@ export class OneBotAdapter implements AdapterInterface {
 			group_id: groupId.toString(),
 			join_time: 0,
 			last_sent_time: 0,
-			level: 0,
+			title: '',
 			role: Role.User,
 			unfriendly: false,
 		}
@@ -1360,6 +1361,15 @@ export class OneBotAdapter implements AdapterInterface {
 		return `https://p.qlogo.cn/gh/${id}/${id}/0`
 	}
 	//#endregion
+
+	protected isRobot(id: string | number): boolean {
+		id = +id
+		if (id >= 4010000000 && id <= 4019999999) return true
+		if (id >= 2854196301 && id <= 2854216399) return true
+		if (id >= 3889000000 && id <= 3889999999) return true
+		if (id === 66600000) return true
+		return false
+	}
 
 	protected isDelete(_: ObMsg): boolean {
 		return false
