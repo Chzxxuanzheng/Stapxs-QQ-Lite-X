@@ -1,0 +1,1 @@
+function i(){return{canContainEols:["delete"],enter:{strikethrough:e},exit:{strikethrough:r}}}function e(t){this.enter({type:"delete",children:[],position:void 0},t)}function r(t){this.exit(t)}export{i as g};
