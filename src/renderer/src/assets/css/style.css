@@ -409,10 +409,6 @@ footer header span {
     height: var(--main-size);
 }
 
-.user-name {
-    display: none;
-}
-
 .scroll-top {
     border-top: 1px dashed var(--color-main);
     margin: 0 30px;
@@ -485,16 +481,6 @@ pre > code {
 
     .bar-search {
         display: none !important;
-    }
-
-    .user-name {
-        display: unset;
-        cursor: pointer;
-        color: var(--color-font-1);
-    }
-    .user-name:hover {
-        color: var(--color-font);
-        opacity: 0.7;
     }
 }
 

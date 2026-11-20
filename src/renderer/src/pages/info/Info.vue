@@ -39,14 +39,6 @@
                 </div> -->
 			</div>
 			<div v-else-if="chat instanceof UserSession && userInfo">
-				<header>
-					<span>QID</span>
-				</header>
-				<span>{{ userInfo.qid }}</span>
-				<header>
-					<span>{{ $t('等级') }}</span>
-				</header>
-				<span>{{ qqLevelToEmoji(userInfo.level) }}</span>
 				<header v-if="userInfo.regTime">
 					<span>{{ $t('注册时间') }}</span>
 				</header>
@@ -59,14 +51,6 @@
 						? userInfo.longNick
 						: $t('这个人很懒什么都没有写～')
 				}}</span>
-				<!-- <template v-if="!chat.show.temp">
-                    <header>
-                        <span>{{ $t('设置') }}</span>
-                    </header>
-                    <OptInfo
-                        :type="'number'"
-                        :chat="chat" />
-                </template> -->
 			</div>
 		</div>
 		<Tab v-if="chat instanceof GroupSession" class="chat-info-tab">
@@ -305,7 +289,7 @@ import {
 } from '@renderer/function/model/session'
 import { Member, User } from '@renderer/function/model/user'
 import useRuntimeData from '@renderer/state/runtimeData'
-import { changeSession, qqLevelToEmoji } from '@renderer/function/utils/msgUtil'
+import { changeSession } from '@renderer/function/utils/msgUtil'
 import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
 import { copyToClipboard, delay } from '@renderer/function/utils/systemUtil'
 import { vSearch } from '@renderer/function/utils/vcmd'

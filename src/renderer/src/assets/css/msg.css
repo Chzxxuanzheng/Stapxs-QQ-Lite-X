@@ -108,13 +108,14 @@
 .message-info {
     display: flex;
     height: calc(0.9rem + 2px);
+	align-items: center;
 }
 
 .without-avatar .message-info {
     display: none;
 }
 
-.right .message-info {
+.right .user-name {
     justify-content: end;
 }
 
@@ -1065,10 +1066,14 @@ div.rotate > div > svg {
     animation: rotate 1.5s linear infinite;
 }
 
-span.user-title {
+.user-name {
+	display: inline-flex;
+	align-items: center;
+}
+
+.user-name > .title {
     margin-right: 3px;
     font-size: 0.9rem;
-    height: 1rem;
     display: inline-block;
     background: var(--color-main);
     color: var(--color-font-r);
@@ -1076,9 +1081,22 @@ span.user-title {
     padding: 1px 4px;
     overflow: hidden;
     text-overflow: ellipsis;
+	align-items: center;
 }
 
-span.user-title.owner {
+.user-name > svg.admin {
+    color: var(--color-yellow);
+}
+
+.user-name > svg.owner {
+    color: var(--color-yellow);
+}
+
+.user-name > svg.bot {
+    color: var(--color-blue);
+}
+
+/* span.user-title.owner {
     background: var(--color-yellow);
 }
 
@@ -1088,7 +1106,7 @@ span.user-title.admin {
 
 span.user-title.robot {
     background: var(--color-blue);
-}
+} */
 
 .loading {
     opacity: 0;

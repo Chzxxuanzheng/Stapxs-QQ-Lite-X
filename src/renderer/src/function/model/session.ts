@@ -923,8 +923,6 @@ export class GroupSession extends Session {
 			if (b.role === Role.Owner) return 1
 			if (a.role === Role.Admin && b.role !== Role.Admin) return -1
 			if (b.role === Role.Admin && a.role !== Role.Admin) return 1
-			if (a.role === Role.Bot && b.role !== Role.Bot) return -1
-			if (b.role === Role.Bot && a.role !== Role.Bot) return 1
 			return a.namePy.localeCompare(b.namePy)
 		})
 

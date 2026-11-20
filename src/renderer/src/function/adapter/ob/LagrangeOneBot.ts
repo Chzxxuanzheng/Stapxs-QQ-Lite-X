@@ -107,7 +107,7 @@ export default class LagrangeOneBot
 				nickname: item.nickname,
 				remark: item.remark === '' ? undefined : item.remark,
 				regTime: 0,
-				level: 0,
+				bot: this.isRobot(item.user_id),
 				age: 0,
 				sex: Gender.Unknown,
 				class: {
@@ -143,9 +143,7 @@ export default class LagrangeOneBot
 		out.avatar = user.avatar || out.avatar
 		out.remark = baseInfo?.remark
 		out.longNick = user.sign === '' ? undefined : user.sign
-		out.qid = user.q_id
 		out.regTime = user.RegisterTime
-		out.level = user.level
 		out.age = user.age
 		out.sex = getGender(user.sex)
 		return out

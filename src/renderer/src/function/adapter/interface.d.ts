@@ -382,16 +382,15 @@ export interface UserData {
 	remark?: string // 备注
 	nickname: string // 昵称
 	longNick?: string // 个性签名
-	qid?: string // qid
 	remark?: string // 备注
+	regTime: number | string // 注册时间
+	bot: boolean // 是否是机器人
+	age: number // 年龄
+	sex: Gender // 性别
 	class?: {
 		id: string
 		name: string
 	}
-	regTime: number | string // 注册时间
-	level: number // QQ等级
-	age: number // 年龄
-	sex: Gender // 性别
 }
 export interface FriendData extends UserData {
 	id: string // 用户ID
@@ -408,10 +407,9 @@ export interface MemberData extends UserData {
 	group_id: string // 群ID
 	join_time: number // 加入时间
 	last_sent_time: number // 最后发言时间
-	level: number // 群等级
+	title: string // 头衔
 	nickname: string // 昵称
 	role: Role // 角色
-	title?: string // 头衔
 	unfriendly: boolean // 不友好记录
 	banTime?: number // 禁言时间，单位秒
 }

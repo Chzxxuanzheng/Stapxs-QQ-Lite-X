@@ -127,7 +127,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 					nickname: friend.nickname,
 					remark: friend.remark === '' ? undefined : friend.remark,
 					regTime: 0,
-					level: 0,
+					bot: this.isRobot(id),
 					age: 0,
 					sex: Gender.Unknown,
 					class: {
@@ -156,9 +156,7 @@ export default class LLBTOneBot extends OneBotAdapter {
 		const remark = this.remarkCache?.get(userIdNum)
 		out.remark = remark === '' ? undefined : remark
 		out.longNick = user.long_nick === '' ? undefined : user.long_nick
-		out.qid = user.qid
 		out.regTime = user.reg_time
-		out.level = user.level
 		out.age = user.age
 		out.sex = getGender(user.sex)
 		return out

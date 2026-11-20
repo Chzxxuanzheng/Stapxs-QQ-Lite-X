@@ -22,25 +22,7 @@
 				<img :src="userInfo.avatar" :alt="userInfo.name" />
 				<div>
 					<span name="id">{{ userInfo.user_id }}</span>
-					<div>
-						<a>{{ userInfo.name }}</a>
-						<span v-user-role="userInfo.role">
-							<template v-if="userInfo.role === Role.Bot">
-								<font-awesome-icon :icon="['fas', 'robot']" />
-							</template>
-							<template v-if="userInfo.level">
-								{{ 'Lv.' + userInfo.level }}
-							</template>
-							<template v-if="userInfo.title">
-								{{
-									userInfo.title.replace(
-										/[\u202A-\u202E\u2066-\u2069]/g,
-										'',
-									)
-								}}
-							</template>
-						</span>
-					</div>
+					<UserName :user="userInfo" />
 				</div>
 			</div>
 			<div class="member">
@@ -87,9 +69,6 @@
 					<span name="id">{{ userInfo.user_id }}</span>
 					<div>
 						<a>{{ userInfo.name }}</a>
-						<div>
-							等级: <span>Lv {{ userInfo.level }}</span>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -101,9 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { Role } from '@renderer/function/adapter/enmu'
 import { User, Member } from '@renderer/function/model/user'
-import { vUserRole } from '@renderer/function/utils/vcmd'
 
 const { user: userProp } = defineProps<{
 	user: User | number | (() => User | number)

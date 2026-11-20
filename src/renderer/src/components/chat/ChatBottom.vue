@@ -154,34 +154,18 @@
 				}"
 			>
 				<div
-					v-for="(item, id) in atFindList"
-					:key="'atFind-' + item.user_id"
+					v-for="(atUser, id) in atFindList"
+					:key="'atFind-' + atUser.user_id"
 					ref="at-find-items"
 					:class="{ selected: atSelected === id }"
 					@click="choiceAt(id)"
 				>
-					<img :src="item.avatar" :alt="item.name" />
-					<div>
-						<span>{{ item.name }}</span>
-						<span
-							v-if="item.role !== Role.User || item.title"
-							v-user-role="item.role"
-						>
-							<template v-if="item.title">
-								{{ item.title }}
-							</template>
-							<template v-else-if="item.role === Role.Bot">
-								<font-awesome-icon :icon="['fas', 'robot']" />
-							</template>
-							<template v-else-if="item.role === Role.Owner">
-								{{ $t('群主') }}
-							</template>
-							<template v-else-if="item.role === Role.Admin">
-								{{ $t('管理员') }}
-							</template>
-						</span>
-					</div>
-					<a>{{ item.user_id }}</a>
+					<img :src="atUser.avatar" :alt="atUser.name" />
+					<UserName
+						:user="atUser"
+						:order="['name', 'svg', 'title']"
+					/>
+					<a>{{ atUser.user_id }}</a>
 				</div>
 				<div v-if="atFindList.length == 0" class="emp">
 					<span>{{ $t('没有找到匹配的群成员') }}</span>
@@ -262,8 +246,6 @@ import {
 	watchEffect,
 	onMounted,
 } from 'vue'
-import { Role } from '@renderer/function/adapter/enmu'
-import { vUserRole } from '@renderer/function/utils/vcmd'
 import { fitScroll } from '@renderer/function/utils/appUtil'
 import { FileSender } from '@renderer/function/utils/fileSender'
 import { uploadFile } from '@renderer/function/input'
@@ -274,6 +256,7 @@ import { useViewer } from '@renderer/function/composable/inject/useViewer'
 import { useUpdateFlag } from '@renderer/function/composable/useUpdateFlag'
 import { useFrame } from '@renderer/function/composable/useFrame'
 import { useResizeObserver } from '@renderer/function/composable/useResizeObserver'
+import UserName from '@root/src/renderer/src/components/UserName.vue'
 
 const viewer = useViewer()
 

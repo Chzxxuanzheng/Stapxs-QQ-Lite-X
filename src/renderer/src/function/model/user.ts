@@ -26,9 +26,8 @@ export class User {
 	_nickname: Name
 	_remark?: Name
 	_longNick?: Name
-	qid?: string
+	bot: boolean
 	regTime: Time
-	level: number
 	age: number
 	sex: Gender
 	class?: {
@@ -41,12 +40,11 @@ export class User {
 		this._nickname = new Name(data.nickname)
 		if (data.remark) this._remark = new Name(data.remark)
 		if (data.longNick) this._longNick = new Name(data.longNick)
-		this.qid = data.qid
-		this.level = data.level
 		this.age = data.age
 		this.regTime = new Time(data.regTime)
 		this.sex = data.sex
 		this.class = data.class
+		this.bot = data.bot
 	}
 
 	upgrade(data: UserData, force = false) {
@@ -129,10 +127,9 @@ export class User {
 			regTime: this.regTime.time,
 			sex: this.sex,
 			age: this.age,
-			level: this.level,
+			bot: this.bot,
 			remark: this.remark?.toString(),
 			longNick: this.longNick?.toString(),
-			qid: this.qid,
 			class: this.class,
 		}
 	}
@@ -150,7 +147,6 @@ export class Member extends User {
 	_card?: Name
 	join_time: Time
 	last_sent_time: Time
-	level: number
 	role: Role
 	sex: Gender
 	_title?: Name
@@ -172,7 +168,6 @@ export class Member extends User {
 		if (data.card) this._card = new Name(data.card)
 		this.join_time = new Time(data.join_time)
 		this.last_sent_time = new Time(data.last_sent_time)
-		this.level = Number(data.level)
 		this.unfriendly = data.unfriendly
 		if (data.nickname) this._nickname = new Name(data.nickname)
 		if (data.title) this._title = new Name(data.title)
@@ -189,8 +184,7 @@ export class Member extends User {
 				this.role = Role.Admin
 				break
 			default:
-				if (isRobot(data.id ?? '0')) this.role = Role.Bot
-				else this.role = Role.User
+				this.role = Role.User
 				break
 		}
 		switch (data.sex) {
@@ -332,7 +326,6 @@ export class Member extends User {
 		if (newData._title) this._title = newData._title
 		this.join_time = newData.join_time
 		this.last_sent_time = newData.last_sent_time
-		this.level = newData.level
 		this.role = newData.role
 		if (newData._banTime) this._banTime = newData._banTime
 	}
@@ -360,15 +353,6 @@ function canBeAdmined(target: Role, other: Role): boolean {
 		if (other === Role.Owner) return true
 		return false
 	}
-	if (other === Role.User || other === Role.Bot) return false
+	if (other === Role.User) return false
 	return true
-}
-
-function isRobot(qqId: string): boolean {
-	const id = +qqId
-	if (id >= 4010000000 && id <= 4019999999) return true
-	if (id >= 2854196301 && id <= 2854216399) return true
-	if (id >= 3889000000 && id <= 3889999999) return true
-	if (id === 66600000) return true
-	return false
 }
