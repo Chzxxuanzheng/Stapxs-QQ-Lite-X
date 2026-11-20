@@ -969,7 +969,10 @@ export class MilkyAdapter implements AdapterInterface {
 		let sender: UserData
 		switch (data.message_scene) {
 			case 'friend':
-				sender = this.parseFriend(data.friend)
+				sender =
+					data.sender_id === data.friend.user_id
+						? this.parseFriend(data.friend)
+						: this.buildUnknownUser(data.sender_id)
 				break
 			case 'group':
 				sender = this.parseMember(
