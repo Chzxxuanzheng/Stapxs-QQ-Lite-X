@@ -3,7 +3,10 @@
  */
 import { autoMarkRaw } from '@renderer/function/model/utils'
 import { registerSegType, Seg } from '@renderer/function/model/segs/seg'
-import type { EmphasisSegData } from '@renderer/function/adapter/interface'
+import type {
+	EmphasisSegData,
+	SendMsgTextType,
+} from '@renderer/function/adapter/interface'
 import { Msg } from '@renderer/function/model/msg'
 
 @registerSegType
@@ -22,10 +25,10 @@ export class EmphasisSeg extends Seg {
 		return `*${this.children.map((child) => child.plaintext(msg)).join('')}*`
 	}
 
-	override reedit(): (string | Seg)[] {
+	override reedit(ctx: Msg, type: SendMsgTextType): (string | Seg)[] {
 		const out: (string | Seg)[] = []
 		for (const child of this.children) {
-			out.push(...child.reedit())
+			out.push(...child.reedit(ctx, type))
 		}
 
 		return ['*', ...out, '*']

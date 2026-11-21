@@ -249,6 +249,7 @@ export class InputMsg {
 		this.clear()
 		this.focus()
 		const redditSegs: (string | Seg)[] = []
+		const runtimeData = useRuntimeData()
 		for (const seg of msg.message) {
 			if (seg instanceof ReplySeg) {
 				const replyMsg = this.session.getMsgById(seg.id)
@@ -256,7 +257,9 @@ export class InputMsg {
 				continue
 			}
 
-			redditSegs.push(...seg.reedit())
+			redditSegs.push(
+				...seg.reedit(msg, runtimeData.nowAdapter!.sendMsgTextType),
+			)
 		}
 
 		for (const seg of redditSegs) {

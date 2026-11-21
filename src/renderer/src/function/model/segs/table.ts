@@ -3,7 +3,10 @@
  */
 import { autoMarkRaw } from '@renderer/function/model/utils'
 import { registerSegType, Seg } from '@renderer/function/model/segs/seg'
-import type { TableSegData } from '@renderer/function/adapter/interface'
+import type {
+	SendMsgTextType,
+	TableSegData,
+} from '@renderer/function/adapter/interface'
 import { Msg } from '@renderer/function/model/msg'
 
 @registerSegType
@@ -36,7 +39,7 @@ export class TableSeg extends Seg {
 			.join('\n')
 	}
 
-	override reedit(): (Seg | string)[] {
+	override reedit(ctx: Msg, type: SendMsgTextType): (Seg | string)[] {
 		const parseChildren = <T>(
 			segs: T[],
 			parseFunc: (child: T) => (Seg | string)[],
@@ -55,7 +58,8 @@ export class TableSeg extends Seg {
 		const formatRow = (row: Seg[][]): (Seg | string)[] =>
 			parseChildren(
 				row,
-				(cell) => parseChildren(cell, (child) => child.reedit()),
+				(cell) =>
+					parseChildren(cell, (child) => child.reedit(ctx, type)),
 				'|',
 			)
 		return parseChildren([this.head, ...this.content], formatRow, '\n')

@@ -3,7 +3,10 @@
  */
 import { autoMarkRaw } from '@renderer/function/model/utils'
 import { registerSegType, Seg } from '@renderer/function/model/segs/seg'
-import type { ListSegData } from '@renderer/function/adapter/interface'
+import type {
+	ListSegData,
+	SendMsgTextType,
+} from '@renderer/function/adapter/interface'
 import { Msg } from '@renderer/function/model/msg'
 
 @registerSegType
@@ -34,12 +37,12 @@ export class ListSeg extends Seg {
 			.join('\n')
 	}
 
-	override reedit(): (Seg | string)[] {
+	override reedit(ctx: Msg, type: SendMsgTextType): (Seg | string)[] {
 		const lines = this.children.map((item, index) => {
 			const prefix = this.ordered ? `${index + 1}. ` : '- '
 			const lineChildResult: (string | Seg)[] = []
 			for (const child of item) {
-				lineChildResult.push(...child.reedit())
+				lineChildResult.push(...child.reedit(ctx, type))
 			}
 			return [prefix, ...lineChildResult]
 		})

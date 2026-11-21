@@ -3,7 +3,11 @@
  */
 import { autoMarkRaw } from '@renderer/function/model/utils'
 import { registerSegType, Seg } from '@renderer/function/model/segs/seg'
-import type { LinkSegData } from '@renderer/function/adapter/interface'
+import type {
+	LinkSegData,
+	SendMsgTextType,
+} from '@renderer/function/adapter/interface'
+import { Msg } from '@root/src/renderer/src/function/model/msg'
 
 @registerSegType
 @autoMarkRaw
@@ -23,8 +27,9 @@ export class LinkSeg extends Seg {
 		return this.url ? `[${this.name}](${this.url})` : this.name
 	}
 
-	override reedit(): [string] {
-		return [this.plaintext()]
+	override reedit(_ctx: Msg, type: SendMsgTextType): [string] {
+		if (type === 'md') return [this.plaintext()]
+		else return [this.name]
 	}
 
 	override serializeData(): LinkSegData {

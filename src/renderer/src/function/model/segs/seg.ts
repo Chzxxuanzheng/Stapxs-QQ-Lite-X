@@ -1,6 +1,7 @@
 import {
 	AdapterName,
 	SegData,
+	SendMsgTextType,
 	type UnknownSegData,
 } from '@renderer/function/adapter/interface'
 import { Msg } from '@renderer/function/model/msg'
@@ -22,7 +23,7 @@ export abstract class Seg {
 
 	abstract serializeData(): SegData
 
-	abstract reedit(): (Seg | string)[]
+	abstract reedit(ctx: Msg, type: SendMsgTextType): (Seg | string)[]
 
 	init?(): void | Promise<void>
 	getImgData?(): { url: string; id: string } | undefined
