@@ -11,8 +11,8 @@ export class ThematicBreakSeg extends Seg {
 	static readonly type = 'thematic-break'
 	static readonly inline = false
 
-	constructor(_: ThematicBreakSegData) {
-		super()
+	constructor(data: ThematicBreakSegData) {
+		super(data.extra)
 	}
 
 	override plaintext(): string {
@@ -26,6 +26,7 @@ export class ThematicBreakSeg extends Seg {
 	override serializeData(): ThematicBreakSegData {
 		return {
 			type: 'thematic-break',
+			extra: this.extra,
 		}
 	}
 }

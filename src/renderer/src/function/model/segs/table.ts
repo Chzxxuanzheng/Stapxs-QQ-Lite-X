@@ -15,7 +15,7 @@ export class TableSeg extends Seg {
 	readonly content: Seg[][][]
 
 	constructor(data: TableSegData) {
-		super()
+		super(data.extra)
 		this.head = data.head.map((cell) =>
 			cell.map((child) => Seg.parse(child)),
 		)
@@ -70,6 +70,7 @@ export class TableSeg extends Seg {
 			content: this.content.map((row) =>
 				row.map((cell) => cell.map((child) => child.serializeData())),
 			),
+			extra: this.extra,
 		}
 	}
 }

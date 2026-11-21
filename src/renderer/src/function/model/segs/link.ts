@@ -14,7 +14,7 @@ export class LinkSeg extends Seg {
 	readonly name: string
 
 	constructor(data: LinkSegData) {
-		super()
+		super(data.extra)
 		this.url = data.url
 		this.name = data.name
 	}
@@ -32,6 +32,7 @@ export class LinkSeg extends Seg {
 			type: 'link',
 			url: this.url,
 			name: this.name,
+			extra: this.extra,
 		}
 	}
 }

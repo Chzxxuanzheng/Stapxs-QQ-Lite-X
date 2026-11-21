@@ -4,7 +4,6 @@ import {
 	FileSeg,
 	ForwardSeg,
 	JsonSeg,
-	PokeSeg,
 	Seg,
 	VideoSeg,
 	XmlSeg,
@@ -178,7 +177,7 @@ export function getProp(obj: any, key: string): unknown {
 	return obj[key]
 }
 
-const SingleSeg = [FileSeg, VideoSeg, ForwardSeg, PokeSeg, XmlSeg, JsonSeg]
+const SingleSeg = [FileSeg, VideoSeg, ForwardSeg, XmlSeg, JsonSeg]
 
 /**
  * 判断是不是单个消息段

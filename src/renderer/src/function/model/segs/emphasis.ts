@@ -14,7 +14,7 @@ export class EmphasisSeg extends Seg {
 	readonly children: Seg[]
 
 	constructor(data: EmphasisSegData) {
-		super()
+		super(data.extra)
 		this.children = data.children.map((child) => Seg.parse(child))
 	}
 
@@ -35,6 +35,7 @@ export class EmphasisSeg extends Seg {
 		return {
 			type: 'emphasis',
 			children: this.children.map((child) => child.serializeData()),
+			extra: this.extra,
 		}
 	}
 }

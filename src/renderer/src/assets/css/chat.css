@@ -1622,7 +1622,6 @@ input {
 }
 
 .face > div {
-    background: var(--color-card-2);
     border-radius: 100%;
     cursor: pointer;
     height: 40px;

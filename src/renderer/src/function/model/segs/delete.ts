@@ -14,7 +14,7 @@ export class DeleteSeg extends Seg {
 	readonly children: Seg[]
 
 	constructor(data: DeleteSegData) {
-		super()
+		super(data.extra)
 		this.children = data.children.map((child) => Seg.parse(child))
 	}
 
@@ -35,6 +35,7 @@ export class DeleteSeg extends Seg {
 		return {
 			type: 'delete',
 			children: this.children.map((child) => child.serializeData()),
+			extra: this.extra,
 		}
 	}
 }

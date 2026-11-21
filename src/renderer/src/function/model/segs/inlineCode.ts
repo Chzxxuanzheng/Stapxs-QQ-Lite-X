@@ -13,7 +13,7 @@ export class InlineCodeSeg extends Seg {
 	readonly content: string
 
 	constructor(data: InlineCodeSegData) {
-		super()
+		super(data.extra)
 		this.content = data.content
 	}
 
@@ -29,6 +29,7 @@ export class InlineCodeSeg extends Seg {
 		return {
 			type: 'inline-code',
 			content: this.content,
+			extra: this.extra,
 		}
 	}
 }

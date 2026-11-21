@@ -8,7 +8,6 @@ import {
 	FileSeg,
 	ForwardSeg,
 	JsonSeg,
-	PokeSeg,
 	Seg,
 	VideoSeg,
 	XmlSeg,
@@ -322,7 +321,7 @@ export async function fileToBase64(file: File): Promise<string> {
 	return btoa(binary)
 }
 
-const SingleSeg = [FileSeg, VideoSeg, ForwardSeg, PokeSeg, XmlSeg, JsonSeg]
+const SingleSeg = [FileSeg, VideoSeg, ForwardSeg, XmlSeg, JsonSeg]
 
 /**
  * 判断是不是单个消息段

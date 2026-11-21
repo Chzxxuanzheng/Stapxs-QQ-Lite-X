@@ -16,10 +16,11 @@ export class FaceSeg extends Seg {
 	constructor(id: string)
 	constructor(data: FaceSegData)
 	constructor(arg: string | FaceSegData) {
-		super()
 		if (typeof arg === 'string') {
+			super()
 			this.id = arg
 		} else {
+			super(arg.extra)
 			this.text = arg.text
 			this.id = arg.id
 		}
@@ -41,6 +42,7 @@ export class FaceSeg extends Seg {
 			type: 'face',
 			id: this.id,
 			text: this.text,
+			extra: this.extra,
 		}
 	}
 }

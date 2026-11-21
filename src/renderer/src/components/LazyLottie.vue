@@ -5,6 +5,7 @@
 			:animation-link="animationLink"
 			:title="title"
 			:auto-play="false"
+			@on-animation-loaded="onAnimationLoaded"
 		/>
 	</div>
 </template>
@@ -19,9 +20,31 @@ defineProps<{
 	title?: string
 }>()
 
+const emit = defineEmits<{
+	/** 动画渲染完成，携带原始画布尺寸（读取不到时均为 0） */
+	loaded: [size: { width: number; height: number }]
+}>()
+
 const lottieContainer = useTemplateRef('lottieContainer')
 const lottieRef = useTemplateRef('lottieRef')
 let observer: IntersectionObserver | null = null
+
+/**
+ * 动画渲染完成，回报原始画布尺寸
+ * PS: lottie-web 渲染时会把 JSON 里的画布尺寸写进 SVG 的 viewBox，
+ *     所以这里直接读 viewBox 即可，不需要额外请求动画 JSON。
+ */
+function onAnimationLoaded() {
+	const svg = lottieContainer.value?.querySelector('svg')
+	const viewBox = svg
+		?.getAttribute('viewBox')
+		?.trim()
+		.split(/[\s,]+/)
+	// viewBox 形如 "0 0 w h"，后两项才是画布尺寸
+	const width = Number(viewBox?.[2]) || 0
+	const height = Number(viewBox?.[3]) || 0
+	emit('loaded', { width, height })
+}
 
 const playAnimation = () => {
 	if (!lottieRef.value) return

@@ -1,4 +1,5 @@
 import {
+	AdapterName,
 	SegData,
 	type UnknownSegData,
 } from '@renderer/function/adapter/interface'
@@ -14,6 +15,8 @@ export function registerSegType<T extends Seg>(segClass: SegCon<T>): void {
 export abstract class Seg {
 	declare static readonly type: string
 	declare static readonly inline: boolean
+
+	constructor(public extra?: Record<string, Record<AdapterName, any>>) {}
 
 	abstract plaintext(msg?: Msg): string
 
@@ -76,6 +79,7 @@ export class UnknownSeg extends Seg {
 			type: 'unknown',
 			segType: this._type,
 			data: this.data,
+			extra: this.extra,
 		}
 	}
 }

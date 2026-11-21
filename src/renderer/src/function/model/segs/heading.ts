@@ -15,7 +15,7 @@ export class HeadingSeg extends Seg {
 	readonly children: Seg[]
 
 	constructor(data: HeadingSegData) {
-		super()
+		super(data.extra)
 		this.level = data.level
 		this.children = data.children.map((child) => Seg.parse(child))
 	}
@@ -38,6 +38,7 @@ export class HeadingSeg extends Seg {
 			type: 'heading',
 			level: this.level,
 			children: this.children.map((child) => child.serializeData()),
+			extra: this.extra,
 		}
 	}
 }

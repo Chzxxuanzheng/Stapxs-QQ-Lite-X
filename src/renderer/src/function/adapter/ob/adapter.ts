@@ -16,11 +16,9 @@ import {
 	JsonSeg,
 	LinkSeg,
 	ListSeg,
-	PokeSeg,
 	ReplySeg,
 	Seg,
 	StrongSeg,
-	SuperFaceSeg,
 	TableSeg,
 	TextSeg,
 	ThematicBreakSeg,
@@ -39,6 +37,7 @@ import { parseUrlFromMsg, queueWait } from '@renderer/function/utils/baseUtil'
 import { shallowReactive, shallowRef, ShallowRef } from 'vue'
 import type {
 	AdapterInterface,
+	AdapterName,
 	AtAllSegData,
 	AtSegData,
 	BanEventData,
@@ -61,12 +60,10 @@ import type {
 	MsgData,
 	MsgEventData,
 	PokeEventData,
-	PokeSegData,
 	RecallEventData,
 	ReplySegData,
 	SegData,
 	SessionData,
-	SuperFaceSegData,
 	TextSegData,
 	UnknownSegData,
 	UserData,
@@ -104,7 +101,6 @@ import type {
 	ObMsg,
 	ObNoticeEvent,
 	ObPokeEvent,
-	ObPokeSeg,
 	ObPrivateSender,
 	ObReplySeg,
 	ObSeg,
@@ -123,6 +119,7 @@ import {
 import { logger } from '@renderer/function/base'
 import Emoji from '@renderer/function/model/emoji'
 import { parseMarkdown } from '@renderer/function/utils/markdown'
+import z from 'zod'
 
 // 定义 API 装饰器：在方法外层包裹 try/catch，失败时返回 undefined
 export function api(
@@ -142,7 +139,7 @@ export function api(
 }
 
 export class OneBotAdapter implements AdapterInterface {
-	readonly name: string = 'OneBot'
+	readonly name: AdapterName = 'OneBot' as AdapterName
 	readonly version: string = '0.0.2'
 	readonly protocol: string = 'ob'
 	readonly sendMsgTextType = 'text'
@@ -178,7 +175,6 @@ export class OneBotAdapter implements AdapterInterface {
 		this.segParsers['video'] = this.videoParser.bind(this)
 		this.segParsers['forward'] = this.forwardParser.bind(this)
 		this.segParsers['reply'] = this.replyParser.bind(this)
-		this.segParsers['poke'] = this.pokeParser.bind(this)
 		this.segParsers['xml'] = this.xmlParser.bind(this)
 		this.segParsers['json'] = this.jsonParser.bind(this)
 
@@ -188,14 +184,11 @@ export class OneBotAdapter implements AdapterInterface {
 		this.segSerializer['button'] = this.buttonSerialize.bind(this)
 		this.segSerializer['image'] = this.imageSerializer.bind(this)
 		this.segSerializer['face'] = this.llbotFaceSerializer.bind(this)
-		this.segSerializer['super-face'] =
-			this.llbotSuperFaceSerializer.bind(this)
 		this.segSerializer['at'] = this.atSerializer.bind(this)
 		this.segSerializer['atall'] = this.atallSerializer.bind(this)
 		this.segSerializer['video'] = this.videoSerializer.bind(this)
 		this.segSerializer['forward'] = this.forwardSerializer.bind(this)
 		this.segSerializer['reply'] = this.replySerializer.bind(this)
-		this.segSerializer['poke'] = this.pokeSerializer.bind(this)
 		this.segSerializer['xml'] = this.xmlSerializer.bind(this)
 		this.segSerializer['json'] = this.jsonSerializer.bind(this)
 
@@ -656,10 +649,25 @@ export class OneBotAdapter implements AdapterInterface {
 	async faceParser(
 		data: ObFaceSeg,
 		msg?: ObMsg,
-	): Promise<FaceSegData[] | SuperFaceSegData[]> {
+	): Promise<FaceSegData[] | ImgSegData[]> {
 		const id = Number(data.data.id)
-		if (msg?.message.length === 1 && Emoji.superList.includes(id))
-			return [{ type: 'super-face', id: data.data.id }]
+		const emoji = Emoji.get(id)
+		if (msg?.message.length === 1 && emoji?.superValue)
+			return [
+				{
+					type: 'image',
+					url: Resource.fromUrl(emoji.superValue),
+					isFace: true,
+					isLottie: true,
+					width: 300,
+					height: 300,
+					summary: emoji.description,
+					extra: this.createExtra({
+						type: 'super-face',
+						id: data.data.id,
+					}),
+				},
+			]
 		else return [{ type: 'face', id: data.data.id }]
 	}
 	async atParser(
@@ -712,9 +720,6 @@ export class OneBotAdapter implements AdapterInterface {
 				id: data.data.id,
 			},
 		]
-	}
-	async pokeParser(_data: ObPokeSeg, _?: ObMsg): Promise<PokeSegData[]> {
-		return [{ type: 'poke' }]
 	}
 	async xmlParser(data: ObXmlSeg, _?: ObMsg): Promise<XmlSegData[]> {
 		return [
@@ -904,7 +909,11 @@ export class OneBotAdapter implements AdapterInterface {
 			},
 		}
 	}
-	async imageSerializer(seg: ImgSeg): Promise<ObImgSeg> {
+	async imageSerializer(
+		seg: ImgSeg,
+	): Promise<ObSeg<'image', unknown> | ObSeg<'face', unknown>> {
+		const superFace = this.getSuperFace(seg)
+		if (superFace) return superFace
 		return {
 			type: 'image',
 			data: {
@@ -914,14 +923,6 @@ export class OneBotAdapter implements AdapterInterface {
 		}
 	}
 	async llbotFaceSerializer(seg: FaceSeg): Promise<ObFaceSeg> {
-		return {
-			type: 'face',
-			data: {
-				id: seg.id.toString(),
-			},
-		}
-	}
-	async llbotSuperFaceSerializer(seg: SuperFaceSeg): Promise<ObFaceSeg> {
 		return {
 			type: 'face',
 			data: {
@@ -970,15 +971,6 @@ export class OneBotAdapter implements AdapterInterface {
 			type: 'reply',
 			data: {
 				id: seg.id,
-			},
-		}
-	}
-	async pokeSerializer(_seg: PokeSeg): Promise<ObPokeSeg> {
-		return {
-			type: 'poke',
-			data: {
-				type: '1',
-				id: '-1',
 			},
 		}
 	}
@@ -1369,6 +1361,48 @@ export class OneBotAdapter implements AdapterInterface {
 		if (id >= 3889000000 && id <= 3889999999) return true
 		if (id === 66600000) return true
 		return false
+	}
+
+	protected readonly superFaceExtraSchema = z.object({
+		type: z.literal('super-face'),
+		id: z.string(),
+	})
+	/**
+	 * 从消息段的额外信息中还原超级表情的 face 段
+	 * @param seg 消息段
+	 */
+	protected getSuperFace(seg: Seg): ObFaceSeg | undefined {
+		const data = this.getExtra(seg, this.superFaceExtraSchema)
+		if (!data) return undefined
+		return {
+			type: 'face',
+			data: {
+				id: data.id,
+			},
+		}
+	}
+	/**
+	 * 读取消息段中属于当前适配器的额外信息
+	 * @param seg 消息段
+	 * @param schema 校验规则
+	 */
+	protected getExtra<T extends z.ZodType>(
+		seg: SegData,
+		schema: T,
+	): z.output<T> | undefined {
+		const obj = seg.extra?.[this.name]
+		if (!obj) return undefined
+		const { data } = schema.safeParse(obj)
+		return data
+	}
+	/**
+	 * 构造写入消息段的额外信息
+	 * @param data 额外信息
+	 */
+	protected createExtra<T>(data: T): Record<AdapterName, T> {
+		const result = {}
+		result[this.name] = data
+		return result
 	}
 
 	protected isDelete(_: ObMsg): boolean {

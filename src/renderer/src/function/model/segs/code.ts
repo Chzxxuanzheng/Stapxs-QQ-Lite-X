@@ -14,7 +14,7 @@ export class CodeSeg extends Seg {
 	readonly lang: string
 
 	constructor(data: CodeSegData) {
-		super()
+		super(data.extra)
 		this.content = data.content
 		this.lang = data.lang
 	}
@@ -32,6 +32,7 @@ export class CodeSeg extends Seg {
 			type: 'code',
 			content: this.content,
 			lang: this.lang,
+			extra: this.extra,
 		}
 	}
 }

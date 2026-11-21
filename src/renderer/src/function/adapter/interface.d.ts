@@ -18,14 +18,20 @@ import { Member, User } from '@renderer/function/model/user'
 import { Gender, Role } from '@renderer/function/adapter/enmu'
 import { Seg } from '@renderer/function/model/segs'
 
+declare const brand: unique symbol
+
+type Brand<T, B extends string> = T & { readonly [brand]: B }
+
 export type SendMsgTextType = 'md' | 'text'
+
+export type AdapterName = Brand<string, 'AdapterName'>
 
 export interface AdapterInterface {
 	// 基础信息
 	/**
 	 * 适配器名称
 	 */
-	name: string
+	name: AdapterName
 	/**
 	 * 适配器版本
 	 */
@@ -603,6 +609,7 @@ export interface EssenceData {
 //#region == 消息段 ================================================
 export interface SegData {
 	type: string // 消息段类型
+	extra?: Record<string, Record<AdapterName, any>> // 额外信息
 }
 
 //#region == Markdown ==================================
@@ -683,25 +690,13 @@ export interface ImgSegData extends SegData {
 	type: 'image' // 消息段类型
 	url: Resource // 图片链接
 	isFace: boolean // 是否是表情图片
+	isLottie?: boolean // 是否是Lottie
 	summary?: string // 预览信息
 	width?: number // 图片宽度
 	height?: number // 图片高度
 }
-export interface MfaceSegData extends SegData {
-	type: 'mface' // 消息段类型
-	url: string // 表情链接
-	summary: string // 预览信息
-	packageId: number // 表情包ID
-	id: string // 表情ID
-	key: string // key
-}
 export interface FaceSegData extends SegData {
 	type: 'face' // 消息段类型
-	text?: string // 文本描述
-	id: string // 表情ID
-}
-export interface SuperFaceSegData extends SegData {
-	type: 'super-face' // 消息段类型
 	text?: string // 文本描述
 	id: string // 表情ID
 }
@@ -734,9 +729,6 @@ export interface ForwardSegData extends SegData {
 export interface ReplySegData extends SegData {
 	type: 'reply' // 消息段类型
 	id: string // 回复的消息ID
-}
-export interface PokeSegData extends SegData {
-	type: 'poke' // 消息段类型
 }
 export interface ButtonSegData extends SegData {
 	type: 'button' // 消息类型

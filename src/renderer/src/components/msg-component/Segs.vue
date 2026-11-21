@@ -17,17 +17,15 @@ import {
 	JsonSeg,
 	LinkSeg,
 	ListSeg,
-	MfaceSeg,
-	PokeSeg,
 	ReplySeg,
 	Seg,
 	StrongSeg,
-	SuperFaceSeg,
 	TableSeg,
 	TextSeg,
 	ThematicBreakSeg,
 	VideoSeg,
 	XmlSeg,
+	ButtonSeg,
 } from '@renderer/function/model/segs'
 
 import ErrorSegComp from '@renderer/components/msg-component/ErrorSegComp.vue'
@@ -38,8 +36,6 @@ import AtSegComp from '@renderer/components/msg-component/AtSegComp.vue'
 import AtAllSegComp from '@renderer/components/msg-component/AtAllSegComp.vue'
 import FileSegComp from '@renderer/components/msg-component/FileSegComp.vue'
 import ReplySegComp from '@renderer/components/msg-component/ReplySegComp.vue'
-import PokeSegComp from '@renderer/components/msg-component/PokeSegComp.vue'
-import SuperFaceSegComp from '@renderer/components/msg-component/SuperFaceSegComp.vue'
 import JsonSegComp from '@renderer/components/msg-component/JsonSegComp.vue'
 import XmlSegComp from '@renderer/components/msg-component/XmlSegComp.vue'
 import VideoSegComp from '@renderer/components/msg-component/VideoSegComp.vue'
@@ -59,7 +55,6 @@ import StrongSegComp from '@root/src/renderer/src/components/msg-component/Stron
 import TableSegComp from '@root/src/renderer/src/components/msg-component/TableSegComp.vue'
 import ThematicBreakSegComp from '@root/src/renderer/src/components/msg-component/ThematicBreakSegComp.vue'
 import ButtonSegComp from '@root/src/renderer/src/components/msg-component/ButtonSegComp.vue'
-import { ButtonSeg } from '@root/src/renderer/src/function/model/segs/buttonSeg'
 
 const { segs, showToMe = false } = defineProps<{
 	segs: Seg[]
@@ -155,12 +150,6 @@ const runtimeData = useRuntimeData()
 			:seg="seg"
 			@image-loaded="(height) => emit('imageLoaded', height)"
 		/>
-		<ImgSegComp
-			v-else-if="seg instanceof MfaceSeg"
-			:pos="getSegPos(seg)"
-			:seg="seg"
-			@image-loaded="(height) => emit('imageLoaded', height)"
-		/>
 		<FaceSegComp v-else-if="seg instanceof FaceSeg" :seg="seg" />
 		<AtSegComp
 			v-else-if="seg instanceof AtSeg"
@@ -176,10 +165,8 @@ const runtimeData = useRuntimeData()
 		<!-- 单个消息 -->
 		<FileSegComp v-else-if="seg instanceof FileSeg" :seg="seg" />
 		<ReplySegComp v-else-if="seg instanceof ReplySeg" :seg="seg" />
-		<PokeSegComp v-else-if="seg instanceof PokeSeg" :seg="seg" />
 		<VideoSegComp v-else-if="seg instanceof VideoSeg" :seg="seg" />
 		<ForwardSegComp v-else-if="seg instanceof ForwardSeg" :seg="seg" />
-		<SuperFaceSegComp v-else-if="seg instanceof SuperFaceSeg" :seg="seg" />
 		<!-- 卡片消息 -->
 		<JsonSegComp v-else-if="seg instanceof JsonSeg" :seg="seg" />
 		<XmlSegComp v-else-if="seg instanceof XmlSeg" :seg="seg" />

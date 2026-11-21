@@ -13,7 +13,7 @@ export class VideoSeg extends Seg {
 	file: string
 	_url: Resource
 	constructor(data: VideoSegData) {
-		super()
+		super(data.extra)
 		this.file = data.file
 		this._url = data.url
 	}
@@ -41,6 +41,7 @@ export class VideoSeg extends Seg {
 			type: 'video',
 			file: this.file,
 			url: this._url,
+			extra: this.extra,
 		}
 	}
 }

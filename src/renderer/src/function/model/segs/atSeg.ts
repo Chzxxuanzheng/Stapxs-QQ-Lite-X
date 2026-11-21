@@ -12,9 +12,13 @@ export class AtSeg extends Seg {
 	constructor(user_id: string)
 	constructor(data: AtSegData)
 	constructor(arg: AtSegData | string) {
-		super()
-		if (typeof arg === 'string') this.user_id = arg
-		else this.user_id = arg.user_id
+		if (typeof arg === 'string') {
+			super()
+			this.user_id = arg
+		} else {
+			super(arg.extra)
+			this.user_id = arg.user_id
+		}
 	}
 
 	plaintext(msg?: Msg): string {
@@ -33,6 +37,7 @@ export class AtSeg extends Seg {
 		return {
 			type: 'at',
 			user_id: this.user_id,
+			extra: this.extra,
 		}
 	}
 }

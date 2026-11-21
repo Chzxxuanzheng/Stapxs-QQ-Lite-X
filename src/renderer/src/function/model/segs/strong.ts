@@ -14,7 +14,7 @@ export class StrongSeg extends Seg {
 	readonly children: Seg[]
 
 	constructor(data: StrongSegData) {
-		super()
+		super(data.extra)
 		this.children = data.children.map((child) => Seg.parse(child))
 	}
 
@@ -35,6 +35,7 @@ export class StrongSeg extends Seg {
 		return {
 			type: 'strong',
 			children: this.children.map((child) => child.serializeData()),
+			extra: this.extra,
 		}
 	}
 }

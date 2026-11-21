@@ -14,16 +14,17 @@ export class ImgSeg extends Seg {
 	_url: Resource
 	summary: string
 	isFace: boolean = false
+	isLottie: boolean = false
 	imgData: Img
 	width?: number
 	height?: number
 	constructor(url: string, isFace?: boolean)
 	constructor(data: ImgSegData)
 	constructor(arg1: string | ImgSegData, arg2: boolean = false) {
-		super()
 		const { $t } = app.config.globalProperties
 		if (typeof arg1 === 'string') {
 			// constructor(url: string, isFace ?: boolean)
+			super()
 			const url = arg1
 			const isFace = arg2 as boolean | undefined
 			this._url = Resource.fromUrl(url)
@@ -32,9 +33,11 @@ export class ImgSeg extends Seg {
 		} else {
 			// constructor(data: ImgSegData)
 			const data = arg1
+			super(data.extra)
 			this._url = data.url
 			this.summary = data.summary ?? $t('[图片]')
 			this.isFace = data.isFace
+			this.isLottie = data.isLottie ?? false
 			this.width = data.width
 			this.height = data.height
 		}
@@ -82,6 +85,7 @@ export class ImgSeg extends Seg {
 			isFace: this.isFace,
 			width: this.width,
 			height: this.height,
+			extra: this.extra,
 		}
 	}
 }

@@ -2,16 +2,17 @@
  * @FileDescription: 图片消息消息组件
  * @Author: Mr.Lee
  * @Date: 2026/01/02
- * @Version: 1.2 - 按一次性组件精简状态；占位尺寸规则下沉到 CSS
+ * @Version: 1.3 - 支持 isLottie 动画消息
  * @Description: 图片消息的单独组件，主要用于处理图片加载完成后的消息尺寸刷新问题
 -->
 <script setup lang="ts">
 import { useViewer } from '@renderer/function/composable/inject/useViewer'
-import { ImgSeg, MfaceSeg } from '@renderer/function/model/segs'
-import { computed, nextTick, shallowRef, useTemplateRef } from 'vue'
+import { ImgSeg } from '@renderer/function/model/segs'
+import LazyLottie from '@renderer/components/LazyLottie.vue'
+import { computed, h, nextTick, render, shallowRef, useTemplateRef } from 'vue'
 
 const { seg, pos } = defineProps<{
-	seg: ImgSeg | MfaceSeg
+	seg: ImgSeg
 	pos: 'alone' | 'top' | 'middle' | 'bottom'
 }>()
 
@@ -26,34 +27,24 @@ const viewer = useViewer()
 const src = computed(() => {
 	const url = seg.url
 	if (!url) return ''
-	if (url.startsWith('http')) return url
-	// 认证媒体下载后是 blob URL，浏览器 <img> 无法携带 Authorization，
-	// 只能通过这种本地对象地址展示
-	if (url.startsWith('blob:')) return url
-	if (url.startsWith('data:')) return url
 	if (url.startsWith('base64://')) {
 		return url.replace('base64://', 'data:image/png;base64,')
 	}
-	throw new Error('Unsupported image url format:' + url)
+	return url
 })
 
-/** 图片的真实像素尺寸，用于在图片解码完成前就锁定占位盒子 */
-const naturalWidth = shallowRef(seg instanceof ImgSeg ? (seg.width ?? 0) : 0)
-const naturalHeight = shallowRef(seg instanceof ImgSeg ? (seg.height ?? 0) : 0)
+const naturalWidth = shallowRef(seg.width ?? 0)
+const naturalHeight = shallowRef(seg.height ?? 0)
 
-function initType(): 'image' | 'face' | 'mface' | 'long-image' {
-	if (seg instanceof MfaceSeg) return 'mface'
+function initType(): 'image' | 'face' | 'long-image' {
 	if (seg.isFace) return 'face'
-	const w = naturalWidth.value
-	const h = naturalHeight.value
-	return w > 0 && h / w > 3 ? 'long-image' : 'image'
+	const nw = naturalWidth.value
+	const nh = naturalHeight.value
+	return nw > 0 && nh / nw > 3 ? 'long-image' : 'image'
 }
 
-/** 只有会真正变化的两项才需要响应式：渲染分支与 class 切换 */
-const state = shallowRef<'loading' | 'loaded' | 'error'>(
-	src ? 'loading' : 'error',
-)
-const type = shallowRef<'image' | 'face' | 'mface' | 'long-image'>(initType())
+const state = shallowRef<'loading' | 'loaded' | 'error'>('loading')
+const type = shallowRef<'image' | 'face' | 'long-image'>(initType())
 
 /**
  * 只把原始像素尺寸以 CSS 变量形式下发给样式表，
@@ -63,11 +54,10 @@ const type = shallowRef<'image' | 'face' | 'mface' | 'long-image'>(initType())
  *     图片就绪后又被撑开，是整个聊天列表高度突变的直接原因。
  */
 const boxStyle = computed(() => {
-	if (!(seg instanceof ImgSeg)) return undefined
-	const w = naturalWidth.value
-	const h = naturalHeight.value
-	if (!(w > 0 && h > 0)) return undefined
-	return { '--img-w': `${w}`, '--img-h': `${h}` }
+	const nw = naturalWidth.value
+	const nh = naturalHeight.value
+	if (!(nw > 0 && nh > 0)) return undefined
+	return { '--img-w': `${nw}`, '--img-h': `${nh}` }
 })
 
 function init() {
@@ -78,52 +68,25 @@ function init() {
  * 初始化图片尺寸信息
  */
 async function initImg() {
-	let loadResult = await loadedImg()
-	if (!loadResult && seg instanceof ImgSeg) {
+	const load = seg.isLottie ? loadedLottie : loadedImg
+	let loadResult = await load()
+	if (!loadResult) {
 		await seg.refreshResource()
-		loadResult = await loadedImg()
+		loadResult = await load()
 	}
 
-	if (loadResult) {
-		// 加载前的高度，用于让父级纠正滚动位置
-		const beforeHeight = rootRef.value?.getBoundingClientRect().height ?? 0
-
-		state.value = 'loaded'
-
-		// 通知父级图片撑开的高度，用于纠正滚动位置
-		nextTick(() => {
-			const afterHeight =
-				rootRef.value?.getBoundingClientRect().height ?? 0
-			emit('imageLoaded', afterHeight - beforeHeight)
-		})
-	} else {
-		state.value = 'error'
-	}
+	if (!loadResult) state.value = 'error'
 }
 
 async function loadedImg(): Promise<boolean> {
+	if (!src.value) return false
 	return new Promise((resolve) => {
 		const img = new Image()
 		img.onload = () => {
-			const w = img.naturalWidth || img.width
-			const h = img.naturalHeight || img.height
-			if (w > 0 && h > 0) {
-				naturalWidth.value = w
-				naturalHeight.value = h
-				// 回填尺寸元数据，供其它图片组件复用，避免重复探测
-				if (seg instanceof ImgSeg && !seg.width) {
-					try {
-						seg.setSize(w, h)
-					} catch {
-						// 尺寸已被其它实例设置，忽略即可
-					}
-				}
-				if (h / w > 3) {
-					// 长图特殊处理
-					type.value = 'long-image'
-				}
-			}
-
+			onLoaded(
+				img.naturalWidth || img.width,
+				img.naturalHeight || img.height,
+			)
 			resolve(true)
 		}
 
@@ -132,6 +95,72 @@ async function loadedImg(): Promise<boolean> {
 		}
 
 		img.src = src.value
+	})
+}
+
+async function loadedLottie(): Promise<boolean> {
+	if (!seg.url) return false
+
+	const size = await new Promise<
+		{ width: number; height: number } | undefined
+	>((resolve) => {
+		const host = document.createElement('div')
+		let settled = false
+
+		const finish = (result?: { width: number; height: number }) => {
+			if (settled) return
+			settled = true
+			clearTimeout(timer)
+			// 卸载探测实例并释放游离节点
+			render(null, host)
+			resolve(result)
+		}
+
+		const timer = setTimeout(() => finish(), 10 * 1000)
+
+		render(
+			h(LazyLottie, {
+				animationLink: seg.url,
+				onLoaded: (result) => finish(result),
+			}),
+			host,
+		)
+	})
+
+	if (!size) return false
+	onLoaded(size.width, size.height)
+	return true
+}
+
+/**
+ * 资源就绪，图片解码和动画探测共用这一条路径
+ * 记录尺寸、回填元数据、切换状态，并通知父级纠正滚动位置
+ * @param width 原始宽度
+ * @param height 原始高度
+ */
+function onLoaded(width: number, height: number) {
+	// 加载前的高度，用于让父级纠正滚动位置
+	const beforeHeight = rootRef.value?.getBoundingClientRect().height ?? 0
+
+	if (width > 0 && height > 0) {
+		naturalWidth.value = width
+		naturalHeight.value = height
+		if (!seg.width) {
+			try {
+				seg.setSize(width, height)
+			} catch {}
+		}
+		// 长图是针对超长图片的展示兜底，动画不适用
+		if (!seg.isLottie && height / width > 3) {
+			type.value = 'long-image'
+		}
+	}
+
+	state.value = 'loaded'
+
+	nextTick(() => {
+		const afterHeight = rootRef.value?.getBoundingClientRect().height ?? 0
+		emit('imageLoaded', afterHeight - beforeHeight)
 	})
 }
 
@@ -160,6 +189,11 @@ setTimeout(() => (transitionName.value = 'fade-out-in'), 500)
 				:icon="['fas', 'spinner']"
 				spin
 			/>
+			<LazyLottie
+				v-else-if="seg.isLottie"
+				:animation-link="seg.url"
+				:title="seg.summary"
+			/>
 			<img
 				v-else-if="state === 'loaded'"
 				:alt="seg.summary"
@@ -179,3 +213,13 @@ setTimeout(() => (transitionName.value = 'fade-out-in'), 500)
 		</Transition>
 	</div>
 </template>
+
+<style scoped>
+/* 动画铺满图片的占位盒子，避免被 LazyLottie 的 100px 最小尺寸撑成小块 */
+.msg-img > .lazy-lottie {
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+}
+</style>

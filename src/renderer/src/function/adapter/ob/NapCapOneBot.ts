@@ -1,12 +1,7 @@
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
 import { Msg } from '@renderer/function/model/msg'
 import { Resource } from '@renderer/function/model/resource'
-import {
-	FileSeg,
-	ForwardSeg,
-	ImgSeg,
-	MfaceSeg,
-} from '@renderer/function/model/segs'
+import { FileSeg, ForwardSeg, ImgSeg } from '@renderer/function/model/segs'
 import {
 	GroupSession,
 	Session,
@@ -15,6 +10,7 @@ import {
 import { Member } from '@renderer/function/model/user'
 import useRuntimeData from '@renderer/state/runtimeData'
 import {
+	AdapterName,
 	EssenceData,
 	EssenceSeg,
 	FilesData,
@@ -51,12 +47,12 @@ import type {
 	NcObGroupMsgEmojiLikeEvent,
 	NcObImgSeg,
 	NcObMessageSendEvent,
-	NcObMfaceSeg,
 	NcObPokeEvent,
 	NcObUploadGroupFile,
 	NcObUploadPrivateFile,
 	ObForwardNodeSeg,
 	ObForwardSeg,
+	ObFaceSeg,
 	ObGetVersionInfo,
 	ObGroupDecreaseEvent,
 	ObJsonSeg,
@@ -74,7 +70,7 @@ import { Gender } from '@renderer/function/adapter/enmu'
 import semver from 'semver'
 
 export default class NapCapOneBot extends OneBotAdapter {
-	override name = 'NapCap OneBot'
+	override name = 'NapCap OneBot' as AdapterName
 	override version = '0.0.1'
 	constructor(connector: ObConnector, botInfo?: ObGetVersionInfo) {
 		super()
@@ -100,7 +96,6 @@ export default class NapCapOneBot extends OneBotAdapter {
 		this.segParsers['markdown'] = this.markdownParser.bind(this)
 		this.segParsers['file'] = this.fileParser.bind(this)
 
-		this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
 		this.segSerializer['file'] = this.fileSerializer.bind(this)
 
 		this.noticeEventProcessers['group_msg_emoji_like'] =
@@ -570,13 +565,13 @@ export default class NapCapOneBot extends OneBotAdapter {
 		} else {
 			return [
 				{
-					type: 'mface',
-					url: data.data.url,
+					type: 'image',
+					url: Resource.fromUrl(data.data.url),
 					summary: data.data.summary,
-					packageId: data.data.emoji_package_id,
-					id: data.data.emoji_id,
-					key: data.data.key,
-				} as any as ImgSegData,
+					isFace: true,
+					width: 300,
+					height: 300,
+				},
 			]
 		}
 	}
@@ -646,7 +641,11 @@ export default class NapCapOneBot extends OneBotAdapter {
 	//#endregion
 
 	//#region == 序列化 =============================
-	override async imageSerializer(seg: ImgSeg): Promise<NcObImgSeg> {
+	override async imageSerializer(
+		seg: ImgSeg,
+	): Promise<NcObImgSeg | ObFaceSeg> {
+		const superFace = this.getSuperFace(seg)
+		if (superFace) return superFace
 		return {
 			type: 'image',
 			data: {
@@ -655,19 +654,6 @@ export default class NapCapOneBot extends OneBotAdapter {
 				sub_type: seg.isFace ? 7 : 0, // 0表示普通图片，7表示表情
 				summary: seg.summary,
 				file_size: 0,
-			},
-		}
-	}
-	async mfaceSerializer(seg: MfaceSeg): Promise<NcObMfaceSeg> {
-		return {
-			type: 'mface',
-			data: {
-				file: seg.url,
-				url: seg.url,
-				summary: seg.summary,
-				key: seg.key,
-				emoji_id: seg.id,
-				emoji_package_id: seg.packageId,
 			},
 		}
 	}

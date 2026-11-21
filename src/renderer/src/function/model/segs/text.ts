@@ -13,7 +13,7 @@ export class TextSeg extends Seg {
 	text: string
 
 	constructor(data: TextSegData) {
-		super()
+		super(data.extra)
 		this.text = data.text
 	}
 
@@ -25,6 +25,7 @@ export class TextSeg extends Seg {
 		return {
 			type: 'text',
 			text: this.text,
+			extra: this.extra,
 		}
 	}
 

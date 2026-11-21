@@ -11,8 +11,8 @@ export class BreakSeg extends Seg {
 	static readonly type = 'break'
 	static readonly inline = true
 
-	constructor(_: BreakSegData) {
-		super()
+	constructor(data: BreakSegData) {
+		super(data.extra)
 	}
 
 	override plaintext(): string {
@@ -26,6 +26,7 @@ export class BreakSeg extends Seg {
 	override serializeData(): BreakSegData {
 		return {
 			type: 'break',
+			extra: this.extra,
 		}
 	}
 }

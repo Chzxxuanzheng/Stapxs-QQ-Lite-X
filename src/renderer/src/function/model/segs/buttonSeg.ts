@@ -15,7 +15,7 @@ export class ButtonSeg extends Seg {
 	cmd: string
 
 	constructor(data: ButtonSegData) {
-		super()
+		super(data.extra)
 		this.name = data.name
 		this.cmd = data.cmd
 	}
@@ -37,6 +37,7 @@ export class ButtonSeg extends Seg {
 			type: 'button',
 			name: this.name,
 			cmd: this.cmd,
+			extra: this.extra,
 		}
 	}
 }

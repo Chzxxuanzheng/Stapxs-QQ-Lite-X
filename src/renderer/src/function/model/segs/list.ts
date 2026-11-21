@@ -15,7 +15,7 @@ export class ListSeg extends Seg {
 	readonly children: Seg[][]
 
 	constructor(data: ListSegData) {
-		super()
+		super(data.extra)
 		this.ordered = data.ordered
 		this.children = data.children.map((item) =>
 			item.map((child) => Seg.parse(child)),
@@ -59,6 +59,7 @@ export class ListSeg extends Seg {
 			children: this.children.map((item) =>
 				item.map((child) => child.serializeData()),
 			),
+			extra: this.extra,
 		}
 	}
 }

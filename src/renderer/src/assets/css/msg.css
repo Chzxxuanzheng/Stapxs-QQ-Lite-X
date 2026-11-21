@@ -350,14 +350,6 @@ h6.msg-heading {
     cursor: pointer;
 }
 
-/* 表情 / 表情包 / 长图沿用各自的固定尺寸，不套用普通图片的占位规则 */
-.msg-img.mface,
-.msg-img.long-image {
-    width: auto;
-    aspect-ratio: auto;
-    background: transparent;
-}
-
 .msg-img.top {
     margin-top: 0;
 }
@@ -371,17 +363,9 @@ h6.msg-heading {
     margin: -10px;
 }
 
-.msg-img.mface,
 .msg-img.face,
-.msg-img.mface > img,
 .msg-img.face > img {
     max-height: 17.5vh;
-}
-
-.msg-img.mface {
-    outline: 1px dashed var(--color-main);
-    width: 17.5vh;
-    height: 17.5vh;
 }
 
 .msg-img.long-image {

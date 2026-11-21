@@ -1,12 +1,7 @@
 import { GroupFile } from '@renderer/function/model/file'
 import { Msg } from '@renderer/function/model/msg'
 import { Resource } from '@renderer/function/model/resource'
-import {
-	ForwardSeg,
-	ImgSeg,
-	MfaceSeg,
-	FileSeg,
-} from '@renderer/function/model/segs'
+import { ForwardSeg, ImgSeg, FileSeg } from '@renderer/function/model/segs'
 import {
 	GroupSession,
 	Session,
@@ -17,6 +12,7 @@ import useRuntimeData from '@renderer/state/runtimeData'
 import { ShallowRef } from 'vue'
 import type {
 	AdapterInterface,
+	AdapterName,
 	FriendData,
 	UserData,
 	GroupAnnouncementData,
@@ -26,7 +22,6 @@ import type {
 	FilesData,
 	SegData,
 	ImgSegData,
-	MfaceSegData,
 	FileSegData,
 	PokeEventData,
 	LeaveEventData,
@@ -56,15 +51,21 @@ import type {
 	ObPrivateSender,
 	ObGroupSender,
 	ObTextSeg,
+	ObFaceSeg,
 } from '@renderer/function/adapter/ob/type'
 import { ObConnector, getGender } from '@renderer/function/adapter/ob/utils'
 import { Gender } from '@renderer/function/adapter/enmu'
+import z from 'zod'
+
+const mfaceExtraSchema = z.object({
+	type: z.literal('mface'),
+})
 
 export default class LagrangeOneBot
 	extends OneBotAdapter
 	implements AdapterInterface
 {
-	override name = 'Lagrange OneBot'
+	override name = 'Lagrange OneBot' as AdapterName
 	override version = '0.0.1'
 	declare botInfo: ShallowRef<LgrObGetVersionInfo | undefined>
 	constructor(connector: ObConnector, botInfo?: ObGetVersionInfo) {
@@ -80,7 +81,6 @@ export default class LagrangeOneBot
 		this.segParsers['mface'] = this.mfaceParser.bind(this)
 		this.segParsers['file'] = this.fileParser.bind(this)
 
-		this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
 		this.segSerializer['file'] = this.fileSerializer.bind(this)
 	}
 
@@ -401,7 +401,7 @@ export default class LagrangeOneBot
 		for (let id = 0; id < msg.message.length; id++) {
 			const seg = msg.message[id]
 			filter.push(seg)
-			if (seg.type === 'mface') id++
+			if (this.getExtra(seg, mfaceExtraSchema)) id++
 		}
 		msg.message = filter
 		return msg
@@ -437,15 +437,16 @@ export default class LagrangeOneBot
 			},
 		]
 	}
-	async mfaceParser(data: LgrObMfaceSeg): Promise<MfaceSegData[]> {
+	async mfaceParser(data: LgrObMfaceSeg): Promise<[ImgSegData]> {
 		return [
 			{
-				type: 'mface',
-				url: data.data.url,
+				type: 'image',
+				url: Resource.fromUrl(data.data.url),
+				isFace: true,
+				width: 300,
+				height: 300,
 				summary: data.data.summary,
-				packageId: data.data.emoji_package_id,
-				id: data.data.emoji_id,
-				key: data.data.key,
+				extra: this.createExtra({ type: 'mface' }),
 			},
 		]
 	}
@@ -462,7 +463,11 @@ export default class LagrangeOneBot
 	}
 	//#endregion
 	//#region == 序列化 =============================
-	override async imageSerializer(seg: ImgSeg): Promise<LgrObImgSeg> {
+	override async imageSerializer(
+		seg: ImgSeg,
+	): Promise<LgrObImgSeg | ObFaceSeg> {
+		const superFace = this.getSuperFace(seg)
+		if (superFace) return superFace
 		return {
 			type: 'image',
 			data: {
@@ -470,18 +475,6 @@ export default class LagrangeOneBot
 				file: seg.url,
 				subType: seg.isFace ? 7 : undefined, // 0表示普通图片，7表示表情
 				summary: seg.summary,
-			},
-		}
-	}
-	async mfaceSerializer(seg: MfaceSeg): Promise<LgrObMfaceSeg> {
-		return {
-			type: 'mface',
-			data: {
-				url: seg.url,
-				summary: seg.summary,
-				emoji_package_id: seg.packageId,
-				emoji_id: seg.id,
-				key: seg.key,
 			},
 		}
 	}

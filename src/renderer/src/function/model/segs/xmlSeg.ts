@@ -11,7 +11,7 @@ export class XmlSeg extends Seg {
 	readonly data: string
 	readonly id: string
 	constructor(data: XmlSegData) {
-		super()
+		super(data.extra)
 		this.data = data.data
 		this.id = data.id
 	}
@@ -31,6 +31,7 @@ export class XmlSeg extends Seg {
 			type: 'xml',
 			data: this.data,
 			id: this.id,
+			extra: this.extra,
 		}
 	}
 }

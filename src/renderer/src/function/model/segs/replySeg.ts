@@ -13,9 +13,13 @@ export class ReplySeg extends Seg {
 	constructor(msgId: string)
 	constructor(data: ReplySegData)
 	constructor(data: ReplySegData | string) {
-		super()
-		if (typeof data === 'string') this.id = data
-		else this.id = data.id
+		if (typeof data === 'string') {
+			super()
+			this.id = data
+		} else {
+			super(data.extra)
+			this.id = data.id
+		}
 	}
 
 	plaintext(_?: Msg): string {
@@ -31,6 +35,7 @@ export class ReplySeg extends Seg {
 		return {
 			type: 'reply',
 			id: this.id,
+			extra: this.extra,
 		}
 	}
 }

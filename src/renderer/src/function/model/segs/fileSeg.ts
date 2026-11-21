@@ -34,8 +34,8 @@ export class FileSeg extends Seg {
 	constructor(file: string, name: string, size: number)
 	constructor(data: FileSegData)
 	constructor(arg1: string | FileSegData, arg2?: string, arg3?: number) {
-		super()
 		if (typeof arg1 === 'string') {
+			super()
 			const file = arg1
 			const name = arg2 as string
 			const size = arg3 as number
@@ -44,6 +44,7 @@ export class FileSeg extends Seg {
 			this.ext = name.split('.').pop() || 'unknown'
 			this.size = size
 		} else {
+			super(arg1.extra)
 			const data = arg1
 			if (!data.file_id) throw new Error('文件ID缺失')
 			this.file_id = data.file_id
@@ -100,6 +101,7 @@ export class FileSeg extends Seg {
 			size: this.size,
 			url: this.url,
 			file_id: this.file_id,
+			extra: this.extra,
 		}
 	}
 }

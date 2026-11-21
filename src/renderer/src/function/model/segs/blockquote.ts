@@ -14,7 +14,7 @@ export class BlockquoteSeg extends Seg {
 	readonly children: Seg[]
 
 	constructor(data: BlockquoteSegData) {
-		super()
+		super(data.extra)
 		this.children = data.children.map((child) => Seg.parse(child))
 	}
 
@@ -35,6 +35,7 @@ export class BlockquoteSeg extends Seg {
 		return {
 			type: 'blockquote',
 			children: this.children.map((child) => child.serializeData()),
+			extra: this.extra,
 		}
 	}
 }

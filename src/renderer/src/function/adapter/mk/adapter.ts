@@ -30,7 +30,6 @@ import {
 	LeaveEventData,
 	LoginInfo,
 	MemberData,
-	MfaceSegData,
 	MsgData,
 	MsgEventData,
 	PokeEventData,
@@ -44,11 +43,11 @@ import {
 	UserData,
 	VideoSegData,
 	XmlSegData,
-	SuperFaceSegData,
 	FriendData,
 	BreakSegData,
 	LinkSegData,
 	ButtonSegData,
+	AdapterName,
 } from '@renderer/function/adapter/interface'
 
 import { handleEvent } from '@renderer/function/event'
@@ -65,20 +64,16 @@ import {
 	HeadingSeg,
 	ImgSeg,
 	InlineCodeSeg,
-	JsonSeg,
 	LinkSeg,
 	ListSeg,
-	MfaceSeg,
 	ReplySeg,
 	Seg,
 	StrongSeg,
-	SuperFaceSeg,
 	TableSeg,
 	TextSeg,
 	ThematicBreakSeg,
 	UnknownSeg,
 	VideoSeg,
-	XmlSeg,
 } from '@renderer/function/model/segs'
 import { parseUrlFromMsg, queueWait } from '@renderer/function/utils/baseUtil'
 import useRuntimeData from '@renderer/state/runtimeData'
@@ -136,6 +131,7 @@ import { emitConnectionLost } from '@renderer/function/utils/connectionEvent'
 import Emoji from '@renderer/function/model/emoji'
 import { parseMarkdown } from '@root/src/renderer/src/function/utils/markdown'
 import { ButtonSeg } from '@root/src/renderer/src/function/model/segs/buttonSeg'
+import z from 'zod'
 
 // 定义 API 装饰器：在方法外层包裹 try/catch，失败时返回 undefined
 function api(_: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -151,7 +147,7 @@ function api(_: any, propertyKey: string, descriptor: PropertyDescriptor) {
 }
 
 export class MilkyAdapter implements AdapterInterface {
-	readonly name = 'Milky'
+	readonly name = 'Milky' as AdapterName
 	readonly version = '0.0.2'
 	readonly protocol = 'mk'
 	readonly sendMsgTextType = 'text'
@@ -185,7 +181,6 @@ export class MilkyAdapter implements AdapterInterface {
 		this.segParsers['forward'] = this.forwardParser.bind(this)
 		this.segParsers['reply'] = this.replyParser.bind(this)
 		this.segParsers['file'] = this.fileParser.bind(this)
-		// this.segParsers['poke'] = this.pokeParser.bind(this)
 		this.segParsers['xml'] = this.xmlParser.bind(this)
 		this.segParsers['light_app'] = this.lightAppParser.bind(this)
 		this.segParsers['markdown'] = this.markdownParser.bind(this)
@@ -195,17 +190,12 @@ export class MilkyAdapter implements AdapterInterface {
 		}
 		this.segSerializer['image'] = this.imageSerializer.bind(this)
 		this.segSerializer['face'] = this.faceSerializer.bind(this)
-		this.segSerializer['super-face'] = this.superFaceSerializer.bind(this)
-		this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
 		this.segSerializer['at'] = this.atSerializer.bind(this)
 		this.segSerializer['atall'] = this.atallSerializer.bind(this)
 		this.segSerializer['video'] = this.videoSerializer.bind(this)
 		this.segSerializer['forward'] = this.forwardSerializer.bind(this)
 		this.segSerializer['reply'] = this.replySerializer.bind(this)
 		this.segSerializer['button'] = this.buttonSerialize.bind(this)
-		// this.segSerializer['poke'] = this.pokeSerializer.bind(this)
-		this.segSerializer['xml'] = this.xmlSerializer.bind(this)
-		this.segSerializer['json'] = this.jsonSerializer.bind(this)
 
 		this.eventProcessers['message_receive'] =
 			this.messageReceiveEvent.bind(this)
@@ -283,7 +273,6 @@ export class MilkyAdapter implements AdapterInterface {
 			this.getCustomFace = undefined as any
 			this.setNickname = undefined as any
 			this.setSign = undefined as any
-			this.segParsers['market_face'] = this.v1MarketFaceParser.bind(this)
 			this.segParsers['face'] = this.v1FaceParser.bind(this)
 		}
 
@@ -1105,7 +1094,7 @@ export class MilkyAdapter implements AdapterInterface {
 	async imageParser(
 		data: ISeg.ImageSeg,
 		_?: IncomingMessage,
-	): Promise<ImgSegData[]> {
+	): Promise<[ImgSegData]> {
 		return [
 			{
 				type: 'image',
@@ -1122,42 +1111,37 @@ export class MilkyAdapter implements AdapterInterface {
 	async marketFaceParser(
 		data: ISeg.MarketFaceSeg,
 		_?: IncomingMessage,
-	): Promise<MfaceSegData[]> {
+	): Promise<[ImgSegData]> {
 		return [
 			{
-				type: 'mface',
-				url: data.data.url,
+				type: 'image',
+				url: Resource.fromUrl(data.data.url),
+				isFace: true,
+				width: 300,
+				height: 300,
 				summary: data.data.summary,
-				packageId: data.data.emoji_package_id,
-				id: data.data.emoji_id,
-				key: data.data.key,
-			},
-		]
-	}
-	async v1MarketFaceParser(
-		data: ISeg.MarketFaceSeg,
-		_?: IncomingMessage,
-	): Promise<MfaceSegData[]> {
-		return [
-			{
-				type: 'mface',
-				url: data.data.url,
-				summary: '[动画表情]',
-				packageId: 0,
-				id: '',
-				key: '',
 			},
 		]
 	}
 	async faceParser(
 		data: ISeg.FaceSeg,
 		_?: IncomingMessage,
-	): Promise<FaceSegData[] | SuperFaceSegData[]> {
-		if (data.data.is_large)
+	): Promise<[FaceSegData] | [ImgSegData]> {
+		const emoji = Emoji.get(+data.data.face_id)
+		if (data.data.is_large && emoji?.superValue)
 			return [
 				{
-					type: 'super-face',
-					id: data.data.face_id,
+					type: 'image',
+					url: Resource.fromUrl(emoji.superValue),
+					width: 300,
+					height: 300,
+					isFace: true,
+					summary: emoji.description,
+					isLottie: true,
+					extra: this.createExtra({
+						type: 'super-face',
+						id: data.data.face_id,
+					}),
 				},
 			]
 		else
@@ -1171,10 +1155,24 @@ export class MilkyAdapter implements AdapterInterface {
 	async v1FaceParser(
 		data: ISeg.FaceSeg,
 		msg?: IncomingMessage,
-	): Promise<FaceSegData[] | SuperFaceSegData[]> {
-		const id = Number(data.data.face_id)
-		if (msg?.segments.length === 1 && Emoji.superList.includes(id))
-			return [{ type: 'super-face', id: data.data.face_id }]
+	): Promise<[FaceSegData | ImgSegData]> {
+		const emoji = Emoji.get(+data.data.face_id)
+		if (msg?.segments.length === 1 && emoji?.superValue)
+			return [
+				{
+					type: 'image',
+					url: Resource.fromUrl(emoji.superValue),
+					width: 300,
+					height: 300,
+					isFace: true,
+					isLottie: true,
+					summary: emoji.description,
+					extra: this.createExtra({
+						type: 'super-face',
+						id: data.data.face_id,
+					}),
+				},
+			]
 		else return [{ type: 'face', id: data.data.face_id }]
 	}
 	async mentionParser(
@@ -1487,7 +1485,20 @@ export class MilkyAdapter implements AdapterInterface {
 			},
 		}
 	}
-	async imageSerializer(seg: ImgSeg): Promise<OSeg.ImageSeg> {
+	async imageSerializer(seg: ImgSeg): Promise<OSeg.ImageSeg | OSeg.FaceSeg> {
+		const superFaceSchema = z.object({
+			type: z.literal('super-face'),
+			id: z.string(),
+		})
+		const data = this.getExtra(seg, superFaceSchema)
+		if (data)
+			return {
+				type: 'face',
+				data: {
+					face_id: data.id,
+					is_large: true,
+				},
+			}
 		return {
 			type: 'image',
 			data: {
@@ -1502,15 +1513,6 @@ export class MilkyAdapter implements AdapterInterface {
 			data: {
 				face_id: seg.id.toString(),
 				is_large: false,
-			},
-		}
-	}
-	async superFaceSerializer(seg: SuperFaceSeg): Promise<OSeg.FaceSeg> {
-		return {
-			type: 'face',
-			data: {
-				face_id: seg.id.toString(),
-				is_large: true,
 			},
 		}
 	}
@@ -1566,16 +1568,6 @@ export class MilkyAdapter implements AdapterInterface {
 			},
 		}
 	}
-	async mfaceSerializer(data: MfaceSeg): Promise<OSeg.ImageSeg> {
-		return {
-			type: 'image',
-			data: {
-				uri: data.rawUrl,
-				sub_type: 'sticker',
-				summary: data.summary,
-			},
-		}
-	}
 	// async pokeSerializer(_: PokeSeg): Promise<ObPokeSeg> {
 	//     return {
 	//         type: 'poke',
@@ -1585,12 +1577,6 @@ export class MilkyAdapter implements AdapterInterface {
 	//         }
 	//     }
 	// }
-	async xmlSerializer(_: XmlSeg): Promise<OSeg.XmlSeg> {
-		throw new Error('不支持发送xml消息')
-	}
-	async jsonSerializer(_: JsonSeg): Promise<OSeg.LightAppSeg> {
-		throw new Error('不支持发送json消息')
-	}
 	async unknownSerializer(seg: UnknownSeg): Promise<OutgoingSegment> {
 		return seg.data as OutgoingSegment
 	}
@@ -2077,6 +2063,20 @@ export class MilkyAdapter implements AdapterInterface {
 		if (id >= 3889000000 && id <= 3889999999) return true
 		if (id === 66600000) return true
 		return false
+	}
+	protected getExtra<T extends z.ZodType>(
+		seg: SegData,
+		schema: T,
+	): z.output<T> | undefined {
+		const obj = seg.extra?.[this.name]
+		if (!obj) return undefined
+		const { data } = schema.safeParse(obj)
+		return data
+	}
+	protected createExtra<T>(data: T): Record<AdapterName, T> {
+		const result = {}
+		result[this.name] = data
+		return result
 	}
 	//#endregion
 }

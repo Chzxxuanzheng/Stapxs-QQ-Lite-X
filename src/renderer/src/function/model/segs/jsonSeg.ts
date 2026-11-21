@@ -12,7 +12,7 @@ export class JsonSeg extends Seg {
 	readonly data: string
 	readonly id: string
 	constructor(data: JsonSegData) {
-		super()
+		super(data.extra)
 		this.data = data.data
 		this.id = data.id
 	}
@@ -35,6 +35,7 @@ export class JsonSeg extends Seg {
 			type: 'json',
 			data: this.data,
 			id: this.id,
+			extra: this.extra,
 		}
 	}
 }

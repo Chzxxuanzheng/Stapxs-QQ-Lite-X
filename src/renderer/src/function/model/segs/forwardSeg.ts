@@ -21,8 +21,8 @@ export class ForwardSeg extends Seg {
 			super()
 			this.content = msgs
 		} else {
-			super()
 			const data = arg1 as ForwardSegData
+			super(data?.extra)
 			this.id = data.id
 			this.content = data.content.map((item) => new ForwardMsg(item))
 			// 图片拼装
@@ -59,6 +59,7 @@ export class ForwardSeg extends Seg {
 			content: this.content.map((item) =>
 				(item as ForwardMsg).serializeNodeData(),
 			),
+			extra: this.extra,
 		}
 	}
 }

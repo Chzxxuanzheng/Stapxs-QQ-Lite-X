@@ -6,8 +6,6 @@ import {
 	FileSeg,
 	ForwardSeg,
 	ImgSeg,
-	MfaceSeg,
-	SuperFaceSeg,
 } from '@renderer/function/model/segs'
 import {
 	GroupSession,
@@ -16,6 +14,7 @@ import {
 } from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
 import {
+	AdapterName,
 	EssenceData,
 	EssenceSeg,
 	FaceSegData,
@@ -27,11 +26,9 @@ import {
 	ImgSegData,
 	ImplInfo,
 	MessageEventData,
-	MfaceSegData,
 	MsgData,
 	PokeEventData,
 	ResponseEventData,
-	SuperFaceSegData,
 	UserData,
 } from '@renderer/function/adapter/interface'
 import { api, OneBotAdapter } from '@renderer/function/adapter/ob/adapter'
@@ -74,7 +71,7 @@ import type {
 import Emoji from '@renderer/function/model/emoji'
 
 export default class LLBTOneBot extends OneBotAdapter {
-	override name = 'LuckyLillia OneBot'
+	override name = 'LuckyLillia OneBot' as AdapterName
 	override version = '0.0.1'
 	constructor(connector: ObConnector, botInfo?: ObGetVersionInfo) {
 		super()
@@ -95,9 +92,6 @@ export default class LLBTOneBot extends OneBotAdapter {
 		this.segParsers['file'] = this.fileParser.bind(this)
 
 		this.segSerializer['face'] = this.llbotFaceSerializer.bind(this)
-		this.segSerializer['super-face'] =
-			this.llbotSuperFaceSerializer.bind(this)
-		this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
 		this.segSerializer['file'] = this.fileSerializer.bind(this)
 
 		this.eventProcessers['message_sent'] = this.messageSentEvent.bind(this)
@@ -583,30 +577,41 @@ export default class LLBTOneBot extends OneBotAdapter {
 	async llbotFaceParser(
 		data: LlbotObFaceSeg,
 		msg?: ObMsg,
-	): Promise<FaceSegData[] | SuperFaceSegData[]> {
+	): Promise<FaceSegData[] | ImgSegData[]> {
 		const id = Number(data.data.id)
-		if (data.data.sub_type === 3 && Emoji.superList.includes(id))
-			return [{ type: 'super-face', id: id.toString() }]
-		else if (
-			data.data.sub_type === undefined &&
-			msg?.message.length === 1 &&
-			Emoji.superList.includes(id)
+		const emoji = Emoji.get(id)
+		if (
+			(data.data.sub_type === 3 ||
+				(data.data.sub_type === undefined &&
+					msg?.message.length === 1)) &&
+			emoji?.superValue
 		)
-			return [{ type: 'super-face', id: id.toString() }]
+			return [
+				{
+					type: 'image',
+					url: Resource.fromUrl(emoji.superValue),
+					isFace: true,
+					isLottie: true,
+					width: 300,
+					height: 300,
+					summary: emoji.description,
+					extra: this.createExtra({
+						type: 'super-face',
+						id: id.toString(),
+					}),
+				},
+			]
 		return [{ type: 'face', id: id.toString() }]
 	}
-	async mfaceParser(
-		data: LlbotObMfaceSeg,
-		_?: ObMsg,
-	): Promise<MfaceSegData[]> {
+	async mfaceParser(data: LlbotObMfaceSeg, _?: ObMsg): Promise<[ImgSegData]> {
 		return [
 			{
-				type: 'mface',
-				url: data.data.url,
+				type: 'image',
+				url: Resource.fromUrl(data.data.url),
+				isFace: true,
+				width: 300,
+				height: 300,
 				summary: data.data.summary,
-				packageId: data.data.emoji_package_id,
-				id: data.data.emoji_id,
-				key: data.data.key,
 			},
 		]
 	}
@@ -637,7 +642,18 @@ export default class LLBTOneBot extends OneBotAdapter {
 	//#endregion
 
 	//#region == 序列化 =============================
-	override async imageSerializer(seg: ImgSeg): Promise<LlbotObImageSeg> {
+	override async imageSerializer(
+		seg: ImgSeg,
+	): Promise<LlbotObImageSeg | LlbotObFaceSeg> {
+		const data = this.getExtra(seg, this.superFaceExtraSchema)
+		if (data)
+			return {
+				type: 'face',
+				data: {
+					id: Number(data.id),
+					sub_type: 3,
+				},
+			}
 		return {
 			type: 'image',
 			data: {
@@ -664,27 +680,6 @@ export default class LLBTOneBot extends OneBotAdapter {
 			data: {
 				id,
 				sub_type: type,
-			},
-		}
-	}
-	async superFaceSerializer(seg: SuperFaceSeg): Promise<LlbotObFaceSeg> {
-		return {
-			type: 'face',
-			data: {
-				id: Number(seg.id),
-				sub_type: 3,
-			},
-		}
-	}
-	async mfaceSerializer(seg: MfaceSeg): Promise<LlbotObMfaceSeg> {
-		return {
-			type: 'mface',
-			data: {
-				url: seg.url,
-				summary: seg.summary,
-				key: seg.key,
-				emoji_id: seg.id,
-				emoji_package_id: seg.packageId,
 			},
 		}
 	}

@@ -8,10 +8,8 @@ import type { AtAllSegData } from '@renderer/function/adapter/interface'
 export class AtAllSeg extends Seg {
 	static readonly type = 'atall'
 	static readonly inline = true
-	constructor()
-	constructor(_: AtAllSegData)
-	constructor(_?: AtAllSegData) {
-		super()
+	constructor(data?: AtAllSegData) {
+		super(data?.extra)
 	}
 
 	plaintext(): string {
@@ -26,6 +24,7 @@ export class AtAllSeg extends Seg {
 	override serializeData(): AtAllSegData {
 		return {
 			type: 'atall',
+			extra: this.extra,
 		}
 	}
 }
