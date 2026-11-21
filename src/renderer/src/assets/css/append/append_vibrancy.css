@@ -36,10 +36,6 @@ body.vibrancy {
     background: transparent;
 }
 
-.vibrancy .contributors-card {
-    background: rgba(var(--color-card-2-rgb), 0.7) !important;
-}
-
 .vibrancy .jump-card {
     background: rgba(var(--color-card-rgb), 0.7) !important;
 }
@@ -124,7 +120,6 @@ body.vibrancy {
 .vibrancy .main-box > .main-box-bg > .choice-chat {
     background: rgba(var(--color-card-1-rgb), 0.6);
 }
-
 
 .vibrancy .chat-pan > .chat-bottom .at-tag,
 .vibrancy .chat-pan > .chat-bottom > .input-pan > .input-special-tag,
@@ -226,10 +221,6 @@ body.vibrancy {
 
 .vibrancy .umami-info-pan .view-pan {
     background-color: rgba(var(--color-card-rgb), 0.8);
-}
-
-.vibrancy .msg-md table {
-	box-shadow: 0 0 15px var(--color-bg);
 }
 
 @media (max-width: 500px) {

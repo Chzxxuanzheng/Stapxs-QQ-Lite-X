@@ -2409,3 +2409,114 @@ msgstr ""
 
 msgid "全局"
 msgstr ""
+
+msgid "Matrix 不支持发送该类型的消息"
+msgstr ""
+
+msgid "Matrix 不支持合并转发"
+msgstr ""
+
+msgid "Matrix 发送消息失败"
+msgstr ""
+
+msgid "Matrix 同步中"
+msgstr ""
+
+msgid "Matrix 同步状态"
+msgstr ""
+
+msgid "Matrix 媒体消息内容校验失败"
+msgstr ""
+
+msgid "Matrix 尚未连接"
+msgstr ""
+
+msgid "Matrix 已连接"
+msgstr ""
+
+msgid "Matrix 当前仅支持撤回群聊消息"
+msgstr ""
+
+msgid "Matrix 当前仅支持群聊发送消息"
+msgstr ""
+
+msgid "Matrix 当前仅支持群聊表情回应"
+msgstr ""
+
+msgid "Matrix 成员信息内容校验失败"
+msgstr ""
+
+msgid "Matrix 服务器"
+msgstr ""
+
+msgid "Matrix 未连接"
+msgstr ""
+
+msgid "Matrix 消息内容校验失败"
+msgstr ""
+
+msgid "Matrix 用户 ID"
+msgstr ""
+
+msgid "Matrix 登录状态已失效，请重新登录"
+msgstr ""
+
+msgid "Matrix 群名称内容校验失败"
+msgstr ""
+
+msgid "Matrix 表情回应内容校验失败"
+msgstr ""
+
+msgid "Matrix 设备 ID"
+msgstr ""
+
+msgid "[文件]"
+msgstr ""
+
+msgid "[表情]"
+msgstr ""
+
+msgid "无法读取要上传的图片"
+msgstr ""
+
+msgid "无法读取要上传的文件"
+msgstr ""
+
+msgid "无法读取要上传的视频"
+msgstr ""
+
+msgid "未找到要删除的表情回应"
+msgstr ""
+
+msgid "未知用户"
+msgstr ""
+
+msgid "此消息已加密，当前版本不支持解密"
+msgstr ""
+
+msgid "消息 ID 缺失，无法撤回"
+msgstr ""
+
+msgid "消息 ID 缺失，无法设置表情回应"
+msgstr ""
+
+msgid "该群聊启用了端到端加密，当前版本不支持发送文件"
+msgstr ""
+
+msgid "该群聊启用了端到端加密，当前版本不支持发送消息"
+msgstr ""
+
+msgid "连接失败: {reason}"
+msgstr ""
+
+msgid "请输入密码或访问令牌"
+msgstr ""
+
+msgid "Matrix 的连接地址格式为 mx(s)://域名[:端口]@用户名，例如 mxs://matrix.org@alice。密码处填写密码或访问令牌。"
+msgstr ""
+
+msgid "Matrix 用户名可以带上服务器部分，例如 mxs://matrix.example.com:8443@alice:example.com。"
+msgstr ""
+
+msgid "Matrix 适配器不支持端到端加密，加密消息会显示为提示文本。"
+msgstr ""

@@ -3,14 +3,6 @@
     2022/09/23 - Stapx Steve [林槐]
 */
 
-.st0 {
-    fill: var(--color-main);
-}
-
-.st1 {
-    fill: var(--color-font-1-r);
-}
-
 .opt-main {
     overflow: hidden;
     background: var(--color-bg);
@@ -162,30 +154,6 @@
     margin-left: 10px !important;
 }
 
-.contributors-card {
-    align-items: flex-start !important;
-    background: var(--color-card-1);
-    flex-direction: column;
-    padding: 0 10px;
-    width: 100%;
-}
-
-.contributors-card > div {
-    flex-wrap: wrap;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.contributors-card > div > div {
-    min-width: calc(20% - 20px);
-    aspect-ratio: 1;
-    margin: 10px;
-    background-size: 100%;
-    border-radius: 35px;
-    cursor: pointer;
-}
-
 .opt-tab {
     height: calc(100% - 115px);
     flex-direction: column;
@@ -239,39 +207,6 @@
 
 .bcd-body {
     background: var(--color-card-1);
-}
-
-.opt-body {
-    overflow-y: scroll;
-    margin-top: 20px;
-    padding: 0;
-    flex: 1;
-}
-
-.opt-body::-webkit-scrollbar {
-    display: none;
-}
-
-.opt-body > div {
-    height: 100%;
-    overflow-y: scroll;
-    padding-right: 7px;
-}
-
-.opt-body header {
-    font-size: 0.95rem;
-}
-
-.opt-body label[class='ss-switch'] {
-    --switch-dot-border: 5px;
-    --switch-dot-margin: 8px;
-    --switch-height: 25px;
-    min-width: 45px;
-    margin: 5px 0;
-}
-
-.opt-body label[class='ss-switch'] > div > div {
-    margin-top: 3px;
 }
 
 .ss-switch {
@@ -770,13 +705,6 @@
     margin-left: 10px;
 }
 
-.ws-test-out {
-    min-height: 90px;
-    resize: vertical;
-    margin-top: 10px;
-    width: 100%;
-}
-
 .bot-info > div > span {
     width: 100%;
     display: flex;
@@ -891,10 +819,6 @@
 }
 
 @media (max-width: 700px) {
-    .option-title {
-        display: none !important;
-    }
-
     .opt-item {
         flex-wrap: wrap;
         height: auto;

@@ -29,63 +29,6 @@ textarea:focus {
     z-index: 0;
 }
 
-.custom-focus {
-    outline: none;
-}
-
-.custom-focus:focus-visible {
-    animation: custom-focus 0.1s ease-out forwards;
-}
-
-@keyframes custom-focus {
-    0% {
-        outline: 15px solid rgba(127, 145, 222, 0);
-    }
-
-    100% {
-        outline: 3px solid rgba(127, 145, 222, 1);
-    }
-}
-
-.vc-switch {
-    background: var(--color-main) !important;
-    display: none !important;
-}
-
-.mac-controller {
-    -webkit-app-region: drag;
-    z-index: 100;
-    position: absolute;
-    width: 100%;
-    height: 30px;
-}
-
-.dev-bar {
-    transition: opacity 0.3s;
-    background: var(--color-bg-yellow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-font-2);
-    font-size: 0.7rem;
-    box-shadow: 0 0 10px var(--color-shader);
-    position: absolute;
-    width: 100%;
-    padding: 10px 0;
-    z-index: 100;
-}
-
-.dev-bar.win {
-    background: transparent !important;
-    width: calc(100% - 180px);
-    box-shadow: unset;
-    left: 90px;
-}
-
-.dev-bar:hover {
-    opacity: 0;
-}
-
 #app,
 #base-app {
     overflow: hidden;
@@ -94,11 +37,6 @@ textarea:focus {
 
 #base-app {
     transition: transform 0.2s;
-}
-
-#base-app.no-touch {
-    transform: rotate(180deg);
-    padding-bottom: 30px;
 }
 
 .main-body {
@@ -172,28 +110,6 @@ textarea:focus {
     min-width: 60px;
     max-width: 60px;
     width: 60px;
-}
-
-.side-bar.fold > .top {
-    display: flex;
-    justify-content: center;
-}
-
-.side-bar.fold > .top > span {
-    display: none;
-}
-
-.side-bar.fold > .top > label {
-    display: none;
-}
-
-.side-bar.fold > .top > .button {
-    display: none;
-}
-
-.side-bar.fold > .top > .button.open-side-bar {
-    display: block;
-    margin: 0;
 }
 
 .side-bar.fold > .bottom {
@@ -345,16 +261,6 @@ textarea:focus {
     display: block;
 }
 
-.home-body {
-    background: var(--color-bg);
-    justify-content: center;
-    flex-direction: row;
-    align-items: center;
-    display: flex;
-    height: 100%;
-    width: 100%;
-}
-
 .login-pan-card {
     flex: 1;
     background: var(--color-card);
@@ -476,10 +382,6 @@ textarea:focus {
 
 .side-bar-list > div {
     transition: opacity 0.3s;
-}
-
-.side-bar-list-space {
-    background: var(--color-bg);
 }
 
 .side-bar-list.show {
@@ -719,12 +621,6 @@ textarea:focus {
     min-width: 100px;
     max-width: 130px;
     padding: 10px;
-}
-
-.msg-menu-body.topOut {
-    transition:
-        transform 0.1s,
-        margin-top 0.2s;
 }
 
 .chat-menu-enter-active,
@@ -986,26 +882,6 @@ textarea:focus {
     color: var(--color-font-r);
 }
 
-.pop-box-more {
-    position: absolute;
-    margin-left: -20px;
-    margin-top: 20px;
-    z-index: -1;
-    width: 100%;
-}
-
-.pop-box-more > div {
-    box-shadow: 0 0 3px var(--color-bg);
-    background: var(--color-card);
-    border-radius: 0 0 7px 7px;
-    margin: 0 10px;
-    height: 10px;
-}
-
-.pop-box-more > div.hid {
-    height: 0;
-}
-
 .pop-box-enter-active,
 .pop-box-leave-active {
     transition: all 0.2s ease-in-out;
@@ -1098,10 +974,6 @@ textarea:focus {
 
 .update-info > div.info > div > div > span {
     color: var(--color-font);
-}
-
-.hiden-home {
-    display: none !important;
 }
 
 .qq-err-card {
@@ -1220,13 +1092,6 @@ textarea:focus {
     transform: rotate(90deg);
     display: inline-block;
     margin-right: 5px;
-}
-
-.view-iframe {
-    margin: -40px -40px -20px -40px;
-    width: calc(100% + 80px);
-    border-radius: 7px;
-    border: none;
 }
 
 .config-box {
@@ -1865,10 +1730,6 @@ textarea:focus {
         margin-bottom: 20px !important;
     }
 
-    .pop-box-more {
-        display: none;
-    }
-
     .pop-box-enter-active > div.pop-box-body,
     .pop-box-leave-active > div.pop-box-body {
         transform-origin: bottom;
@@ -1913,24 +1774,6 @@ textarea:focus {
 
 .v-leave-to > div.ss-card {
     transform: translateY(20px);
-}
-
-@keyframes wordsLoop {
-    0% {
-        transform: translateX(0px);
-    }
-
-    25% {
-        transform: translateX(0px);
-    }
-
-    75% {
-        transform: translateX(calc(-100% + 2.35rem));
-    }
-
-    100% {
-        transform: translateX(calc(-100% + 2.35rem));
-    }
 }
 
 @keyframes show-chat-menu {

@@ -417,23 +417,6 @@ input {
     color: var(--color-font);
 }
 
-.msg-menu {
-    pointer-events: none;
-    position: absolute;
-    overflow: hidden;
-    height: calc(100% - var(--safe-area-bottom)) !important;
-    top: 0;
-    width: 100%;
-    z-index: 10;
-}
-
-.msg-menu-bg {
-    pointer-events: all;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-}
-
 .merge-pan {
     align-items: stretch;
     flex-direction: row;
@@ -601,24 +584,6 @@ input {
 
     to {
         transform: translateX(400px);
-    }
-}
-
-.merge-node-enter-active {
-    animation: merge-node-enter 0.3s ease-in-out;
-}
-
-.merge-node-leave-active {
-    animation: merge-node-enter 0.3s ease-in-out reverse;
-}
-
-@keyframes merge-node-enter {
-    from {
-        width: 0;
-    }
-
-    to {
-        width: 400px;
     }
 }
 
@@ -850,14 +815,6 @@ input {
     border-radius: 100%;
     margin: 0 3px 3px 0;
     height: 35px;
-}
-
-.chat-info-base > div:last-child > div.outher > span {
-    display: block;
-}
-
-.chat-info-base > div:last-child > div.outher > span > span {
-    color: var(--color-font-1);
 }
 
 .chat-info-pan .tab-bar {
@@ -1393,149 +1350,6 @@ input {
     background: var(--color-main);
 }
 
-.sub_file {
-    margin-top: 10px;
-    width: 100%;
-}
-
-.download-bar {
-    --main-size: 25px;
-    height: var(--main-size) !important;
-    width: var(--main-size) !important;
-    transform: rotate(-90deg);
-    padding: calc(5px / 2);
-    margin: 0 !important;
-}
-
-.download-bar > circle:first-child {
-    stroke: var(--color-card-2);
-}
-
-.download-bar > circle:last-child {
-    stroke: var(--color-main);
-}
-
-.img-sender {
-    pointer-events: all;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    left: 0;
-    top: 0;
-}
-
-.img-sender > div.bg {
-    background: var(--color-card-2);
-    height: 100%;
-    opacity: 0.7;
-    width: 100%;
-}
-
-.img-sender > div.card {
-    margin: calc(50vh - 75px) 0 0 50%;
-    transform: translate(-50%, -50%);
-    flex-direction: column;
-    position: absolute;
-    display: flex;
-    height: 50%;
-    width: 50%;
-    z-index: 1;
-}
-
-.img-sender > div.card > div.hander {
-    align-items: center;
-    display: flex;
-}
-
-.img-sender > div.card > div.hander > span {
-    font-weight: bold;
-    font-size: 1rem;
-    flex: 1;
-}
-
-.img-sender > div.card > div.hander > button {
-    width: 100px;
-}
-
-.img-sender > div.card > div.imgs {
-    margin-bottom: 20px;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    margin-right: -7px;
-    margin-top: 10px;
-    height: 100%;
-}
-
-.img-sender > div.card > div.imgs::-webkit-scrollbar {
-    display: none;
-}
-
-.img-sender > div.card > div.imgs > div {
-    border: 2px solid var(--color-card-2);
-    border-radius: 7px;
-    margin-right: 9px;
-    margin-top: 10px;
-    padding: 10px;
-}
-
-.img-sender > div.card > div.imgs > div > img {
-    transform: translateX(-50%);
-    margin-bottom: 9px;
-    border-radius: 7px;
-    max-height: 30vh;
-    margin-left: 50%;
-    max-width: 100%;
-    margin-top: 5px;
-}
-
-.img-sender > div.card > div.imgs > div > div {
-    margin-bottom: calc(-20px - 1rem);
-    background: var(--color-card-2);
-    backdrop-filter: blur(10px);
-    height: calc(1rem + 15px);
-    width: calc(1rem + 15px);
-    justify-content: center;
-    border-radius: 100%;
-    align-items: center;
-    position: relative;
-    margin-right: 10px;
-    margin-top: 9px;
-    cursor: pointer;
-    display: flex;
-    float: right;
-    z-index: 1;
-}
-
-.img-sender > div.card > div.imgs > div > div > svg {
-    color: var(--color-font);
-    height: 1rem;
-}
-
-.img-sender > div.card > div.sender {
-    display: flex;
-}
-
-.img-sender > div.card > div.sender > input {
-    background: var(--color-card-1);
-    width: calc(100% - 20px);
-    border-radius: 7px;
-    padding: 0 10px;
-    height: 50px;
-    border: 0;
-    flex: 1;
-}
-
-.img-sender > div.card > div.sender > svg {
-    background: var(--color-card-1);
-    color: var(--color-font-1);
-    border-radius: 7px;
-    margin-right: 20px;
-    padding: 15px;
-    cursor: pointer;
-    height: 20px;
-    width: 20px;
-}
-
 .face-pan {
     pointer-events: all;
     background: var(--color-card-1);
@@ -1544,14 +1358,6 @@ input {
     width: 300px;
     padding: 0;
     display: flex;
-}
-
-.fase-pan-tab > li > svg {
-    color: var(--color-font);
-    margin-top: 10px;
-    margin-left: 5px;
-    height: 1.1rem;
-    width: 1.1rem;
 }
 
 .face-pan .tab-bar {
@@ -1602,14 +1408,6 @@ input {
     height: calc(300px - 145px);
     overflow-y: scroll;
     width: 100%;
-}
-
-.base-face {
-    justify-content: center;
-    padding: 0 20px;
-    flex-wrap: wrap;
-    display: flex;
-    align-content: flex-start;
 }
 
 .face {
@@ -2299,11 +2097,6 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
         width: 90%;
     }
 
-    /* 发送图片面板 */
-    .img-sender > div.card {
-        width: calc(100% - 80px);
-    }
-
     /* 转发面板 */
     .forward-pan > div.card {
         width: calc(100% - 120px);
@@ -2311,20 +2104,6 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
 }
 
 @media (max-width: 500px) {
-    /* 群信息面板 */
-    .chat-info {
-        height: calc(100% - 115px);
-        width: calc(100% - 40px);
-        max-height: unset;
-        border-radius: 0;
-        min-width: unset;
-        margin: 0;
-    }
-
-    .chat-info:hover {
-        box-shadow: none;
-    }
-
     /* 表情面板 */
     .face-pan {
         width: calc(100% - 40px);
@@ -2340,14 +2119,6 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
     }
 
     /* 图片发送器 */
-    .img-sender > div.card {
-        height: calc(100% - 40px);
-        width: calc(100% - 40px);
-        border-radius: 0;
-        transform: unset;
-        box-shadow: none;
-        margin: 0;
-    }
 
     /* 转发面板 */
     .forward-pan > div.card {

@@ -77,14 +77,6 @@ input {
     color: var(--color-font);
 }
 
-.ss-code {
-    background: var(--color-main);
-    color: var(--color-font-r);
-    border-radius: 7px;
-    padding: 3px 10px;
-    margin: 0 5px;
-}
-
 .ss-card {
     background-color: var(--color-card);;
     box-shadow:0 0 5px transparent;
@@ -168,22 +160,6 @@ input {
     outline: 2px solid var(--color-card-1);
 }
 
-.ss-pop {
-    -webkit-box-shadow: 0 0 5px var(--color-shader);
-    -moz-box-shadow: 0 0 5px var(--color-shader);
-    box-shadow: 0 0 5px var(--color-shader);
-    background: var(--color-bg);
-}
-.ss-pop div[class="arrow"]:before {
-    border: none;
-}
-.ss-pop div[class="arrow"]:after {
-    border: none;
-}
-.ss-pop div {
-    color: var(--color-font);
-}
-
 .ss-radio {
     --radio-size: 32px;
 
@@ -212,49 +188,6 @@ input {
 }
 .ss-radio input:checked ~ div:nth-child(2) {
     padding: calc(var(--radio-size) / 4);
-}
-
-.ss-checkbox {
-    --checkbox-size: 13px;
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-}
-.ss-checkbox > input {
-    display: none;
-}
-.ss-checkbox > div {
-    border: 1px solid var(--color-font);
-    border-radius: 30%;
-    background: transparent;
-    transition: background .3s, border .1s;
-    height: var(--checkbox-size);
-    width: var(--checkbox-size);
-}
-.ss-checkbox > input:checked ~ div {
-    background: var(--color-bg);
-    border: calc(var(--checkbox-size) / 3) solid var(--color-main);
-}
-.ss-checkbox > span {
-    margin-left: 10px;
-    font-size: 0.9rem;
-}
-.ss-checkbox.button {
-    border: 2px solid var(--color-main);
-    border-radius: 7px;
-    background: transparent;
-    padding: 10px 15px;
-}
-.ss-checkbox.button > div {
-    border: 0 !important;
-    max-width: 5px;
-    border-radius: 5px;
-    transform: scaleY(0);
-    background: var(--color-main) !important;
-    transition: transform .3s;
-}
-.ss-checkbox.button > input:checked ~ div {
-    transform: scaleY(1);
 }
 
 .ss-switch {
@@ -294,59 +227,6 @@ input {
     margin-left: calc(100% - var(--switch-height) + var(--switch-dot-margin));
 }
 
-.ss-code-input {
-    flex-direction: initial;
-    justify-content: center;
-    padding-top: 30px;
-    display: flex;
-}
-.ss-code-input input {
-    background: var(--color-card-1);
-    outline: 2px solid transparent;
-    caret-color: transparent;
-    transition: outline .3s;
-    border-radius: 7px;
-    text-align: center;
-    font-size: 1.5rem;
-    margin: 0 10px;
-    height: 60px;
-    width: 60px;
-    border: 0;
-}
-.ss-code-input input:first-child {
-    padding: 0;
-    margin: 0;
-    height: 0;
-    width: 0;
-}
-.ss-code-input-selete {
-    outline: 2px solid var(--color-main) !important;
-}
-.ss-code-input-err {
-    outline: 2px solid #ef5f5f !important;
-}
-
-.ana-card {
-    color: var(--color-font);
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 100;
-    display: flex;
-    height: 60px;
-}
-.ana-card div {
-    background: var(--color-main);
-    border-radius: 5px;
-    height: 100%;
-    width: 5px;
-}
-.ana-card span {
-    width: 100%;
-}
-.ana-card-left {
-    text-align: left;
-}
-
 footer > div:first-child {
     color: var(--color-font);
     margin-bottom: 20px;
@@ -377,22 +257,6 @@ footer header span {
     fill: var(--color-card-1);
 }
 
-.bar-search {
-    border: 0;
-    height: 35px;
-    font-size: 15px;
-    margin-right: 0 !important;
-    background: var(--color-card-1);
-}
-.bar-search:focus {
-    background: var(--color-card-1);
-    outline: none;
-
-    -webkit-box-shadow:0 0 5px var(--color-shader);
-    -moz-box-shadow:0 0 5px var(--color-shader);
-    box-shadow:0 0 5px var(--color-shader);
-}
-
 .avatar {
     cursor: hand;
     overflow: hidden;
@@ -407,11 +271,6 @@ footer header span {
 .avatar img {
     width: var(--main-size);
     height: var(--main-size);
-}
-
-.scroll-top {
-    border-top: 1px dashed var(--color-main);
-    margin: 0 30px;
 }
 
 pre {
@@ -433,26 +292,6 @@ pre > code {
     {
         font-family: 'Fira Code VF', monospace;
     }
-}
-
-.about-text {
-    padding: 20px;
-}
-.about-text i {
-    color: var(--color-font-1);
-    margin-bottom: 10px;
-    font-style: normal;
-    font-size: 0.9rem;
-    font-weight: 400;
-    text-indent: 2em;
-    display: block;
-}
-.about-text a {
-    color: var(--color-font);
-    font-weight: bold;
-}
-.no-indent i {
-    text-indent: 0;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -479,23 +318,5 @@ pre > code {
         display: none;
     }
 
-    .bar-search {
-        display: none !important;
-    }
 }
 
-.navbar-dark .navbar-brand {
-    color: var(--color-font) !important;
-}
-
-.navbar-dark .navbar-nav .nav-link.active {
-    color: var(--color-font) !important;
-}
-
-.navbar-dark .navbar-nav .nav-link {
-    color: var(--color-font-1) !important;
-}
-.navbar-dark:hover .navbar-nav:hover .nav-link:hover {
-    color: var(--color-font) !important;
-    opacity: 0.7 !important;
-}
