@@ -17,7 +17,6 @@ import '@renderer/assets/css/chat.css'
 import '@renderer/assets/css/doc.css'
 import '@renderer/assets/css/msg.css'
 import '@renderer/assets/css/options.css'
-import '@renderer/assets/css/sys_notice.css'
 import '@renderer/assets/css/view.css'
 import '@renderer/assets/css/color.css'
 
